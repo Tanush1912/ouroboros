@@ -1,0 +1,34 @@
+# LangGraph Reference (compressed)
+# Source: https://langchain-ai.github.io/langgraph/
+# Version: 0.2+
+
+## Core Concepts
+
+StateGraph: The workflow definition.
+  graph = StateGraph(MyStateTypedDict)
+  graph.add_node("node_name", async_func)
+  graph.set_entry_point("first_node")
+  graph.add_edge("a", "b")
+  graph.add_conditional_edges("a", routing_func, {"key": "node_name"})
+  graph.add_edge("last_node", END)
+  app = graph.compile()
+  result = await app.ainvoke(initial_state)
+
+State: TypedDict subclass. Each node receives full state, returns a dict of updates.
+  - Updates are merged (not replaced) by default
+  - Nodes return dict with only the keys they want to update
+
+Routing: Conditional edges based on state:
+  def route(state: MyState) -> str:
+      return "node_a" if state["condition"] else "node_b"
+  graph.add_conditional_edges("node", route)
+
+Human-in-the-loop: Use interrupt_after or interrupt_before at compile time.
+  app = graph.compile(interrupt_before=["human_checkpoint"])
+
+## Best Practices (Ouroboros-specific)
+
+- All state keys are typed in TypedDict
+- Routing driven by typed fields (e.g., next_action: Literal["proceed", "retry"])
+- Never route on string parsing — use structured state fields
+- Guards run pre-node via wrapper, update state["status"] if violated
