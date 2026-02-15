@@ -1,0 +1,37 @@
+# Vertex AI Reference (compressed)
+# Source: https://cloud.google.com/vertex-ai/docs
+# Relevant to: Gemini models via PydanticAI
+
+## Setup
+
+vertexai.init(project="my-gcp-project", location="us-central1")
+model = VertexAIModel("gemini-2.0-flash")
+
+## Authentication
+
+- Use Application Default Credentials (ADC): gcloud auth application-default login
+- In CI/CD: Use Workload Identity Federation or service account JSON
+- No API keys — IAM-based auth only
+- Required IAM role: roles/aiplatform.user
+
+## Model Names (Gemini via Vertex AI)
+
+- gemini-2.0-flash  — Production default. Fast, cheap, strong.
+- gemini-1.5-pro    — Larger context window (1M tokens). More expensive.
+- gemini-1.5-flash  — Balanced. Good for simple tasks.
+
+## Rate Limits (us-central1, as of 2026)
+
+- gemini-2.0-flash: 360 RPM, 4M TPM per project
+- Supports batch requests for non-latency-sensitive workloads
+
+## Pricing (approximate, check current pricing page)
+
+- gemini-2.0-flash input:  $0.075 / 1M tokens
+- gemini-2.0-flash output: $0.30  / 1M tokens
+
+## Regions
+
+- Use us-central1 for lowest latency from US
+- eu-west1 for EU data residency
+- Region must be specified at vertexai.init()
