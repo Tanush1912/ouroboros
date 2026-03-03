@@ -1,0 +1,70 @@
+version: "3.9"
+
+# Observability harness for Project Ouroboros.
+# Agents query this stack via agents/tools/observability.py
+
+# Usage:
+#   docker compose up -d
+#   Grafana: http://localhost:3000  (admin/admin)
+#   VictoriaLogs LogQL: http://localhost:9428
+#   VictoriaMetrics PromQL: http://localhost:8428
+
+services:
+  vector:
+    image: timberio/vector:0.41.1-alpine
+    container_name: ouroboros-vector
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+      - /var/log:/var/log:ro
+    ports:
+      - "8686:8686"    
+      - "9001:9001"    
+    depends_on:
+      - victoria-logs
+      - victoria-metrics
+    restart: unless-stopped
+
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v0.28.0-victorialogs
+    container_name: ouroboros-victoria-logs
+    ports:
+      - "9428:9428"
+    volumes:
+      - victoria-logs-data:/victoria-logs-data
+    command:
+      - -storageDataPath=/victoria-logs-data
+      - -retentionPeriod=7d
+    restart: unless-stopped
+
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.101.0
+    container_name: ouroboros-victoria-metrics
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoria-metrics-data:/victoria-metrics-data
+    command:
+      - -storageDataPath=/victoria-metrics-data
+      - -retentionPeriod=7d
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: ouroboros-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - victoria-logs
+      - victoria-metrics
+    restart: unless-stopped
+
+volumes:
+  victoria-logs-data:
+  victoria-metrics-data:
+  grafana-data:

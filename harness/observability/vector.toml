@@ -1,0 +1,43 @@
+# Vector configuration — routes app logs/metrics to VictoriaLogs/VictoriaMetrics
+
+[api]
+enabled = true
+address = "0.0.0.0:8686"
+
+# --- Sources ---
+
+[sources.app_logs_http]
+type = "http_server"
+address = "0.0.0.0:9001"
+encoding.codec = "json"
+
+[sources.app_logs_file]
+type = "file"
+include = ["/var/log/ouroboros/*.log"]
+read_from = "beginning"
+
+# --- Transforms ---
+
+[transforms.parse_app_logs]
+type = "remap"
+inputs = ["app_logs_http", "app_logs_file"]
+source = '''
+  .timestamp = to_unix_timestamp(parse_timestamp!(.timestamp, format: "%+"), unit: "nanoseconds")
+  .service = string!(.service, default: "unknown")
+  .level = string!(.level, default: "info")
+'''
+
+# --- Sinks ---
+
+[sinks.victoria_logs]
+type = "elasticsearch"
+inputs = ["parse_app_logs"]
+endpoint = "http://victoria-logs:9428/insert/elasticsearch/"
+mode = "bulk"
+bulk.index = "ouroboros"
+encoding.codec = "json"
+
+[sinks.victoria_metrics]
+type = "prometheus_remote_write"
+inputs = []  # Add metric sources here when needed
+endpoint = "http://victoria-metrics:8428/api/v1/write"
