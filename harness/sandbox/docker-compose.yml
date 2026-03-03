@@ -1,0 +1,38 @@
+version: "3.9"
+
+# Per-worktree ephemeral app sandbox.
+# Spin up with: scripts/worktree_up.sh <worktree-name>
+# Tear down with: scripts/worktree_down.sh <worktree-name>
+
+# Each worktree gets unique ports via WORKTREE_PORT_OFFSET env var.
+# Default offset: 0 (ports 8000, 9000, etc.)
+# Worktree 1: offset 100 (ports 8100, 9100, etc.)
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: ouroboros-app-${WORKTREE_NAME:-dev}
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - ENV=sandbox
+      - LOG_ENDPOINT=http://vector:9001
+      - GCP_PROJECT=${GCP_PROJECT}
+    volumes:
+      - ../..:/app:ro
+    depends_on:
+      - vector
+
+  vector:
+    image: timberio/vector:0.41.1-alpine
+    container_name: ouroboros-vector-${WORKTREE_NAME:-dev}
+    ports:
+      - "${VECTOR_PORT:-9001}:9001"
+    environment:
+      - VICTORIA_LOGS_URL=${VICTORIA_LOGS_URL:-http://localhost:9428}
+
+networks:
+  default:
+    name: ouroboros-${WORKTREE_NAME:-dev}
