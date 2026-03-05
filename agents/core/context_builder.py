@@ -10,7 +10,7 @@ import json
 from pydantic import BaseModel, Field
 
 from agents.core.paths import repo_root as _repo_root
-from agents.tools.registry import REGISTRY
+from agents.models.registry import REGISTRY
 
 
 class FileSnippet(BaseModel):
