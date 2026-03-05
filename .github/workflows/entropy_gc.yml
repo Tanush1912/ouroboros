@@ -1,0 +1,44 @@
+name: Entropy GC
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # Daily at 6am UTC
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  entropy-gc:
+    name: Entropy Garbage Collection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Build repo index
+        run: uv run python repo_index/build_index.py
+
+      - name: Run Entropy GC
+        run: uv run python agents/workflows/entropy_gc.py
+        env:
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+          GCP_LOCATION: ${{ vars.GCP_LOCATION || 'us-central1' }}
+          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload GC results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gc-results-${{ github.run_id }}
+          path: docs/QUALITY_SCORE.md
