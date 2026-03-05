@@ -3,12 +3,14 @@
 All tools return structured Pydantic models. No raw stdout parsing.
 """
 
+import shlex
 import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 from pydantic_ai import tool
 
+from agents.core.paths import repo_root as _repo_root
 from agents.models.validator import LintResult, TestResult
 
 
@@ -25,21 +27,8 @@ class CommandResult(BaseModel):
     success: bool
 
 
-def _repo_root() -> Path:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
-
-
 def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
-    result = subprocess.run(
-        cmd, capture_output=True, text=True, cwd=cwd or _repo_root()
-    )
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd or _repo_root())
     return result.returncode, result.stdout, result.stderr
 
 
@@ -47,6 +36,7 @@ def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
 def run_tests(path: str = ".") -> TestResult:
     """Run pytest. Returns structured pass/fail with failure details."""
     import time
+
     start = time.monotonic()
     returncode, stdout, stderr = _run(
         ["python", "-m", "pytest", path, "--tb=short", "-q"],
@@ -69,19 +59,19 @@ def run_lint(path: str = ".") -> LintResult:
     violations = []
     auto_fixed = 0
 
-    returncode, stdout, stderr = _run(["python", "-m", "ruff", "check", path], cwd=root)
+    returncode, stdout, _stderr = _run(["python", "-m", "ruff", "check", path], cwd=root)
     if returncode != 0:
         for line in stdout.splitlines():
             if line.strip():
                 violations.append(f"RUFF: {line.strip()}")
 
-    returncode, stdout, stderr = _run(
+    returncode, stdout, _stderr = _run(
         ["python", "lint/run_lint.py", "--arch-only", path], cwd=root
     )
     if returncode != 0:
         violations.extend(stdout.splitlines())
 
-    returncode, stdout, stderr = _run(
+    returncode, stdout, _stderr = _run(
         ["python", "lint/run_lint.py", "--golden-only", path], cwd=root
     )
     if returncode != 0:
@@ -94,6 +84,7 @@ def run_lint(path: str = ".") -> LintResult:
 def run_build() -> BuildResult:
     """Build the application. Returns success/failure + build log."""
     import time
+
     start = time.monotonic()
     returncode, stdout, stderr = _run(["python", "-m", "build"])
     duration = time.monotonic() - start
@@ -109,9 +100,7 @@ def run_command(command: str, cwd: str = ".") -> CommandResult:
     """Run an arbitrary shell command. Use sparingly — prefer specific tools."""
     root = _repo_root()
     work_dir = (root / cwd).resolve()
-    result = subprocess.run(
-        command, shell=True, capture_output=True, text=True, cwd=work_dir
-    )
+    result = subprocess.run(shlex.split(command), capture_output=True, text=True, cwd=work_dir)
     return CommandResult(
         returncode=result.returncode,
         stdout=result.stdout[:4000],

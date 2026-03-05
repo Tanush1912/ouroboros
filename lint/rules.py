@@ -172,9 +172,7 @@ GOLDEN_RULES: list[LintRule] = [
         name="quality-score-current",
         description="QUALITY_SCORE.md must be updated within 24 hours.",
         severity="info",
-        agent_remediation=(
-            "Run: python agents/workflows/entropy_gc.py --update-scores-only"
-        ),
+        agent_remediation=("Run: python agents/workflows/entropy_gc.py --update-scores-only"),
         auto_fixable=True,
     ),
 ]

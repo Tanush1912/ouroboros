@@ -18,13 +18,9 @@ class FileChange(BaseModel):
 
 
 class ImplementOutput(BaseModel):
-    files_changed: list[FileChange] = Field(
-        description="All files created, modified, or deleted"
-    )
+    files_changed: list[FileChange] = Field(description="All files created, modified, or deleted")
     commit_message: str = Field(description="Conventional commit message for these changes")
     implementation_notes: str = Field(
         description="Notes on implementation decisions, trade-offs, or limitations"
     )
-    test_commands: list[str] = Field(
-        description="Shell commands to verify the implementation"
-    )
+    test_commands: list[str] = Field(description="Shell commands to verify the implementation")

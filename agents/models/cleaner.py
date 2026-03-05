@@ -10,12 +10,8 @@ class EntropyViolation(BaseModel):
     file: str = Field(description="File where violation was detected")
     description: str = Field(description="Human-readable description of the violation")
     suggested_fix: str = Field(description="Concrete remediation steps")
-    auto_fixable: bool = Field(
-        description="True if the agent can fix this without human input"
-    )
-    severity: Literal["low", "medium", "high"] = Field(
-        description="Violation severity"
-    )
+    auto_fixable: bool = Field(description="True if the agent can fix this without human input")
+    severity: Literal["low", "medium", "high"] = Field(description="Violation severity")
 
 
 class CleanupOutput(BaseModel):

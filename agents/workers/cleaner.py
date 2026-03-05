@@ -1,40 +1,15 @@
 """Cleaner (entropy GC) worker — detects entropy violations, returns CleanupOutput."""
 
+from pathlib import Path
+
 import logfire
 from pydantic_ai import Agent
 
 from agents.core.config import get_model
 from agents.models.cleaner import CleanupOutput
+from agents.models.cost import TokenUsage
 
-SYSTEM_PROMPT = """You are the Cleaner agent in the Ouroboros system.
-
-Your job is to scan the repository for Golden Principle violations and report them.
-
-Golden Principles to check:
-- GP-001: No duplicate utility functions across packages
-- GP-002: No file exceeds 500 lines
-- GP-003: No hand-rolled helpers duplicating shared packages
-- GP-004: All external data validated at boundary (Pydantic models)
-- GP-005: No print() outside scripts/
-- GP-006: Schema types follow *Output/*Result/*Schema naming
-- GP-007: No dead imports
-- GP-008: All docs reference real code that still exists
-- GP-009: All active plans updated within 7 days
-- GP-010: QUALITY_SCORE.md is current (updated within 24h)
-
-For each violation:
-1. Identify the principle (GP-XXX)
-2. Identify the specific file
-3. Describe the violation concisely
-4. Provide a concrete suggested_fix
-5. Set auto_fixable = True only if an agent can fix without human judgment
-6. Set severity: high (GP-001, GP-004), medium (GP-002, GP-003, GP-008, GP-009), low (rest)
-
-quality_scores: Rate each domain 0-10 based on violations found.
-recommended_prs: One PR per auto-fixable cluster of same principle + domain.
-
-You will receive a scan report from the lint tools in the user message.
-"""
+SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "cleaner.txt").read_text()
 
 _agent: Agent[None, CleanupOutput] | None = None
 
@@ -46,19 +21,22 @@ def _get_agent() -> Agent[None, CleanupOutput]:
             model=get_model(),
             result_type=CleanupOutput,
             system_prompt=SYSTEM_PROMPT,
+            retries=3,
         )
     return _agent
 
 
-async def run_cleaner(scan_report: str, domains: list[str] | None = None) -> CleanupOutput:
-    """Run the cleaner agent against a lint scan report."""
+async def run_cleaner(
+    scan_report: str, domains: list[str] | None = None
+) -> tuple[CleanupOutput, TokenUsage]:
+    """Run the cleaner agent. Returns (CleanupOutput, TokenUsage) for cost tracking."""
     with logfire.span("cleaner"):
         domain_list = domains or ["agents", "lint", "repo_index", "tests"]
         prompt = f"""## Lint Scan Report
 {scan_report}
 
 ## Domains to Score
-{', '.join(domain_list)}
+{", ".join(domain_list)}
 
 Analyze the scan report and produce a CleanupOutput with all violations,
 quality scores per domain, recommended PRs for auto-fixable clusters,
@@ -66,12 +44,17 @@ and human_review_needed for non-auto-fixable issues.
 """
         agent = _get_agent()
         result = await agent.run(prompt)
-
+        usage_data = result.usage()
+        token_usage = TokenUsage(
+            tokens_in=usage_data.request_tokens or 0,
+            tokens_out=usage_data.response_tokens or 0,
+        )
         logfire.info(
             "cleanup_analysis_complete",
             violations_count=len(result.data.violations),
             auto_fixable=sum(1 for v in result.data.violations if v.auto_fixable),
-            recommended_prs=len(result.data.recommended_prs),
             overall_score=result.data.overall_score(),
+            tokens_in=token_usage.tokens_in,
+            tokens_out=token_usage.tokens_out,
         )
-        return result.data
+        return result.data, token_usage

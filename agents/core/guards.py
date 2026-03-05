@@ -12,10 +12,11 @@ from pydantic import BaseModel
 
 from agents.core.state import RalphState
 
-MAX_IMPLEMENT_ITERATIONS = 5    
-MAX_REVIEW_ITERATIONS = 3       
-MAX_TOOL_CALLS_PER_NODE = 50    
-MAX_TOTAL_TOOL_CALLS = 200      
+MAX_IMPLEMENT_ITERATIONS = 5
+MAX_REVIEW_ITERATIONS = 3
+MAX_TOOL_CALLS_PER_NODE = 50
+MAX_TOTAL_TOOL_CALLS = 200
+MAX_COST_USD_PER_RUN = 2.00
 
 
 class GuardResult(BaseModel):
@@ -57,6 +58,14 @@ def check_guards(state: RalphState) -> GuardResult:
             action="abort",
         )
 
+    budget = state.get("cost_budget_usd", MAX_COST_USD_PER_RUN)
+    if state.get("estimated_cost_usd", 0.0) >= budget:
+        return GuardResult(
+            allowed=False,
+            reason=f"Cost budget ${budget:.2f} reached — escalating.",
+            action="escalate",
+        )
+
     return GuardResult(allowed=True, action="continue")
 
 
@@ -65,6 +74,7 @@ def pre_node_guard(state: RalphState, node_name: str) -> GuardResult:
     result = check_guards(state)
     if not result.allowed:
         import logfire
+
         logfire.warning(
             "Guard triggered",
             node=node_name,

@@ -12,9 +12,7 @@ from pydantic import BaseModel, Field
 class TestResult(BaseModel):
     passed: bool = Field(description="True if all tests passed")
     failures: list[str] = Field(description="Test failure messages")
-    coverage: float | None = Field(
-        default=None, description="Code coverage percentage (0-100)"
-    )
+    coverage: float | None = Field(default=None, description="Code coverage percentage (0-100)")
     duration_seconds: float = Field(default=0.0, description="Test run duration")
 
 
@@ -30,9 +28,7 @@ class ValidationOutput(BaseModel):
     tests: TestResult
     lint: LintResult
     arch_lint: LintResult
-    overall_pass: bool = Field(
-        description="True only if tests, lint, and arch_lint all passed"
-    )
+    overall_pass: bool = Field(description="True only if tests, lint, and arch_lint all passed")
     next_action: Literal["proceed", "retry", "escalate"] = Field(
         description=(
             "proceed: all checks pass, ready for PR. "

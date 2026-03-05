@@ -4,11 +4,12 @@ State machine:
   start → plan_node → implement_node → validate_node
          → [retry] → implement_node (max 5)
          → [escalate] → human_checkpoint
-         → [proceed] → open_pr_node → review_loop_node
+         → [proceed] → ui_validate_node → open_pr_node → review_loop_node
          → [not approved] → implement_node (address feedback)
          → [approved] → merge_node → done
 """
 
+import os
 import time
 from typing import Any
 
@@ -16,14 +17,19 @@ import logfire
 from langgraph.graph import END, StateGraph
 
 from agents.core.context_builder import build_context
-from agents.core.guards import MAX_IMPLEMENT_ITERATIONS, pre_node_guard
+from agents.core.guards import pre_node_guard
 from agents.core.state import RalphState, initial_state
-from agents.models.cost import CostSummary, RunMetrics
+from agents.models.cost import CostSummary, RunMetrics, TokenUsage
 from agents.tools.git import commit, merge_pr, open_pr
 from agents.workers.implementer import run_implementer
 from agents.workers.planner import run_planner
 from agents.workers.reviewer import run_reviewer
 from agents.workers.validator import run_validator
+
+
+def _accumulate_cost(state: RalphState, usage: TokenUsage) -> float:
+    """Return updated estimated_cost_usd after adding usage."""
+    return state["estimated_cost_usd"] + usage.cost_usd()
 
 
 async def plan_node(state: RalphState) -> dict[str, Any]:
@@ -32,8 +38,13 @@ async def plan_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     context = build_context(state["task"])
-    plan = await run_planner(state["task"], context)
-    return {"plan": plan, "status": "implementing"}
+    plan, usage = await run_planner(state["task"], context)
+    return {
+        "plan": plan,
+        "status": "implementing",
+        "estimated_cost_usd": _accumulate_cost(state, usage),
+        "total_tool_calls": state["total_tool_calls"] + 1,
+    }
 
 
 async def implement_node(state: RalphState) -> dict[str, Any]:
@@ -46,7 +57,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
 
     iteration = state["iteration_count"] + 1
     context = build_context(state["task"])
-    impl = await run_implementer(
+    impl, usage = await run_implementer(
         task=state["task"],
         plan=state["plan"],
         context=context,
@@ -54,14 +65,14 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         iteration=iteration,
     )
 
-    import aiofiles
-    from pathlib import Path
     import subprocess
+    from pathlib import Path
 
-    repo_root = Path(subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    ).stdout.strip())
+    repo_root = Path(
+        subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
+        ).stdout.strip()
+    )
 
     for change in impl.files_changed:
         target = repo_root / change.path
@@ -74,6 +85,8 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
     return {
         "files_changed": impl.files_changed,
         "iteration_count": iteration,
+        "estimated_cost_usd": _accumulate_cost(state, usage),
+        "total_tool_calls": state["total_tool_calls"] + 1,
         "status": "validating",
     }
 
@@ -84,6 +97,7 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     from agents.models.implementer import ImplementOutput
+
     fake_impl = ImplementOutput(
         files_changed=state["files_changed"],
         commit_message="",
@@ -91,7 +105,11 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
         test_commands=[],
     )
     validation = await run_validator(fake_impl, iteration=state["iteration_count"])
-    return {"validation": validation, "status": "validating"}
+    return {
+        "validation": validation,
+        "total_tool_calls": state["total_tool_calls"] + 2,  # run_tests + run_lint
+        "status": "validating",
+    }
 
 
 def route_after_validate(state: RalphState) -> str:
@@ -101,15 +119,47 @@ def route_after_validate(state: RalphState) -> str:
     if validation is None:
         return "human_checkpoint"
     return {
-        "proceed": "open_pr_node",
+        "proceed": "ui_validate_node",
         "retry": "implement_node",
         "escalate": "human_checkpoint",
     }.get(validation.next_action, "human_checkpoint")
 
 
+async def ui_validate_node(state: RalphState) -> dict[str, Any]:
+    """Capture browser screenshots when the plan flags UI changes.
+
+    Requires APP_URL env var (set by worktree_up.sh). Skips gracefully if not set
+    or if plan.requires_browser_validation is False.
+    """
+    plan = state.get("plan")
+    if not plan or not plan.requires_browser_validation:
+        return {}
+
+    app_url = os.environ.get("APP_URL", "")
+    if not app_url:
+        logfire.warning("ui_validate_skipped", reason="APP_URL env var not set")
+        return {}
+
+    try:
+        from agents.tools.browser import snapshot_dom, take_screenshot
+
+        screenshot = await take_screenshot.fn(app_url)
+        dom = await snapshot_dom.fn(app_url)
+        logfire.info(
+            "ui_validate_complete",
+            url=app_url,
+            title=dom.title,
+            screenshot_bytes=len(screenshot.image_base64),
+        )
+        return {"ui_screenshots": state["ui_screenshots"] + [screenshot.image_base64]}
+    except Exception as e:
+        logfire.warning("ui_validate_failed", error=str(e), url=app_url)
+        return {}
+
+
 async def open_pr_node(state: RalphState) -> dict[str, Any]:
     changed_paths = [f.path for f in state["files_changed"]]
-    commit_result = await commit.fn(  
+    commit_result = await commit.fn(
         message=f"feat: {state['task'][:72]}",
         files=changed_paths,
     )
@@ -119,14 +169,17 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
             "error_log": state["error_log"] + [f"Commit failed: {commit_result.error}"],
         }
 
-    pr_result = await open_pr.fn(  
+    screenshot_note = ""
+    if state["ui_screenshots"]:
+        screenshot_note = f"\n\n## UI Validation\n{len(state['ui_screenshots'])} screenshot(s) captured before this PR."
+
+    pr_result = await open_pr.fn(
         title=state["task"][:72],
         body=(
             f"## Task\n{state['task']}\n\n"
             f"## Changes\n"
             + "\n".join(f"- `{f.path}` ({f.operation})" for f in state["files_changed"])
-            + f"\n\n## Implementation Notes\n"
-            + (state.get("impl_notes", "") or "")
+            + screenshot_note
         ),
     )
     if not pr_result.success:
@@ -138,6 +191,7 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
     return {
         "pr_url": pr_result.url,
         "pr_number": pr_result.number,
+        "total_tool_calls": state["total_tool_calls"] + 2,  # commit + open_pr
         "status": "reviewing",
     }
 
@@ -147,10 +201,12 @@ async def review_loop_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    review = await run_reviewer(state["pr_number"], state["task"])
+    review, usage = await run_reviewer(state["pr_number"], state["task"])
     return {
         "review": review,
         "review_iteration_count": state["review_iteration_count"] + 1,
+        "estimated_cost_usd": _accumulate_cost(state, usage),
+        "total_tool_calls": state["total_tool_calls"] + 1,  # get_pr_diff in reviewer
     }
 
 
@@ -166,7 +222,7 @@ def route_after_review(state: RalphState) -> str:
 
 
 async def merge_node(state: RalphState) -> dict[str, Any]:
-    result = await merge_pr.fn(pr_number=state["pr_number"])  
+    result = await merge_pr.fn(pr_number=state["pr_number"])
     if not result.success:
         return {
             "status": "failed",
@@ -192,6 +248,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_node("plan_node", plan_node)
     graph.add_node("implement_node", implement_node)
     graph.add_node("validate_node", validate_node)
+    graph.add_node("ui_validate_node", ui_validate_node)
     graph.add_node("open_pr_node", open_pr_node)
     graph.add_node("review_loop_node", review_loop_node)
     graph.add_node("merge_node", merge_node)
@@ -201,6 +258,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_edge("plan_node", "implement_node")
     graph.add_edge("implement_node", "validate_node")
     graph.add_conditional_edges("validate_node", route_after_validate)
+    graph.add_edge("ui_validate_node", "open_pr_node")
     graph.add_edge("open_pr_node", "review_loop_node")
     graph.add_conditional_edges("review_loop_node", route_after_review)
     graph.add_edge("merge_node", END)
@@ -221,21 +279,23 @@ async def run_ralph_loop(task: str) -> RalphState:
         final_state = await app.ainvoke(state)
 
         duration = time.monotonic() - start_time
+        total_cost = final_state["estimated_cost_usd"]
+
         logfire.info(
             "ralph_loop_complete",
             task=task[:100],
             status=final_state["status"],
             iterations=final_state["iteration_count"],
             duration_seconds=duration,
+            cost_usd=total_cost,
         )
 
-        # Emit RunMetrics
         metrics = RunMetrics(
             cost=CostSummary(
-                tokens_in=0,  # TODO: wire up token counting from Logfire spans
+                tokens_in=0,
                 tokens_out=0,
-                cost_usd=0.0,
-                model="gemini-2.0-flash",
+                cost_usd=total_cost,
+                model="gemini-3.0-flash-preview",
                 task=task[:200],
                 workflow="ralph_loop",
                 duration_seconds=duration,

@@ -5,12 +5,12 @@ a token budget enforced before the agent sees anything. This prevents context po
 and keeps token costs under control.
 """
 
-import json
-from pathlib import Path
+from pydantic import BaseModel, Field, RootModel
 
-from pydantic import BaseModel, Field
+from agents.core.paths import repo_root as _repo_root
+from agents.models.registry import REGISTRY
 
-from agents.tools.registry import REGISTRY, ToolCapability
+_JsonDict = RootModel[dict]
 
 
 class FileSnippet(BaseModel):
@@ -78,18 +78,6 @@ class TaskContext(BaseModel):
         return "\n\n".join(parts)
 
 
-def _repo_root() -> Path:
-    import subprocess
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
-
-
 def _estimate_tokens(text: str) -> int:
     """Rough token estimate: ~4 chars per token."""
     return len(text) // 4
@@ -98,14 +86,14 @@ def _estimate_tokens(text: str) -> int:
 def _load_symbols() -> dict:
     symbols_path = _repo_root() / "repo_index" / "symbols.json"
     if symbols_path.exists():
-        return json.loads(symbols_path.read_text())
+        return _JsonDict.model_validate_json(symbols_path.read_text()).root
     return {}
 
 
 def _load_file_map() -> dict:
     file_map_path = _repo_root() / "repo_index" / "file_map.json"
     if file_map_path.exists():
-        return json.loads(file_map_path.read_text())
+        return _JsonDict.model_validate_json(file_map_path.read_text()).root
     return {}
 
 
@@ -210,7 +198,7 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
         snippet = _read_snippet(file_path)
         if snippet:
             cost = _estimate_tokens(snippet.content)
-            if budget - cost > 1000: 
+            if budget - cost > 1000:
                 relevant_files.append(snippet)
                 budget -= cost
 
@@ -219,8 +207,7 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
 
     all_tools = REGISTRY.all_tools()
     available_tools = [
-        ToolSummary(name=t.name, description=t.description, category=t.category)
-        for t in all_tools
+        ToolSummary(name=t.name, description=t.description, category=t.category) for t in all_tools
     ]
 
     return TaskContext(

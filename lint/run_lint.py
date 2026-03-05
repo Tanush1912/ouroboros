@@ -9,15 +9,8 @@ Usage:
 
 import subprocess
 import sys
-from pathlib import Path
 
-
-def _repo_root() -> Path:
-    result = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    )
-    return Path(result.stdout.strip())
+from agents.core.paths import repo_root as _repo_root
 
 
 def run_all(path: str) -> int:
@@ -26,13 +19,11 @@ def run_all(path: str) -> int:
     from lint.golden_lint import run_golden_lint
 
     root = _repo_root()
-    all_violations = []
     exit_code = 0
 
     print("Running ruff...")
     ruff_result = subprocess.run(
-        ["python", "-m", "ruff", "check", path],
-        capture_output=True, text=True, cwd=root
+        ["python", "-m", "ruff", "check", path], capture_output=True, text=True, cwd=root
     )
     if ruff_result.returncode != 0:
         print(ruff_result.stdout)
@@ -64,7 +55,7 @@ def run_all(path: str) -> int:
 
     total = len(arch_violations) + len(golden_violations) + len(doc_violations)
     if exit_code == 0:
-        print(f"\n✓ All lint checks passed.")
+        print("\n✓ All lint checks passed.")
     else:
         print(f"\n✗ {total} violation(s) found.")
 
@@ -76,6 +67,7 @@ def main() -> int:
 
     if "--arch-only" in args:
         from lint.arch_lint import run_arch_lint
+
         path = args[-1] if len(args) > 1 else "."
         violations = run_arch_lint(path)
         for v in violations:
@@ -84,6 +76,7 @@ def main() -> int:
 
     if "--golden-only" in args:
         from lint.golden_lint import run_golden_lint
+
         path = args[-1] if len(args) > 1 else "."
         violations = run_golden_lint(path)
         for v in violations:
@@ -92,6 +85,7 @@ def main() -> int:
 
     if "--doc-only" in args:
         from lint.doc_lint import run_doc_lint
+
         path = args[-1] if len(args) > 1 else "."
         violations = run_doc_lint(path)
         for v in violations:

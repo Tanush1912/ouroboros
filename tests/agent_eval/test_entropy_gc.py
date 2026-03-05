@@ -36,6 +36,7 @@ def tmp_repo_with_gp001(tmp_path: Path) -> Path:
 def test_gc_detects_gp001_violation(tmp_repo_with_gp001: Path) -> None:
     """Golden lint detects the duplicate utility function as GP-001 violation."""
     from lint.golden_lint import check_gp001_duplicates
+
     violations = check_gp001_duplicates(tmp_repo_with_gp001)
     gp001_violations = [v for v in violations if "GP-001" in v]
     assert len(gp001_violations) >= 1
@@ -101,7 +102,7 @@ def test_cleanup_output_non_auto_fixable_goes_to_human() -> None:
 
     assert len(cleanup.human_review_needed) >= 1
     assert len(cleanup.recommended_prs) == 0
-    assert not cleanup.has_blocking_violations()  
+    assert not cleanup.has_blocking_violations()
 
 
 def test_cleanup_output_score_calculation() -> None:
@@ -161,7 +162,7 @@ def test_violation_cluster_by_principle() -> None:
         if v.auto_fixable:
             clusters.setdefault(v.principle, []).append(v)
 
-    assert len(clusters) == 2  
+    assert len(clusters) == 2
     assert len(clusters["GP-001"]) == 2
     assert len(clusters["GP-005"]) == 1
 
@@ -176,8 +177,11 @@ def test_violation_cluster_by_principle() -> None:
         )
 
         mock_run_cleaner = AsyncMock(return_value=mock_cleanup)
-        with patch.dict("sys.modules", {"agents.workers.cleaner": MagicMock(run_cleaner=mock_run_cleaner)}):
+        with patch.dict(
+            "sys.modules", {"agents.workers.cleaner": MagicMock(run_cleaner=mock_run_cleaner)}
+        ):
             import sys
+
             worker_module = sys.modules["agents.workers.cleaner"]
             result = await worker_module.run_cleaner(scan_report="No violations")
             assert result.overall_score() == pytest.approx(10.0)

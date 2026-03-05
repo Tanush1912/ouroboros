@@ -3,13 +3,15 @@
 All GitHub operations go through the gh CLI. Requires gh to be authenticated.
 """
 
+import contextlib
 import json
 import subprocess
-from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field
 from pydantic_ai import tool
+
+from agents.core.paths import repo_root as _repo_root
 
 
 class GitStatus(BaseModel):
@@ -47,17 +49,6 @@ class MergeResult(BaseModel):
     success: bool
     sha: str = Field(default="", description="Merge commit SHA")
     error: str = Field(default="")
-
-
-def _repo_root() -> Path:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
 
 
 def _run(cmd: list[str]) -> tuple[int, str, str]:
@@ -100,7 +91,7 @@ def commit(message: str, files: list[str]) -> CommitResult:
     if not files:
         return CommitResult(success=False, message=message, error="No files specified")
 
-    rc, _, err = _run(["git", "add", "--"] + files)
+    rc, _, err = _run(["git", "add", "--", *files])
     if rc != 0:
         return CommitResult(success=False, message=message, error=f"git add failed: {err}")
 
@@ -120,21 +111,26 @@ def commit(message: str, files: list[str]) -> CommitResult:
 @tool
 def open_pr(title: str, body: str, base: str = "main") -> PRResult:
     """Open a pull request via gh CLI. Returns PR URL and number."""
-    rc, out, err = _run([
-        "gh", "pr", "create",
-        "--title", title,
-        "--body", body,
-        "--base", base,
-    ])
+    rc, out, err = _run(
+        [
+            "gh",
+            "pr",
+            "create",
+            "--title",
+            title,
+            "--body",
+            body,
+            "--base",
+            base,
+        ]
+    )
     if rc != 0:
         return PRResult(success=False, error=err.strip())
 
     url = out.strip()
     number = 0
-    try:
+    with contextlib.suppress(ValueError, IndexError):
         number = int(url.rstrip("/").split("/")[-1])
-    except (ValueError, IndexError):
-        pass
     return PRResult(success=True, url=url, number=number)
 
 
@@ -150,22 +146,27 @@ def get_pr_diff(pr_number: int) -> str:
 @tool
 def get_pr_comments(pr_number: int) -> list[PRComment]:
     """Fetch review comments on a PR. Returns structured comment list."""
-    rc, out, err = _run([
-        "gh", "api",
-        f"repos/{{owner}}/{{repo}}/pulls/{pr_number}/comments",
-    ])
+    rc, out, err = _run(
+        [
+            "gh",
+            "api",
+            f"repos/:owner/:repo/pulls/{pr_number}/comments",
+        ]
+    )
     if rc != 0:
         raise RuntimeError(f"gh api failed: {err}")
 
     raw = json.loads(out)
     return [
-        PRComment(
-            id=c["id"],
-            author=c["user"]["login"],
-            body=c["body"],
-            path=c.get("path"),
-            line=c.get("line"),
-            created_at=c["created_at"],
+        PRComment.model_validate(
+            {
+                "id": c["id"],
+                "author": c["user"]["login"],
+                "body": c["body"],
+                "path": c.get("path"),
+                "line": c.get("line"),
+                "created_at": c["created_at"],
+            }
         )
         for c in raw
     ]
@@ -175,7 +176,7 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
 def merge_pr(pr_number: int, strategy: Literal["squash", "merge"] = "squash") -> MergeResult:
     """Merge a pull request."""
     flag = "--squash" if strategy == "squash" else "--merge"
-    rc, out, err = _run(["gh", "pr", "merge", str(pr_number), flag, "--auto"])
+    rc, _out, err = _run(["gh", "pr", "merge", str(pr_number), flag, "--auto"])
     if rc != 0:
         return MergeResult(success=False, error=err.strip())
     return MergeResult(success=True)

@@ -11,7 +11,7 @@ from pydantic_ai.models.vertexai import VertexAIModel
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "")
 GCP_LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
-MODEL_NAME = os.environ.get("OUROBOROS_MODEL", "gemini-2.0-flash")
+MODEL_NAME = os.environ.get("OUROBOROS_MODEL", "gemini-3.0-flash-preview")
 
 _initialized = False
 
@@ -32,6 +32,3 @@ def get_model() -> VertexAIModel:
     """Return the configured Vertex AI model instance."""
     _ensure_initialized()
     return VertexAIModel(MODEL_NAME)
-
-
-model = get_model if not GCP_PROJECT else None  

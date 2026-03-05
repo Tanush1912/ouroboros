@@ -1,45 +1,41 @@
 """Validator worker — runs tests and lint, returns ValidationOutput.
 
 The next_action field drives LangGraph conditional routing. No string parsing.
+next_action is determined deterministically from test/lint results — no LLM call needed.
 """
 
 import logfire
-from pydantic_ai import Agent
 
-from agents.core.config import get_model
 from agents.models.implementer import ImplementOutput
 from agents.models.validator import LintResult, TestResult, ValidationOutput
 from agents.tools.shell import run_lint, run_tests
 
-SYSTEM_PROMPT = """You are the Validator agent in the Ouroboros system.
 
-Your job is to assess the results of running tests and lint, and determine the next action.
+def _determine_next_action(
+    test_result: TestResult,
+    lint_result: LintResult,
+    arch_lint_result: LintResult,
+    iteration: int,
+) -> tuple[str, str]:
+    """Deterministically compute next_action and failure_summary from results."""
+    if test_result.passed and lint_result.passed and arch_lint_result.passed:
+        return "proceed", ""
 
-Rules for next_action:
-- "proceed": tests pass AND lint passes AND arch_lint passes
-- "retry": tests fail OR lint fails, but failures look fixable by the implementer
-  (e.g., missing import, off-by-one, lint violation with REMEDIATION instructions)
-- "escalate": failures are unrecoverable without human input
-  (e.g., missing external dependency, broken infrastructure, unclear requirement)
+    failures = []
+    if not test_result.passed:
+        failures.extend(test_result.failures[:5])
+    if not lint_result.passed:
+        failures.extend(lint_result.violations[:3])
+    if not arch_lint_result.passed:
+        failures.extend(arch_lint_result.violations[:3])
 
-overall_pass = tests.passed AND lint.passed AND arch_lint.passed
+    unrecoverable = ("ModuleNotFoundError", "ImportError", "missing external", "No module named")
+    for f in failures:
+        for signal in unrecoverable:
+            if signal in f:
+                return "escalate", "\n".join(failures)
 
-Be conservative with "escalate" — most coding failures should be "retry".
-Escalate only when there is no clear mechanical fix the implementer can make.
-"""
-
-_agent: Agent[None, ValidationOutput] | None = None
-
-
-def _get_agent() -> Agent[None, ValidationOutput]:
-    global _agent
-    if _agent is None:
-        _agent = Agent(
-            model=get_model(),
-            result_type=ValidationOutput,
-            system_prompt=SYSTEM_PROMPT,
-        )
-    return _agent
+    return "retry", "\n".join(failures)
 
 
 async def run_validator(
@@ -48,8 +44,8 @@ async def run_validator(
 ) -> ValidationOutput:
     """Run tests and lint on the implementation, return structured validation result."""
     with logfire.span("validator", iteration=iteration):
-        test_result: TestResult = await run_tests.fn(".")  
-        lint_result: LintResult = await run_lint.fn(".") 
+        test_result: TestResult = run_tests.fn(".")
+        lint_result: LintResult = run_lint.fn(".")
 
         arch_violations = [v for v in lint_result.violations if v.startswith("ARCH-")]
         other_violations = [v for v in lint_result.violations if not v.startswith("ARCH-")]
@@ -65,36 +61,17 @@ async def run_validator(
         )
 
         overall_pass = test_result.passed and ruff_lint_result.passed and arch_lint_result.passed
-
-        summary_prompt = f"""
-Test results: {'PASS' if test_result.passed else 'FAIL'}
-Failures: {test_result.failures[:5]}
-
-Lint results: {'PASS' if ruff_lint_result.passed else 'FAIL'}
-Violations: {ruff_lint_result.violations[:5]}
-
-Arch lint results: {'PASS' if arch_lint_result.passed else 'FAIL'}
-Violations: {arch_lint_result.violations[:3]}
-
-Overall: {'PASS' if overall_pass else 'FAIL'}
-Iteration: {iteration}
-
-Files changed: {[f.path for f in implement_output.files_changed]}
-Implementation notes: {implement_output.implementation_notes[:500]}
-
-Determine next_action and provide failure_summary if not passing.
-"""
-        agent = _get_agent()
-        result = await agent.run(summary_prompt)
-        output = result.data
+        next_action, failure_summary = _determine_next_action(
+            test_result, ruff_lint_result, arch_lint_result, iteration
+        )
 
         final = ValidationOutput(
             tests=test_result,
             lint=ruff_lint_result,
             arch_lint=arch_lint_result,
             overall_pass=overall_pass,
-            next_action=output.next_action,
-            failure_summary=output.failure_summary,
+            next_action=next_action,
+            failure_summary=failure_summary,
         )
 
         logfire.info(

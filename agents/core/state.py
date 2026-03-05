@@ -19,6 +19,8 @@ class RalphState(TypedDict):
     iteration_count: int
     review_iteration_count: int
     total_tool_calls: int
+    estimated_cost_usd: float
+    cost_budget_usd: float
     status: Literal[
         "planning",
         "implementing",
@@ -30,6 +32,7 @@ class RalphState(TypedDict):
         "failed",
     ]
     error_log: list[str]
+    ui_screenshots: list[str]  # Base64 screenshots from ui_validate_node (empty if not a UI task)
 
 
 def initial_state(task: str) -> RalphState:
@@ -45,6 +48,9 @@ def initial_state(task: str) -> RalphState:
         iteration_count=0,
         review_iteration_count=0,
         total_tool_calls=0,
+        estimated_cost_usd=0.0,
+        cost_budget_usd=2.0,
         status="planning",
         error_log=[],
+        ui_screenshots=[],
     )

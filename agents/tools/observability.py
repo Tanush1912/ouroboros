@@ -71,8 +71,7 @@ async def query_metrics(promql: str, duration: str = "1h") -> MetricResult:
     for result in data.get("data", {}).get("result", []):
         labels = result.get("metric", {})
         samples = [
-            MetricSample(timestamp=ts, value=float(val))
-            for ts, val in result.get("values", [])
+            MetricSample(timestamp=ts, value=float(val)) for ts, val in result.get("values", [])
         ]
         series.append(MetricSeries(labels=labels, samples=samples))
     return MetricResult(query=promql, series=series)

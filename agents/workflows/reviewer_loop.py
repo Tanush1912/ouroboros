@@ -23,7 +23,7 @@ class ReviewerState(TypedDict):
 
 
 async def review_node(state: ReviewerState) -> dict:
-    review = await run_reviewer(state["pr_number"], state["task"])
+    review, _ = await run_reviewer(state["pr_number"], state["task"])
     return {
         "review": review,
         "iteration": state["iteration"] + 1,
@@ -36,7 +36,7 @@ def route_review(state: ReviewerState) -> str:
         return "approved"
     if state["iteration"] >= MAX_REVIEW_ITERATIONS:
         return "escalate"
-    return "approved"  
+    return "continue_review"
 
 
 def build_reviewer_graph() -> StateGraph:
@@ -45,7 +45,7 @@ def build_reviewer_graph() -> StateGraph:
     graph.add_conditional_edges(
         "review_node",
         route_review,
-        {"approved": END, "escalate": END},
+        {"approved": END, "escalate": END, "continue_review": "review_node"},
     )
     graph.set_entry_point("review_node")
     return graph
