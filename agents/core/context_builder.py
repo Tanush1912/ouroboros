@@ -6,12 +6,11 @@ and keeps token costs under control.
 """
 
 import json
-from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from agents.core.paths import repo_root as _repo_root
-from agents.tools.registry import REGISTRY, ToolCapability
+from agents.tools.registry import REGISTRY
 
 
 class FileSnippet(BaseModel):
@@ -199,7 +198,7 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
         snippet = _read_snippet(file_path)
         if snippet:
             cost = _estimate_tokens(snippet.content)
-            if budget - cost > 1000: 
+            if budget - cost > 1000:
                 relevant_files.append(snippet)
                 budget -= cost
 

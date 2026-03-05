@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from agents.core.paths import repo_root as _get_repo_root
-from lint.rules import ARCH_RULES, RULES_BY_ID
+from lint.rules import RULES_BY_ID
 
 LAYER_ORDER = ["models", "config", "core", "tools", "workers", "workflows"]
 
@@ -61,7 +61,7 @@ def check_file(file_path: Path, repo_root: Path) -> list[str]:
     file_layer = _classify_module(file_module)
 
     if file_layer is None:
-        return []  
+        return []
 
     violations = []
     imports = _get_imports(file_path)

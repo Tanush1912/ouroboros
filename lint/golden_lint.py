@@ -7,12 +7,11 @@ import ast
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from agents.core.paths import repo_root as _repo_root
 from lint.rules import RULES_BY_ID
-
 
 _GP006_ALLOWED_SUFFIXES = (
     "Output", "Result", "Schema", "Type", "Summary", "State", "Context",
@@ -56,7 +55,7 @@ def check_gp001_duplicates(root: Path) -> list[str]:
                     f"{py_file.relative_to(root)}:{node.name}"
                 )
 
-    for body, locations in func_bodies.items():
+    for _body, locations in func_bodies.items():
         if len(locations) > 1:
             rule = RULES_BY_ID["GP-001"]
             violations.append(
@@ -254,7 +253,7 @@ def check_gp009_active_plans(root: Path) -> list[str]:
     if not plans_dir.exists():
         return []
 
-    threshold = datetime.now(tz=timezone.utc) - timedelta(days=7)
+    threshold = datetime.now(tz=UTC) - timedelta(days=7)
 
     for plan_file in plans_dir.glob("*.md"):
         content = plan_file.read_text(encoding="utf-8")
@@ -268,7 +267,7 @@ def check_gp009_active_plans(root: Path) -> list[str]:
 
         date_str = match.group(1)
         try:
-            plan_date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            plan_date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
         except ValueError:
             continue
 
@@ -292,8 +291,8 @@ def check_gp010_quality_score(root: Path) -> list[str]:
         ]
 
     import os
-    mtime = datetime.fromtimestamp(os.path.getmtime(score_path), tz=timezone.utc)
-    age = datetime.now(tz=timezone.utc) - mtime
+    mtime = datetime.fromtimestamp(os.path.getmtime(score_path), tz=UTC)
+    age = datetime.now(tz=UTC) - mtime
     if age > timedelta(hours=24):
         rule = RULES_BY_ID["GP-010"]
         return [

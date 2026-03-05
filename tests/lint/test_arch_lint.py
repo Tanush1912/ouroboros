@@ -3,8 +3,6 @@
 import textwrap
 from pathlib import Path
 
-import pytest
-
 from lint.arch_lint import check_file, run_arch_lint
 
 

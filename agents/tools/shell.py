@@ -60,19 +60,19 @@ def run_lint(path: str = ".") -> LintResult:
     violations = []
     auto_fixed = 0
 
-    returncode, stdout, stderr = _run(["python", "-m", "ruff", "check", path], cwd=root)
+    returncode, stdout, _stderr = _run(["python", "-m", "ruff", "check", path], cwd=root)
     if returncode != 0:
         for line in stdout.splitlines():
             if line.strip():
                 violations.append(f"RUFF: {line.strip()}")
 
-    returncode, stdout, stderr = _run(
+    returncode, stdout, _stderr = _run(
         ["python", "lint/run_lint.py", "--arch-only", path], cwd=root
     )
     if returncode != 0:
         violations.extend(stdout.splitlines())
 
-    returncode, stdout, stderr = _run(
+    returncode, stdout, _stderr = _run(
         ["python", "lint/run_lint.py", "--golden-only", path], cwd=root
     )
     if returncode != 0:

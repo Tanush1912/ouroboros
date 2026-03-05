@@ -3,8 +3,6 @@
 import textwrap
 from pathlib import Path
 
-import pytest
-
 from lint.golden_lint import (
     check_gp001_duplicates,
     check_gp002_file_size,

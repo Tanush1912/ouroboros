@@ -15,8 +15,6 @@ Run after significant changes or on every CI build:
 
 import ast
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 from agents.core.paths import repo_root as _repo_root
@@ -78,9 +76,8 @@ def _extract_imports(file_path: Path) -> list[str]:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 imports.append(alias.name)
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                imports.append(node.module)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imports.append(node.module)
     return list(set(imports))
 
 
@@ -94,9 +91,8 @@ def _extract_exports(file_path: Path) -> list[str]:
 
     exports = []
     for node in ast.walk(tree):
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            if not node.name.startswith("_"):
-                exports.append(node.name)
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
+            exports.append(node.name)
     return exports
 
 
@@ -163,7 +159,7 @@ def reindex(paths: list[str], root: Path | None = None) -> tuple[dict, dict]:
 
     for rel_path in paths:
         file_path = root / rel_path
-        if not file_path.exists() or not file_path.suffix == ".py":
+        if not file_path.exists() or file_path.suffix != ".py":
             continue
         for sym in _extract_symbols(file_path, root):
             name = sym["name"]

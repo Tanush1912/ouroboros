@@ -17,7 +17,7 @@ import logfire
 from langgraph.graph import END, StateGraph
 
 from agents.core.context_builder import build_context
-from agents.core.guards import MAX_IMPLEMENT_ITERATIONS, pre_node_guard
+from agents.core.guards import pre_node_guard
 from agents.core.state import RalphState, initial_state
 from agents.models.cost import CostSummary, RunMetrics, TokenUsage
 from agents.tools.git import commit, merge_pr, open_pr
@@ -65,8 +65,8 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         iteration=iteration,
     )
 
-    from pathlib import Path
     import subprocess
+    from pathlib import Path
 
     repo_root = Path(subprocess.run(
         ["git", "rev-parse", "--show-toplevel"],
@@ -131,7 +131,7 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
     """
     plan = state.get("plan")
     if not plan or not plan.requires_browser_validation:
-        return {}  
+        return {}
 
     app_url = os.environ.get("APP_URL", "")
     if not app_url:
@@ -289,8 +289,8 @@ async def run_ralph_loop(task: str) -> RalphState:
 
         metrics = RunMetrics(
             cost=CostSummary(
-                tokens_in=0,   
-                tokens_out=0,  
+                tokens_in=0,
+                tokens_out=0,
                 cost_usd=total_cost,
                 model="gemini-3.0-flash-preview",
                 task=task[:200],

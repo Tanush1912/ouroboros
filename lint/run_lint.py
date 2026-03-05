@@ -9,7 +9,6 @@ Usage:
 
 import subprocess
 import sys
-from pathlib import Path
 
 from agents.core.paths import repo_root as _repo_root
 
@@ -20,7 +19,6 @@ def run_all(path: str) -> int:
     from lint.golden_lint import run_golden_lint
 
     root = _repo_root()
-    all_violations = []
     exit_code = 0
 
     print("Running ruff...")
@@ -58,7 +56,7 @@ def run_all(path: str) -> int:
 
     total = len(arch_violations) + len(golden_violations) + len(doc_violations)
     if exit_code == 0:
-        print(f"\n✓ All lint checks passed.")
+        print("\n✓ All lint checks passed.")
     else:
         print(f"\n✗ {total} violation(s) found.")
 

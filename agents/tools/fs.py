@@ -5,7 +5,7 @@ Agents should prefer search_symbol() over read_file() for navigation.
 """
 
 import json
-import os
+import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -39,8 +39,8 @@ def _resolve(path: str) -> Path:
     resolved = (root / path).resolve()
     try:
         resolved.relative_to(root.resolve())
-    except ValueError:
-        raise ValueError(f"Path '{path}' is outside the repository root")
+    except ValueError as err:
+        raise ValueError(f"Path '{path}' is outside the repository root") from err
     return resolved
 
 

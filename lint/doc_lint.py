@@ -61,9 +61,9 @@ def check_doc_references(
 
         if (
             re.match(r"^[A-Z][a-zA-Z0-9]{4,}$", ref)
-            and re.search(r"[a-z]", ref)  
+            and re.search(r"[a-z]", ref)
             and ref not in _COMMON_NON_SYMBOLS
-            and known_symbols 
+            and known_symbols
             and ref not in known_symbols
         ):
             violations.append(

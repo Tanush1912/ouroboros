@@ -4,7 +4,6 @@ Tests the typed model contracts that agents must satisfy.
 Worker functions are mocked — no pydantic_ai or GCP credentials required.
 """
 
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

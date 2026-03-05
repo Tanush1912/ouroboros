@@ -7,7 +7,6 @@ Schedule: daily via .github/workflows/entropy_gc.yml
 """
 
 from datetime import datetime
-from pathlib import Path
 from typing import TypedDict
 
 import logfire
@@ -37,7 +36,7 @@ def _collect_domains() -> list[str]:
 
 async def entropy_scan_node(state: GCState) -> dict:
     """Run all linters and collect a comprehensive scan report."""
-    lint_result = run_lint.fn(".")  
+    lint_result = run_lint.fn(".")
     violations_text = "\n".join(lint_result.violations) if lint_result.violations else "No violations"
     scan_report = f"Lint violations:\n{violations_text}\n\nAuto-fixed: {lint_result.auto_fixed}"
     return {"scan_report": scan_report}
@@ -69,7 +68,7 @@ async def open_cleanup_prs_node(state: GCState) -> dict:
     prs_opened = []
 
     for principle, violations in clusters.items():
-        files = list({v.file for v in violations})
+        list({v.file for v in violations})
         body = f"## Entropy GC — {principle}\n\n"
         body += "**Violations:**\n"
         for v in violations:
@@ -79,7 +78,7 @@ async def open_cleanup_prs_node(state: GCState) -> dict:
 
         title = f"[gc] {principle}: {violations[0].description[:60]}"
 
-        pr_result = await open_pr.fn(title=title, body=body)  
+        pr_result = await open_pr.fn(title=title, body=body)
         if pr_result.success:
             prs_opened.append(pr_result.url)
             logfire.info("gc_pr_opened", principle=principle, url=pr_result.url)
@@ -144,7 +143,7 @@ async def update_quality_score_node(state: GCState) -> dict:
     score_path.write_text("\n".join(lines) + "\n")
 
 
-    commit_result = await commit.fn(  
+    commit_result = await commit.fn(
         message=f"chore(gc): update quality scores [{now}]",
         files=["docs/QUALITY_SCORE.md"],
     )

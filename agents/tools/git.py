@@ -3,9 +3,9 @@
 All GitHub operations go through the gh CLI. Requires gh to be authenticated.
 """
 
+import contextlib
 import json
 import subprocess
-from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -91,7 +91,7 @@ def commit(message: str, files: list[str]) -> CommitResult:
     if not files:
         return CommitResult(success=False, message=message, error="No files specified")
 
-    rc, _, err = _run(["git", "add", "--"] + files)
+    rc, _, err = _run(["git", "add", "--", *files])
     if rc != 0:
         return CommitResult(success=False, message=message, error=f"git add failed: {err}")
 
@@ -122,10 +122,8 @@ def open_pr(title: str, body: str, base: str = "main") -> PRResult:
 
     url = out.strip()
     number = 0
-    try:
+    with contextlib.suppress(ValueError, IndexError):
         number = int(url.rstrip("/").split("/")[-1])
-    except (ValueError, IndexError):
-        pass
     return PRResult(success=True, url=url, number=number)
 
 
@@ -166,7 +164,7 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
 def merge_pr(pr_number: int, strategy: Literal["squash", "merge"] = "squash") -> MergeResult:
     """Merge a pull request."""
     flag = "--squash" if strategy == "squash" else "--merge"
-    rc, out, err = _run(["gh", "pr", "merge", str(pr_number), flag, "--auto"])
+    rc, _out, err = _run(["gh", "pr", "merge", str(pr_number), flag, "--auto"])
     if rc != 0:
         return MergeResult(success=False, error=err.strip())
     return MergeResult(success=True)

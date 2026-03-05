@@ -101,7 +101,7 @@ def test_cleanup_output_non_auto_fixable_goes_to_human() -> None:
 
     assert len(cleanup.human_review_needed) >= 1
     assert len(cleanup.recommended_prs) == 0
-    assert not cleanup.has_blocking_violations()  
+    assert not cleanup.has_blocking_violations()
 
 
 def test_cleanup_output_score_calculation() -> None:
@@ -161,7 +161,7 @@ def test_violation_cluster_by_principle() -> None:
         if v.auto_fixable:
             clusters.setdefault(v.principle, []).append(v)
 
-    assert len(clusters) == 2  
+    assert len(clusters) == 2
     assert len(clusters["GP-001"]) == 2
     assert len(clusters["GP-005"]) == 1
 
