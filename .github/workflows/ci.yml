@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: ruff check
+        run: uv run ruff check .
+
+      - name: ruff format check
+        run: uv run ruff format --check .
+
+      - name: Architecture lint
+        run: uv run python lint/run_lint.py --arch-only .
+
+      - name: Golden lint
+        run: uv run python lint/run_lint.py --golden-only .
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Build repo index
+        run: uv run python repo_index/build_index.py
+
+      - name: Run lint tests
+        run: uv run pytest tests/lint/ -v
+
+      - name: Run agent eval tests
+        run: uv run pytest tests/agent_eval/ -v
+        env:
+          # Agent eval tests use mocks — no real GCP credentials needed
+          GCP_PROJECT: test-project
+
+  index:
+    name: Update Repo Index
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Build index
+        run: uv run python repo_index/build_index.py
+
+      - name: Commit updated index
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(index): update repo index [skip ci]"
+          file_pattern: "repo_index/symbols.json repo_index/file_map.json"

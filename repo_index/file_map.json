@@ -1,0 +1,695 @@
+{
+  "agents/__init__.py": {
+    "domain": "agents",
+    "layer": "agents",
+    "imports": [],
+    "exports": []
+  },
+  "agents/core/__init__.py": {
+    "domain": "agents",
+    "layer": "core",
+    "imports": [],
+    "exports": []
+  },
+  "agents/core/config.py": {
+    "domain": "agents",
+    "layer": "core",
+    "imports": [
+      "os",
+      "vertexai",
+      "pydantic_ai.models.vertexai"
+    ],
+    "exports": [
+      "get_model"
+    ]
+  },
+  "agents/core/context_builder.py": {
+    "domain": "agents",
+    "layer": "core",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "json",
+      "agents.tools.registry",
+      "pydantic"
+    ],
+    "exports": [
+      "FileSnippet",
+      "DocReference",
+      "ToolSummary",
+      "TaskContext",
+      "build_context",
+      "to_prompt_text"
+    ]
+  },
+  "agents/core/guards.py": {
+    "domain": "agents",
+    "layer": "core",
+    "imports": [
+      "agents.core.state",
+      "typing",
+      "pydantic",
+      "logfire"
+    ],
+    "exports": [
+      "GuardResult",
+      "check_guards",
+      "pre_node_guard"
+    ]
+  },
+  "agents/core/instrumentation.py": {
+    "domain": "agents",
+    "layer": "core",
+    "imports": [
+      "os",
+      "logfire"
+    ],
+    "exports": [
+      "configure_logfire"
+    ]
+  },
+  "agents/core/state.py": {
+    "domain": "agents",
+    "layer": "core",
+    "imports": [
+      "agents.models.reviewer",
+      "typing",
+      "agents.models.validator",
+      "agents.models.implementer",
+      "agents.models.planner"
+    ],
+    "exports": [
+      "RalphState",
+      "initial_state"
+    ]
+  },
+  "agents/models/__init__.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [],
+    "exports": []
+  },
+  "agents/models/cleaner.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "typing",
+      "pydantic"
+    ],
+    "exports": [
+      "EntropyViolation",
+      "CleanupOutput",
+      "overall_score",
+      "has_blocking_violations"
+    ]
+  },
+  "agents/models/cost.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "pydantic"
+    ],
+    "exports": [
+      "CostSummary",
+      "RunMetrics",
+      "total_cost_usd",
+      "summary_line"
+    ]
+  },
+  "agents/models/implementer.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "typing",
+      "pydantic"
+    ],
+    "exports": [
+      "FileChange",
+      "ImplementOutput"
+    ]
+  },
+  "agents/models/planner.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "typing",
+      "pydantic"
+    ],
+    "exports": [
+      "ExecutionStep",
+      "PlanOutput"
+    ]
+  },
+  "agents/models/reviewer.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "typing",
+      "pydantic"
+    ],
+    "exports": [
+      "ReviewComment",
+      "ReviewOutput"
+    ]
+  },
+  "agents/models/validator.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "typing",
+      "pydantic"
+    ],
+    "exports": [
+      "TestResult",
+      "LintResult",
+      "ValidationOutput"
+    ]
+  },
+  "agents/tools/__init__.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [],
+    "exports": []
+  },
+  "agents/tools/browser.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [
+      "base64",
+      "typing",
+      "pydantic_ai",
+      "playwright.async_api",
+      "pydantic"
+    ],
+    "exports": [
+      "ScreenshotResult",
+      "DOMNode",
+      "DOMSnapshot",
+      "UIAction",
+      "UIFlowResult",
+      "take_screenshot",
+      "snapshot_dom",
+      "drive_ui_flow"
+    ]
+  },
+  "agents/tools/fs.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "json",
+      "pydantic_ai",
+      "os",
+      "pydantic"
+    ],
+    "exports": [
+      "WriteResult",
+      "SearchMatch",
+      "SymbolLocation",
+      "read_file",
+      "write_file",
+      "list_dir",
+      "search_repo",
+      "search_symbol"
+    ]
+  },
+  "agents/tools/git.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "json",
+      "typing",
+      "pydantic_ai",
+      "pydantic"
+    ],
+    "exports": [
+      "GitStatus",
+      "CommitResult",
+      "PRResult",
+      "PRComment",
+      "MergeResult",
+      "git_status",
+      "commit",
+      "open_pr",
+      "get_pr_diff",
+      "get_pr_comments",
+      "merge_pr"
+    ]
+  },
+  "agents/tools/observability.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [
+      "httpx",
+      "pydantic_ai",
+      "os",
+      "pydantic"
+    ],
+    "exports": [
+      "LogLine",
+      "MetricSample",
+      "MetricSeries",
+      "MetricResult",
+      "query_logs",
+      "query_metrics"
+    ]
+  },
+  "agents/tools/registry.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [
+      "typing",
+      "pydantic"
+    ],
+    "exports": [
+      "ToolCapability",
+      "ToolRegistry",
+      "register",
+      "all_tools",
+      "tools_for_category",
+      "get_tool",
+      "tool_names"
+    ]
+  },
+  "agents/tools/shell.py": {
+    "domain": "agents",
+    "layer": "tools",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "time",
+      "agents.models.validator",
+      "pydantic_ai",
+      "pydantic"
+    ],
+    "exports": [
+      "BuildResult",
+      "CommandResult",
+      "run_tests",
+      "run_lint",
+      "run_build",
+      "run_command"
+    ]
+  },
+  "agents/workers/__init__.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [],
+    "exports": []
+  },
+  "agents/workers/cleaner.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [
+      "agents.core.config",
+      "agents.models.cleaner",
+      "pydantic_ai",
+      "logfire"
+    ],
+    "exports": [
+      "run_cleaner"
+    ]
+  },
+  "agents/workers/implementer.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [
+      "agents.core.config",
+      "agents.core.context_builder",
+      "agents.models.validator",
+      "logfire",
+      "agents.models.implementer",
+      "pydantic_ai",
+      "agents.models.planner"
+    ],
+    "exports": [
+      "run_implementer"
+    ]
+  },
+  "agents/workers/planner.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [
+      "agents.core.config",
+      "agents.core.context_builder",
+      "logfire",
+      "pydantic_ai",
+      "agents.models.planner"
+    ],
+    "exports": [
+      "run_planner"
+    ]
+  },
+  "agents/workers/reviewer.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [
+      "agents.core.config",
+      "agents.models.reviewer",
+      "logfire",
+      "pydantic_ai",
+      "agents.tools.git"
+    ],
+    "exports": [
+      "run_reviewer"
+    ]
+  },
+  "agents/workers/validator.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [
+      "agents.core.config",
+      "agents.tools.shell",
+      "agents.models.validator",
+      "logfire",
+      "agents.models.implementer",
+      "pydantic_ai"
+    ],
+    "exports": [
+      "run_validator"
+    ]
+  },
+  "agents/workflows/__init__.py": {
+    "domain": "agents",
+    "layer": "workflows",
+    "imports": [],
+    "exports": []
+  },
+  "agents/workflows/entropy_gc.py": {
+    "domain": "agents",
+    "layer": "workflows",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "agents.workers.cleaner",
+      "agents.tools.shell",
+      "sys",
+      "typing",
+      "logfire",
+      "asyncio",
+      "datetime",
+      "langgraph.graph",
+      "agents.models.cleaner",
+      "agents.tools.git"
+    ],
+    "exports": [
+      "GCState",
+      "entropy_scan_node",
+      "analyze_violations_node",
+      "open_cleanup_prs_node",
+      "update_quality_score_node",
+      "build_gc_graph",
+      "run_entropy_gc"
+    ]
+  },
+  "agents/workflows/ralph_loop.py": {
+    "domain": "agents",
+    "layer": "workflows",
+    "imports": [
+      "pathlib",
+      "agents.core.state",
+      "subprocess",
+      "agents.core.context_builder",
+      "agents.models.cost",
+      "time",
+      "agents.workers.validator",
+      "typing",
+      "agents.workers.planner",
+      "logfire",
+      "agents.workers.implementer",
+      "langgraph.graph",
+      "agents.core.guards",
+      "aiofiles",
+      "agents.models.implementer",
+      "agents.workers.reviewer",
+      "agents.tools.git"
+    ],
+    "exports": [
+      "plan_node",
+      "implement_node",
+      "validate_node",
+      "route_after_validate",
+      "open_pr_node",
+      "review_loop_node",
+      "route_after_review",
+      "merge_node",
+      "human_checkpoint",
+      "build_ralph_graph",
+      "run_ralph_loop"
+    ]
+  },
+  "agents/workflows/reviewer_loop.py": {
+    "domain": "agents",
+    "layer": "workflows",
+    "imports": [
+      "agents.models.reviewer",
+      "typing",
+      "logfire",
+      "langgraph.graph",
+      "agents.core.guards",
+      "agents.workers.reviewer"
+    ],
+    "exports": [
+      "ReviewerState",
+      "review_node",
+      "route_review",
+      "build_reviewer_graph",
+      "run_reviewer_loop"
+    ]
+  },
+  "lint/__init__.py": {
+    "domain": "lint",
+    "layer": "lint",
+    "imports": [],
+    "exports": []
+  },
+  "lint/arch_lint.py": {
+    "domain": "lint",
+    "layer": "lint",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "lint.rules",
+      "ast",
+      "sys"
+    ],
+    "exports": [
+      "check_file",
+      "run_arch_lint",
+      "main"
+    ]
+  },
+  "lint/doc_lint.py": {
+    "domain": "lint",
+    "layer": "lint",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "json",
+      "re",
+      "sys"
+    ],
+    "exports": [
+      "check_doc_references",
+      "run_doc_lint",
+      "main"
+    ]
+  },
+  "lint/golden_lint.py": {
+    "domain": "lint",
+    "layer": "lint",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "lint.rules",
+      "re",
+      "ast",
+      "datetime",
+      "os",
+      "sys"
+    ],
+    "exports": [
+      "check_gp001_duplicates",
+      "check_gp002_file_size",
+      "check_gp005_no_print",
+      "check_gp009_active_plans",
+      "check_gp010_quality_score",
+      "run_golden_lint",
+      "main"
+    ]
+  },
+  "lint/rules.py": {
+    "domain": "lint",
+    "layer": "lint",
+    "imports": [
+      "dataclasses",
+      "typing"
+    ],
+    "exports": [
+      "LintRule"
+    ]
+  },
+  "lint/run_lint.py": {
+    "domain": "lint",
+    "layer": "lint",
+    "imports": [
+      "pathlib",
+      "lint.golden_lint",
+      "subprocess",
+      "lint.doc_lint",
+      "lint.arch_lint",
+      "sys"
+    ],
+    "exports": [
+      "run_all",
+      "main"
+    ]
+  },
+  "repo_index/__init__.py": {
+    "domain": "repo_index",
+    "layer": "repo_index",
+    "imports": [],
+    "exports": []
+  },
+  "repo_index/build_index.py": {
+    "domain": "repo_index",
+    "layer": "repo_index",
+    "imports": [
+      "pathlib",
+      "subprocess",
+      "json",
+      "ast",
+      "sys"
+    ],
+    "exports": [
+      "build_index",
+      "main"
+    ]
+  },
+  "tests/__init__.py": {
+    "domain": "tests",
+    "layer": "tests",
+    "imports": [],
+    "exports": []
+  },
+  "tests/agent_eval/__init__.py": {
+    "domain": "tests",
+    "layer": "agent_eval",
+    "imports": [],
+    "exports": []
+  },
+  "tests/agent_eval/test_bug_fix.py": {
+    "domain": "tests",
+    "layer": "agent_eval",
+    "imports": [
+      "pathlib",
+      "agents.core.state",
+      "unittest.mock",
+      "textwrap",
+      "agents.workers.validator",
+      "agents.workers.planner",
+      "agents.models.validator",
+      "agents.workers.implementer",
+      "agents.models.implementer",
+      "agents.models.planner",
+      "pytest"
+    ],
+    "exports": [
+      "tmp_repo",
+      "test_agent_produces_plan_for_bug_fix",
+      "test_implementer_produces_fix",
+      "test_validation_passes_after_fix"
+    ]
+  },
+  "tests/agent_eval/test_entropy_gc.py": {
+    "domain": "tests",
+    "layer": "agent_eval",
+    "imports": [
+      "pathlib",
+      "lint.golden_lint",
+      "agents.workflows.entropy_gc",
+      "agents.workers.cleaner",
+      "unittest.mock",
+      "textwrap",
+      "agents.models.cleaner",
+      "pytest",
+      "agents.tools.git"
+    ],
+    "exports": [
+      "tmp_repo_with_gp001",
+      "test_gc_detects_gp001_violation",
+      "test_gc_produces_cleanup_output_with_pr",
+      "test_gc_workflow_opens_pr_for_auto_fixable",
+      "test_cleanup_output_score_calculation",
+      "test_cleanup_output_no_violations_perfect_score"
+    ]
+  },
+  "tests/agent_eval/test_feature_gen.py": {
+    "domain": "tests",
+    "layer": "agent_eval",
+    "imports": [
+      "pathlib",
+      "agents.models.reviewer",
+      "unittest.mock",
+      "agents.workers.planner",
+      "agents.models.validator",
+      "agents.workers.implementer",
+      "agents.models.implementer",
+      "agents.models.planner",
+      "pytest",
+      "agents.workers.reviewer"
+    ],
+    "exports": [
+      "tmp_repo",
+      "test_planner_scopes_feature_correctly",
+      "test_implementer_creates_health_file",
+      "test_reviewer_approves_clean_implementation"
+    ]
+  },
+  "tests/lint/__init__.py": {
+    "domain": "tests",
+    "layer": "lint",
+    "imports": [],
+    "exports": []
+  },
+  "tests/lint/test_arch_lint.py": {
+    "domain": "tests",
+    "layer": "lint",
+    "imports": [
+      "textwrap",
+      "lint.arch_lint",
+      "pytest",
+      "pathlib"
+    ],
+    "exports": [
+      "write_py",
+      "test_worker_cross_import_detected",
+      "test_tool_imports_worker_detected",
+      "test_clean_file_no_violations",
+      "test_remediation_message_in_violation",
+      "test_run_arch_lint_on_clean_dir"
+    ]
+  },
+  "tests/lint/test_golden_lint.py": {
+    "domain": "tests",
+    "layer": "lint",
+    "imports": [
+      "textwrap",
+      "lint.golden_lint",
+      "pytest",
+      "pathlib"
+    ],
+    "exports": [
+      "write_py",
+      "test_gp002_file_exceeds_500_lines",
+      "test_gp002_file_under_limit_passes",
+      "test_gp005_print_detected_outside_scripts",
+      "test_gp005_print_allowed_in_scripts",
+      "test_gp001_duplicate_function_detected",
+      "test_gp001_unique_functions_pass"
+    ]
+  }
+}
