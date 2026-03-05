@@ -11,6 +11,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from pydantic_ai import tool
 
+from agents.core.paths import repo_root as _repo_root
+
 
 class GitStatus(BaseModel):
     branch: str
@@ -47,17 +49,6 @@ class MergeResult(BaseModel):
     success: bool
     sha: str = Field(default="", description="Merge commit SHA")
     error: str = Field(default="")
-
-
-def _repo_root() -> Path:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
 
 
 def _run(cmd: list[str]) -> tuple[int, str, str]:
@@ -152,7 +143,7 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
     """Fetch review comments on a PR. Returns structured comment list."""
     rc, out, err = _run([
         "gh", "api",
-        f"repos/{{owner}}/{{repo}}/pulls/{pr_number}/comments",
+        f"repos/:owner/:repo/pulls/{pr_number}/comments",
     ])
     if rc != 0:
         raise RuntimeError(f"gh api failed: {err}")

@@ -3,12 +3,14 @@
 All tools return structured Pydantic models. No raw stdout parsing.
 """
 
+import shlex
 import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 from pydantic_ai import tool
 
+from agents.core.paths import repo_root as _repo_root
 from agents.models.validator import LintResult, TestResult
 
 
@@ -23,17 +25,6 @@ class CommandResult(BaseModel):
     stdout: str
     stderr: str
     success: bool
-
-
-def _repo_root() -> Path:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
 
 
 def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
@@ -110,7 +101,7 @@ def run_command(command: str, cwd: str = ".") -> CommandResult:
     root = _repo_root()
     work_dir = (root / cwd).resolve()
     result = subprocess.run(
-        command, shell=True, capture_output=True, text=True, cwd=work_dir
+        shlex.split(command), capture_output=True, text=True, cwd=work_dir
     )
     return CommandResult(
         returncode=result.returncode,

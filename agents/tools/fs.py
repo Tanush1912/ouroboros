@@ -6,11 +6,12 @@ Agents should prefer search_symbol() over read_file() for navigation.
 
 import json
 import os
-import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 from pydantic_ai import tool
+
+from agents.core.paths import repo_root as _repo_root
 
 
 class WriteResult(BaseModel):
@@ -33,22 +34,13 @@ class SymbolLocation(BaseModel):
     kind: str = Field(description="class, function, variable, etc.")
 
 
-def _repo_root() -> Path:
-    """Return the repo root by finding the git root or falling back to cwd."""
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
-
-
 def _resolve(path: str) -> Path:
     root = _repo_root()
     resolved = (root / path).resolve()
-    resolved.relative_to(root.resolve())
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError:
+        raise ValueError(f"Path '{path}' is outside the repository root")
     return resolved
 
 
@@ -119,3 +111,15 @@ def search_symbol(name: str) -> SymbolLocation | None:
             kind=entry["kind"],
         )
     return None
+
+
+@tool
+def reindex(paths: list[str]) -> int:
+    """Update the repo symbol index for a list of changed file paths.
+
+    Call this after write_file operations so search_symbol stays accurate.
+    Returns the number of symbols in the updated index.
+    """
+    from repo_index.build_index import reindex as _reindex
+    symbols, _ = _reindex(paths, root=_repo_root())
+    return len(symbols)

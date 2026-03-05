@@ -6,7 +6,6 @@ opens one atomic PR per cluster, updates QUALITY_SCORE.md.
 Schedule: daily via .github/workflows/entropy_gc.yml
 """
 
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
@@ -14,6 +13,7 @@ from typing import TypedDict
 import logfire
 from langgraph.graph import END, StateGraph
 
+from agents.core.paths import repo_root as _repo_root
 from agents.models.cleaner import CleanupOutput, EntropyViolation
 from agents.tools.git import commit, open_pr
 from agents.tools.shell import run_lint
@@ -25,14 +25,6 @@ class GCState(TypedDict):
     cleanup: CleanupOutput | None
     prs_opened: list[str]
     quality_score_updated: bool
-
-
-def _repo_root() -> Path:
-    result = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    )
-    return Path(result.stdout.strip())
 
 
 def _collect_domains() -> list[str]:
@@ -54,7 +46,7 @@ async def entropy_scan_node(state: GCState) -> dict:
 async def analyze_violations_node(state: GCState) -> dict:
     """Run the cleaner agent to analyze violations."""
     domains = _collect_domains()
-    cleanup = await run_cleaner(state["scan_report"], domains)
+    cleanup, _ = await run_cleaner(state["scan_report"], domains)
     return {"cleanup": cleanup}
 
 
@@ -151,8 +143,8 @@ async def update_quality_score_node(state: GCState) -> dict:
     score_path = root / "docs" / "QUALITY_SCORE.md"
     score_path.write_text("\n".join(lines) + "\n")
 
-    # Commit the updated score
-    commit_result = await commit.fn(  # type: ignore[attr-defined]
+
+    commit_result = await commit.fn(  
         message=f"chore(gc): update quality scores [{now}]",
         files=["docs/QUALITY_SCORE.md"],
     )
@@ -177,10 +169,23 @@ def build_gc_graph() -> StateGraph:
     return graph
 
 
+def build_scores_only_graph() -> StateGraph:
+    """Graph that scans and updates quality scores but does not open PRs."""
+    graph = StateGraph(GCState)
+    graph.add_node("entropy_scan_node", entropy_scan_node)
+    graph.add_node("analyze_violations_node", analyze_violations_node)
+    graph.add_node("update_quality_score_node", update_quality_score_node)
+    graph.set_entry_point("entropy_scan_node")
+    graph.add_edge("entropy_scan_node", "analyze_violations_node")
+    graph.add_edge("analyze_violations_node", "update_quality_score_node")
+    graph.add_edge("update_quality_score_node", END)
+    return graph
+
+
 async def run_entropy_gc(update_scores_only: bool = False) -> GCState:
     """Run the entropy GC workflow. Returns final state."""
-    with logfire.span("entropy_gc"):
-        graph = build_gc_graph()
+    with logfire.span("entropy_gc", update_scores_only=update_scores_only):
+        graph = build_scores_only_graph() if update_scores_only else build_gc_graph()
         app = graph.compile()
 
         state = GCState(
