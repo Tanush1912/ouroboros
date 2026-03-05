@@ -1,9 +1,23 @@
 """Cost tracking models.
 
 Every workflow run produces a CostSummary. Emitted to Logfire after completion.
+TokenUsage is returned by every worker alongside its typed output so ralph_loop
+can accumulate estimated_cost_usd in state.
 """
 
 from pydantic import BaseModel, Field
+
+_INPUT_COST_PER_M = 0.25
+_OUTPUT_COST_PER_M = 1.50
+
+
+class TokenUsage(BaseModel):
+    tokens_in: int = 0
+    tokens_out: int = 0
+
+    def cost_usd(self) -> float:
+        """Compute estimated cost using Gemini 2.0 Flash pricing."""
+        return (self.tokens_in * _INPUT_COST_PER_M + self.tokens_out * _OUTPUT_COST_PER_M) / 1_000_000
 
 
 class CostSummary(BaseModel):

@@ -3,32 +3,19 @@
 Never executes tests or linting — that's the validator's job.
 """
 
+from pathlib import Path
+
 import logfire
 from pydantic_ai import Agent
 
 from agents.core.config import get_model
 from agents.core.context_builder import TaskContext, build_context
+from agents.models.cost import TokenUsage
 from agents.models.implementer import ImplementOutput
 from agents.models.planner import PlanOutput
 from agents.models.validator import ValidationOutput
 
-SYSTEM_PROMPT = """You are the Implementer agent in the Ouroboros system.
-
-Your job is to write code that satisfies the plan and addresses any validation failures.
-
-Rules:
-1. Return ALL file changes in the files_changed list. Do not describe — produce the actual content.
-2. For modify operations, content must be the COMPLETE new file content (not a diff).
-3. Follow the architecture rules in your context — no layer violations.
-4. No print() statements (GP-005). Use structured logging.
-5. No file may exceed 500 lines (GP-002).
-6. commit_message must follow conventional commits: type(scope): description
-7. If there are validation failures from a previous attempt, address ALL of them.
-8. Prefer editing existing files over creating new ones.
-9. All new Pydantic models must use *Output, *Result, or *Schema naming (GP-006).
-
-You have access to the task context and plan in the user message.
-"""
+SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "implementer.txt").read_text()
 
 _agent: Agent[None, ImplementOutput] | None = None
 
@@ -40,6 +27,7 @@ def _get_agent() -> Agent[None, ImplementOutput]:
             model=get_model(),
             result_type=ImplementOutput,
             system_prompt=SYSTEM_PROMPT,
+            retries=3,
         )
     return _agent
 
@@ -85,8 +73,8 @@ async def run_implementer(
     context: TaskContext | None = None,
     previous_validation: ValidationOutput | None = None,
     iteration: int = 1,
-) -> ImplementOutput:
-    """Run the implementer agent and return typed file changes."""
+) -> tuple[ImplementOutput, TokenUsage]:
+    """Run the implementer agent. Returns (ImplementOutput, TokenUsage) for cost tracking."""
     if context is None:
         context = build_context(task)
 
@@ -95,9 +83,16 @@ async def run_implementer(
     with logfire.span("implementer", task=task[:100], iteration=iteration):
         agent = _get_agent()
         result = await agent.run(prompt)
+        usage_data = result.usage()
+        token_usage = TokenUsage(
+            tokens_in=usage_data.request_tokens or 0,
+            tokens_out=usage_data.response_tokens or 0,
+        )
         logfire.info(
             "implementation_complete",
             files_changed=len(result.data.files_changed),
             iteration=iteration,
+            tokens_in=token_usage.tokens_in,
+            tokens_out=token_usage.tokens_out,
         )
-        return result.data
+        return result.data, token_usage

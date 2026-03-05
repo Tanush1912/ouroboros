@@ -95,6 +95,23 @@ REGISTRY.register(ToolCapability(
     output_type="SymbolLocation | None",
     category="index",
 ))
+REGISTRY.register(ToolCapability(
+    name="reindex",
+    description=(
+        "Update the repo symbol index for a list of changed file paths. "
+        "Call this after write_file so search_symbol stays accurate. "
+        "Returns total symbol count."
+    ),
+    input_schema={
+        "paths": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Relative file paths that were written or deleted",
+        }
+    },
+    output_type="int",
+    category="index",
+))
 
 REGISTRY.register(ToolCapability(
     name="run_tests",

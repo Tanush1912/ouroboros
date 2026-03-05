@@ -30,3 +30,7 @@ class PlanOutput(BaseModel):
         default_factory=list,
         description="Which architectural domains this task touches",
     )
+    requires_browser_validation: bool = Field(
+        default=False,
+        description="True if this task involves UI changes that need browser validation",
+    )
