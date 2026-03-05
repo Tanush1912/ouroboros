@@ -44,54 +44,49 @@
     "line": 36,
     "kind": "class"
   },
-  "_repo_root": {
+  "_estimate_tokens": {
     "file": "agents/core/context_builder.py",
     "line": 81,
     "kind": "function"
   },
-  "_estimate_tokens": {
-    "file": "agents/core/context_builder.py",
-    "line": 93,
-    "kind": "function"
-  },
   "_load_symbols": {
     "file": "agents/core/context_builder.py",
-    "line": 98,
+    "line": 86,
     "kind": "function"
   },
   "_load_file_map": {
     "file": "agents/core/context_builder.py",
-    "line": 105,
+    "line": 93,
     "kind": "function"
   },
   "_extract_intent_keywords": {
     "file": "agents/core/context_builder.py",
-    "line": 112,
+    "line": 100,
     "kind": "function"
   },
   "_find_relevant_files": {
     "file": "agents/core/context_builder.py",
-    "line": 119,
+    "line": 107,
     "kind": "function"
   },
   "_read_snippet": {
     "file": "agents/core/context_builder.py",
-    "line": 150,
+    "line": 136,
     "kind": "function"
   },
   "_load_arch_rules": {
     "file": "agents/core/context_builder.py",
-    "line": 165,
+    "line": 151,
     "kind": "function"
   },
   "_load_active_plans": {
     "file": "agents/core/context_builder.py",
-    "line": 183,
+    "line": 169,
     "kind": "function"
   },
   "build_context": {
     "file": "agents/core/context_builder.py",
-    "line": 195,
+    "line": 181,
     "kind": "function"
   },
   "to_prompt_text": {
@@ -101,20 +96,25 @@
   },
   "MAX_IMPLEMENT_ITERATIONS": {
     "file": "agents/core/guards.py",
-    "line": 16,
+    "line": 15,
     "kind": "constant"
   },
   "MAX_REVIEW_ITERATIONS": {
     "file": "agents/core/guards.py",
-    "line": 17,
+    "line": 16,
     "kind": "constant"
   },
   "MAX_TOOL_CALLS_PER_NODE": {
     "file": "agents/core/guards.py",
-    "line": 18,
+    "line": 17,
     "kind": "constant"
   },
   "MAX_TOTAL_TOOL_CALLS": {
+    "file": "agents/core/guards.py",
+    "line": 18,
+    "kind": "constant"
+  },
+  "MAX_COST_USD_PER_RUN": {
     "file": "agents/core/guards.py",
     "line": 19,
     "kind": "constant"
@@ -131,12 +131,17 @@
   },
   "pre_node_guard": {
     "file": "agents/core/guards.py",
-    "line": 64,
+    "line": 72,
     "kind": "function"
   },
   "configure_logfire": {
     "file": "agents/core/instrumentation.py",
     "line": 10,
+    "kind": "function"
+  },
+  "repo_root": {
+    "file": "agents/core/paths.py",
+    "line": 11,
     "kind": "function"
   },
   "RalphState": {
@@ -146,7 +151,7 @@
   },
   "initial_state": {
     "file": "agents/core/state.py",
-    "line": 35,
+    "line": 38,
     "kind": "function"
   },
   "EntropyViolation": {
@@ -156,37 +161,57 @@
   },
   "CleanupOutput": {
     "file": "agents/models/cleaner.py",
-    "line": 21,
+    "line": 17,
     "kind": "class"
   },
   "overall_score": {
     "file": "agents/models/cleaner.py",
-    "line": 35,
+    "line": 31,
     "kind": "function"
   },
   "has_blocking_violations": {
     "file": "agents/models/cleaner.py",
-    "line": 40,
+    "line": 36,
     "kind": "function"
+  },
+  "_INPUT_COST_PER_M": {
+    "file": "agents/models/cost.py",
+    "line": 10,
+    "kind": "constant"
+  },
+  "_OUTPUT_COST_PER_M": {
+    "file": "agents/models/cost.py",
+    "line": 11,
+    "kind": "constant"
+  },
+  "TokenUsage": {
+    "file": "agents/models/cost.py",
+    "line": 14,
+    "kind": "class"
   },
   "CostSummary": {
     "file": "agents/models/cost.py",
-    "line": 9,
+    "line": 25,
     "kind": "class"
   },
   "RunMetrics": {
     "file": "agents/models/cost.py",
-    "line": 21,
+    "line": 37,
     "kind": "class"
+  },
+  "cost_usd": {
+    "file": "agents/models/cost.py",
+    "line": 18,
+    "kind": "function"
   },
   "total_cost_usd": {
     "file": "agents/models/cost.py",
-    "line": 28,
+    "line": 44,
     "kind": "function"
   },
   "summary_line": {
     "file": "agents/models/cost.py",
-    "line": 31,
+    "line": 47,
     "kind": "function"
   },
   "FileChange": {
@@ -209,6 +234,51 @@
     "line": 17,
     "kind": "class"
   },
+  "ToolCapability": {
+    "file": "agents/models/registry.py",
+    "line": 12,
+    "kind": "class"
+  },
+  "ToolRegistry": {
+    "file": "agents/models/registry.py",
+    "line": 26,
+    "kind": "class"
+  },
+  "REGISTRY": {
+    "file": "agents/models/registry.py",
+    "line": 48,
+    "kind": "constant"
+  },
+  "__init__": {
+    "file": "agents/models/registry.py",
+    "line": 29,
+    "kind": "function"
+  },
+  "register": {
+    "file": "agents/models/registry.py",
+    "line": 32,
+    "kind": "function"
+  },
+  "all_tools": {
+    "file": "agents/models/registry.py",
+    "line": 35,
+    "kind": "function"
+  },
+  "tools_for_category": {
+    "file": "agents/models/registry.py",
+    "line": 38,
+    "kind": "function"
+  },
+  "get_tool": {
+    "file": "agents/models/registry.py",
+    "line": 41,
+    "kind": "function"
+  },
+  "tool_names": {
+    "file": "agents/models/registry.py",
+    "line": 44,
+    "kind": "function"
+  },
   "ReviewComment": {
     "file": "agents/models/reviewer.py",
     "line": 8,
@@ -226,12 +296,12 @@
   },
   "LintResult": {
     "file": "agents/models/validator.py",
-    "line": 21,
+    "line": 19,
     "kind": "class"
   },
   "ValidationOutput": {
     "file": "agents/models/validator.py",
-    "line": 29,
+    "line": 27,
     "kind": "class"
   },
   "ScreenshotResult": {
@@ -256,132 +326,137 @@
   },
   "UIFlowResult": {
     "file": "agents/tools/browser.py",
-    "line": 45,
+    "line": 43,
     "kind": "class"
   },
   "_get_page": {
     "file": "agents/tools/browser.py",
-    "line": 54,
+    "line": 52,
     "kind": "function"
   },
   "take_screenshot": {
     "file": "agents/tools/browser.py",
-    "line": 65,
+    "line": 64,
     "kind": "function"
   },
   "snapshot_dom": {
     "file": "agents/tools/browser.py",
-    "line": 84,
+    "line": 83,
     "kind": "function"
   },
   "drive_ui_flow": {
     "file": "agents/tools/browser.py",
-    "line": 108,
+    "line": 107,
     "kind": "function"
   },
   "_parse": {
     "file": "agents/tools/browser.py",
-    "line": 92,
+    "line": 91,
     "kind": "function"
   },
   "WriteResult": {
     "file": "agents/tools/fs.py",
-    "line": 16,
+    "line": 17,
     "kind": "class"
   },
   "SearchMatch": {
     "file": "agents/tools/fs.py",
-    "line": 22,
+    "line": 23,
     "kind": "class"
   },
   "SymbolLocation": {
     "file": "agents/tools/fs.py",
-    "line": 29,
+    "line": 30,
     "kind": "class"
   },
   "_resolve": {
     "file": "agents/tools/fs.py",
-    "line": 48,
+    "line": 37,
     "kind": "function"
   },
   "read_file": {
     "file": "agents/tools/fs.py",
-    "line": 57,
+    "line": 48,
     "kind": "function"
   },
   "write_file": {
     "file": "agents/tools/fs.py",
-    "line": 63,
+    "line": 54,
     "kind": "function"
   },
   "list_dir": {
     "file": "agents/tools/fs.py",
-    "line": 73,
+    "line": 64,
     "kind": "function"
   },
   "search_repo": {
     "file": "agents/tools/fs.py",
-    "line": 82,
+    "line": 73,
     "kind": "function"
   },
   "search_symbol": {
     "file": "agents/tools/fs.py",
-    "line": 108,
+    "line": 107,
+    "kind": "function"
+  },
+  "reindex": {
+    "file": "agents/tools/fs.py",
+    "line": 127,
     "kind": "function"
   },
   "GitStatus": {
     "file": "agents/tools/git.py",
-    "line": 15,
+    "line": 17,
     "kind": "class"
   },
   "CommitResult": {
     "file": "agents/tools/git.py",
-    "line": 23,
+    "line": 25,
     "kind": "class"
   },
   "PRResult": {
     "file": "agents/tools/git.py",
-    "line": 30,
+    "line": 32,
     "kind": "class"
   },
   "PRComment": {
     "file": "agents/tools/git.py",
-    "line": 37,
+    "line": 39,
     "kind": "class"
   },
   "MergeResult": {
     "file": "agents/tools/git.py",
-    "line": 46,
+    "line": 48,
     "kind": "class"
   },
   "_run": {
     "file": "agents/tools/git.py",
-    "line": 63,
+    "line": 54,
     "kind": "function"
   },
   "git_status": {
     "file": "agents/tools/git.py",
-    "line": 69,
+    "line": 60,
     "kind": "function"
   },
   "commit": {
     "file": "agents/tools/git.py",
-    "line": 98,
+    "line": 89,
     "kind": "function"
   },
   "open_pr": {
     "file": "agents/tools/git.py",
-    "line": 122,
+    "line": 112,
     "kind": "function"
   },
   "get_pr_diff": {
     "file": "agents/tools/git.py",
-    "line": 143,
+    "line": 138,
     "kind": "function"
   },
   "get_pr_comments": {
     "file": "agents/tools/git.py",
-    "line": 152,
+    "line": 147,
     "kind": "function"
   },
   "merge_pr": {
@@ -429,219 +504,194 @@
     "line": 59,
     "kind": "function"
   },
-  "ToolCapability": {
-    "file": "agents/tools/registry.py",
-    "line": 13,
-    "kind": "class"
-  },
-  "ToolRegistry": {
-    "file": "agents/tools/registry.py",
-    "line": 27,
-    "kind": "class"
-  },
-  "REGISTRY": {
-    "file": "agents/tools/registry.py",
-    "line": 49,
-    "kind": "constant"
-  },
-  "__init__": {
-    "file": "agents/tools/registry.py",
-    "line": 30,
-    "kind": "function"
-  },
-  "register": {
-    "file": "agents/tools/registry.py",
-    "line": 33,
-    "kind": "function"
-  },
-  "all_tools": {
-    "file": "agents/tools/registry.py",
-    "line": 36,
-    "kind": "function"
-  },
-  "tools_for_category": {
-    "file": "agents/tools/registry.py",
-    "line": 39,
-    "kind": "function"
-  },
-  "get_tool": {
-    "file": "agents/tools/registry.py",
-    "line": 42,
-    "kind": "function"
-  },
-  "tool_names": {
-    "file": "agents/tools/registry.py",
-    "line": 45,
-    "kind": "function"
-  },
   "BuildResult": {
     "file": "agents/tools/shell.py",
-    "line": 15,
+    "line": 17,
     "kind": "class"
   },
   "CommandResult": {
     "file": "agents/tools/shell.py",
-    "line": 21,
+    "line": 23,
     "kind": "class"
   },
   "run_tests": {
     "file": "agents/tools/shell.py",
-    "line": 47,
+    "line": 36,
     "kind": "function"
   },
   "run_lint": {
     "file": "agents/tools/shell.py",
-    "line": 66,
+    "line": 56,
     "kind": "function"
   },
   "run_build": {
     "file": "agents/tools/shell.py",
-    "line": 97,
+    "line": 84,
     "kind": "function"
   },
   "run_command": {
     "file": "agents/tools/shell.py",
-    "line": 111,
+    "line": 99,
     "kind": "function"
   },
   "SYSTEM_PROMPT": {
     "file": "agents/workers/cleaner.py",
-    "line": 9,
+    "line": 12,
     "kind": "constant"
   },
   "_get_agent": {
     "file": "agents/workers/cleaner.py",
-    "line": 42,
+    "line": 17,
     "kind": "function"
   },
   "run_cleaner": {
     "file": "agents/workers/cleaner.py",
-    "line": 53,
+    "line": 29,
     "kind": "function"
   },
   "_build_prompt": {
     "file": "agents/workers/implementer.py",
-    "line": 47,
+    "line": 35,
     "kind": "function"
   },
   "run_implementer": {
     "file": "agents/workers/implementer.py",
-    "line": 82,
+    "line": 70,
     "kind": "function"
   },
   "run_planner": {
     "file": "agents/workers/planner.py",
-    "line": 44,
+    "line": 33,
     "kind": "function"
   },
   "run_reviewer": {
     "file": "agents/workers/reviewer.py",
-    "line": 51,
+    "line": 33,
+    "kind": "function"
+  },
+  "_determine_next_action": {
+    "file": "agents/workers/validator.py",
+    "line": 14,
     "kind": "function"
   },
   "run_validator": {
     "file": "agents/workers/validator.py",
-    "line": 45,
+    "line": 41,
     "kind": "function"
   },
   "GCState": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 23,
+    "line": 22,
     "kind": "class"
   },
   "_collect_domains": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 38,
+    "line": 29,
     "kind": "function"
   },
   "entropy_scan_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 46,
+    "line": 38,
     "kind": "function"
   },
   "analyze_violations_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 54,
+    "line": 48,
     "kind": "function"
   },
   "_cluster_violations": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 61,
+    "line": 55,
     "kind": "function"
   },
   "open_cleanup_prs_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 71,
+    "line": 65,
     "kind": "function"
   },
   "update_quality_score_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 99,
+    "line": 92,
     "kind": "function"
   },
   "build_gc_graph": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 164,
+    "line": 160,
+    "kind": "function"
+  },
+  "build_scores_only_graph": {
+    "file": "agents/workflows/entropy_gc.py",
+    "line": 177,
     "kind": "function"
   },
   "run_entropy_gc": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 181,
+    "line": 190,
+    "kind": "function"
+  },
+  "_accumulate_cost": {
+    "file": "agents/workflows/ralph_loop.py",
+    "line": 30,
     "kind": "function"
   },
   "plan_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 29,
+    "line": 35,
     "kind": "function"
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 39,
+    "line": 50,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 82,
+    "line": 94,
     "kind": "function"
   },
   "route_after_validate": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 98,
+    "line": 115,
+    "kind": "function"
+  },
+  "ui_validate_node": {
+    "file": "agents/workflows/ralph_loop.py",
+    "line": 128,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 111,
+    "line": 160,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 147,
+    "line": 199,
     "kind": "function"
   },
   "route_after_review": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 159,
+    "line": 213,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 171,
+    "line": 224,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 181,
+    "line": 234,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 192,
+    "line": 245,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 215,
+    "line": 270,
     "kind": "function"
   },
   "ReviewerState": {
@@ -661,12 +711,12 @@
   },
   "build_reviewer_graph": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 44,
+    "line": 42,
     "kind": "function"
   },
   "run_reviewer_loop": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 56,
+    "line": 54,
     "kind": "function"
   },
   "LAYER_ORDER": {
@@ -676,87 +726,122 @@
   },
   "LAYER_MAP": {
     "file": "lint/arch_lint.py",
-    "line": 17,
+    "line": 16,
     "kind": "constant"
   },
   "_classify_module": {
     "file": "lint/arch_lint.py",
-    "line": 27,
+    "line": 26,
     "kind": "function"
   },
   "_get_imports": {
     "file": "lint/arch_lint.py",
-    "line": 35,
+    "line": 34,
     "kind": "function"
   },
   "_file_to_module": {
     "file": "lint/arch_lint.py",
-    "line": 53,
+    "line": 52,
     "kind": "function"
   },
   "check_file": {
     "file": "lint/arch_lint.py",
-    "line": 58,
+    "line": 57,
     "kind": "function"
   },
   "_get_rule_id": {
     "file": "lint/arch_lint.py",
-    "line": 105,
+    "line": 103,
     "kind": "function"
   },
   "run_arch_lint": {
     "file": "lint/arch_lint.py",
-    "line": 115,
+    "line": 113,
     "kind": "function"
   },
   "main": {
     "file": "lint/arch_lint.py",
-    "line": 135,
+    "line": 128,
     "kind": "function"
+  },
+  "_COMMON_NON_SYMBOLS": {
+    "file": "lint/doc_lint.py",
+    "line": 29,
+    "kind": "constant"
   },
   "check_doc_references": {
     "file": "lint/doc_lint.py",
-    "line": 36,
+    "line": 62,
     "kind": "function"
   },
   "run_doc_lint": {
     "file": "lint/doc_lint.py",
-    "line": 64,
+    "line": 102,
     "kind": "function"
+  },
+  "_GP006_ALLOWED_SUFFIXES": {
+    "file": "lint/golden_lint.py",
+    "line": 16,
+    "kind": "constant"
   },
   "_all_python_files": {
     "file": "lint/golden_lint.py",
-    "line": 24,
+    "line": 42,
     "kind": "function"
   },
   "check_gp001_duplicates": {
     "file": "lint/golden_lint.py",
-    "line": 37,
+    "line": 55,
     "kind": "function"
   },
   "check_gp002_file_size": {
     "file": "lint/golden_lint.py",
-    "line": 69,
+    "line": 87,
     "kind": "function"
+  },
+  "check_gp003_hand_rolled": {
+    "file": "lint/golden_lint.py",
+    "line": 101,
+    "kind": "function"
+  },
+  "check_gp004_unvalidated_external": {
+    "file": "lint/golden_lint.py",
+    "line": 136,
+    "kind": "function"
+  },
+  "_GP005_CLI_DIRS": {
+    "file": "lint/golden_lint.py",
+    "line": 187,
+    "kind": "constant"
   },
   "check_gp005_no_print": {
     "file": "lint/golden_lint.py",
-    "line": 83,
+    "line": 190,
+    "kind": "function"
+  },
+  "check_gp006_model_naming": {
+    "file": "lint/golden_lint.py",
+    "line": 216,
+    "kind": "function"
+  },
+  "check_gp007_dead_imports": {
+    "file": "lint/golden_lint.py",
+    "line": 250,
     "kind": "function"
   },
   "check_gp009_active_plans": {
     "file": "lint/golden_lint.py",
-    "line": 107,
+    "line": 270,
     "kind": "function"
   },
   "check_gp010_quality_score": {
     "file": "lint/golden_lint.py",
-    "line": 142,
+    "line": 305,
     "kind": "function"
   },
   "run_golden_lint": {
     "file": "lint/golden_lint.py",
-    "line": 163,
+    "line": 327,
     "kind": "function"
   },
   "LintRule": {
@@ -766,37 +851,37 @@
   },
   "run_all": {
     "file": "lint/run_lint.py",
-    "line": 23,
+    "line": 16,
     "kind": "function"
   },
   "_discover_python_files": {
     "file": "repo_index/build_index.py",
-    "line": 31,
+    "line": 23,
     "kind": "function"
   },
   "_extract_symbols": {
     "file": "repo_index/build_index.py",
-    "line": 42,
+    "line": 34,
     "kind": "function"
   },
   "_extract_imports": {
     "file": "repo_index/build_index.py",
-    "line": 74,
+    "line": 70,
     "kind": "function"
   },
   "_extract_exports": {
     "file": "repo_index/build_index.py",
-    "line": 93,
+    "line": 88,
     "kind": "function"
   },
   "_infer_domain_layer": {
     "file": "repo_index/build_index.py",
-    "line": 109,
+    "line": 105,
     "kind": "function"
   },
   "build_index": {
     "file": "repo_index/build_index.py",
-    "line": 119,
+    "line": 115,
     "kind": "function"
   },
   "BUGGY_COUNTER_CODE": {
@@ -810,33 +895,43 @@
     "kind": "constant"
   },
   "tmp_repo": {
-    "file": "tests/agent_eval/test_feature_gen.py",
-    "line": 19,
+    "file": "tests/agent_eval/test_bug_fix.py",
+    "line": 38,
     "kind": "function"
   },
-  "test_agent_produces_plan_for_bug_fix": {
+  "test_plan_output_model_is_valid": {
     "file": "tests/agent_eval/test_bug_fix.py",
-    "line": 49,
+    "line": 47,
     "kind": "function"
   },
-  "test_implementer_produces_fix": {
+  "test_implement_output_contains_fix": {
     "file": "tests/agent_eval/test_bug_fix.py",
-    "line": 82,
+    "line": 69,
     "kind": "function"
   },
-  "test_validation_passes_after_fix": {
+  "test_validation_output_next_action_proceed": {
     "file": "tests/agent_eval/test_bug_fix.py",
-    "line": 118,
+    "line": 91,
+    "kind": "function"
+  },
+  "test_validation_output_next_action_retry_on_test_fail": {
+    "file": "tests/agent_eval/test_bug_fix.py",
+    "line": 104,
+    "kind": "function"
+  },
+  "test_planner_called_with_mock": {
+    "file": "tests/agent_eval/test_bug_fix.py",
+    "line": 123,
     "kind": "function"
   },
   "DUPLICATE_LOGGER": {
     "file": "tests/agent_eval/test_entropy_gc.py",
-    "line": 14,
+    "line": 15,
     "kind": "constant"
   },
   "tmp_repo_with_gp001": {
     "file": "tests/agent_eval/test_entropy_gc.py",
-    "line": 23,
+    "line": 24,
     "kind": "function"
   },
   "test_gc_detects_gp001_violation": {
@@ -844,104 +939,129 @@
     "line": 36,
     "kind": "function"
   },
-  "test_gc_produces_cleanup_output_with_pr": {
+  "test_entropy_violation_model_is_valid": {
     "file": "tests/agent_eval/test_entropy_gc.py",
     "line": 45,
     "kind": "function"
   },
-  "test_gc_workflow_opens_pr_for_auto_fixable": {
+  "test_cleanup_output_with_auto_fixable_pr": {
     "file": "tests/agent_eval/test_entropy_gc.py",
-    "line": 74,
+    "line": 60,
+    "kind": "function"
+  },
+  "test_cleanup_output_non_auto_fixable_goes_to_human": {
+    "file": "tests/agent_eval/test_entropy_gc.py",
+    "line": 85,
     "kind": "function"
   },
   "test_cleanup_output_score_calculation": {
     "file": "tests/agent_eval/test_entropy_gc.py",
-    "line": 113,
+    "line": 108,
     "kind": "function"
   },
   "test_cleanup_output_no_violations_perfect_score": {
     "file": "tests/agent_eval/test_entropy_gc.py",
-    "line": 124,
+    "line": 119,
+    "kind": "function"
+  },
+  "test_violation_cluster_by_principle": {
+    "file": "tests/agent_eval/test_entropy_gc.py",
+    "line": 131,
+    "kind": "function"
+  },
+  "test_cleaner_called_with_mock": {
+    "file": "tests/agent_eval/test_entropy_gc.py",
+    "line": 170,
     "kind": "function"
   },
   "FEATURE_TASK": {
     "file": "tests/agent_eval/test_feature_gen.py",
-    "line": 26,
+    "line": 15,
     "kind": "constant"
   },
-  "test_planner_scopes_feature_correctly": {
+  "test_plan_output_for_feature_task": {
     "file": "tests/agent_eval/test_feature_gen.py",
-    "line": 30,
+    "line": 18,
     "kind": "function"
   },
-  "test_implementer_creates_health_file": {
+  "test_implement_output_creates_health_file": {
     "file": "tests/agent_eval/test_feature_gen.py",
-    "line": 71,
+    "line": 49,
     "kind": "function"
   },
-  "test_reviewer_approves_clean_implementation": {
+  "test_review_output_approves_clean_implementation": {
     "file": "tests/agent_eval/test_feature_gen.py",
-    "line": 117,
+    "line": 82,
+    "kind": "function"
+  },
+  "test_review_output_blocks_with_arch_violation": {
+    "file": "tests/agent_eval/test_feature_gen.py",
+    "line": 97,
+    "kind": "function"
+  },
+  "test_reviewer_called_with_mock": {
+    "file": "tests/agent_eval/test_feature_gen.py",
+    "line": 123,
     "kind": "function"
   },
   "write_py": {
-    "file": "tests/lint/test_golden_lint.py",
-    "line": 15,
+    "file": "tests/lint/helpers.py",
+    "line": 7,
     "kind": "function"
   },
   "test_worker_cross_import_detected": {
     "file": "tests/lint/test_arch_lint.py",
-    "line": 18,
+    "line": 9,
     "kind": "function"
   },
   "test_tool_imports_worker_detected": {
     "file": "tests/lint/test_arch_lint.py",
-    "line": 27,
+    "line": 22,
     "kind": "function"
   },
   "test_clean_file_no_violations": {
     "file": "tests/lint/test_arch_lint.py",
-    "line": 36,
+    "line": 35,
     "kind": "function"
   },
   "test_remediation_message_in_violation": {
     "file": "tests/lint/test_arch_lint.py",
-    "line": 46,
+    "line": 49,
     "kind": "function"
   },
   "test_run_arch_lint_on_clean_dir": {
     "file": "tests/lint/test_arch_lint.py",
-    "line": 54,
+    "line": 61,
     "kind": "function"
   },
   "test_gp002_file_exceeds_500_lines": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 22,
+    "line": 13,
     "kind": "function"
   },
   "test_gp002_file_under_limit_passes": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 29,
+    "line": 20,
     "kind": "function"
   },
   "test_gp005_print_detected_outside_scripts": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 36,
+    "line": 27,
     "kind": "function"
   },
   "test_gp005_print_allowed_in_scripts": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 45,
+    "line": 40,
     "kind": "function"
   },
   "test_gp001_duplicate_function_detected": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 54,
+    "line": 53,
     "kind": "function"
   },
   "test_gp001_unique_functions_pass": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 66,
+    "line": 65,
     "kind": "function"
   }
 }

@@ -89,11 +89,13 @@ def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatch]:
             if obj.get("type") == "match":
                 data = obj["data"]
                 matches.append(
-                    SearchMatch(
-                        file=str(Path(data["path"]["text"]).relative_to(root)),
-                        line=data["line_number"],
-                        column=data["submatches"][0]["start"] if data["submatches"] else 0,
-                        text=data["lines"]["text"].rstrip(),
+                    SearchMatch.model_validate(
+                        {
+                            "file": str(Path(data["path"]["text"]).relative_to(root)),
+                            "line": data["line_number"],
+                            "column": data["submatches"][0]["start"] if data["submatches"] else 0,
+                            "text": data["lines"]["text"].rstrip(),
+                        }
                     )
                 )
         except (json.JSONDecodeError, KeyError):
@@ -110,11 +112,13 @@ def search_symbol(name: str) -> SymbolLocation | None:
     symbols = json.loads(symbols_path.read_text())
     if name in symbols:
         entry = symbols[name]
-        return SymbolLocation(
-            name=name,
-            file=entry["file"],
-            line=entry["line"],
-            kind=entry["kind"],
+        return SymbolLocation.model_validate(
+            {
+                "name": name,
+                "file": entry["file"],
+                "line": entry["line"],
+                "kind": entry["kind"],
+            }
         )
     return None
 

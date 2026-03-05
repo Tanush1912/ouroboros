@@ -5,12 +5,12 @@ a token budget enforced before the agent sees anything. This prevents context po
 and keeps token costs under control.
 """
 
-import json
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from agents.core.paths import repo_root as _repo_root
 from agents.models.registry import REGISTRY
+
+_JsonDict = RootModel[dict]
 
 
 class FileSnippet(BaseModel):
@@ -86,14 +86,14 @@ def _estimate_tokens(text: str) -> int:
 def _load_symbols() -> dict:
     symbols_path = _repo_root() / "repo_index" / "symbols.json"
     if symbols_path.exists():
-        return json.loads(symbols_path.read_text())
+        return _JsonDict.model_validate_json(symbols_path.read_text()).root
     return {}
 
 
 def _load_file_map() -> dict:
     file_map_path = _repo_root() / "repo_index" / "file_map.json"
     if file_map_path.exists():
-        return json.loads(file_map_path.read_text())
+        return _JsonDict.model_validate_json(file_map_path.read_text()).root
     return {}
 
 

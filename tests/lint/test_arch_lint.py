@@ -1,16 +1,9 @@
 """Tests for architecture lint rules."""
 
-import textwrap
 from pathlib import Path
 
 from lint.arch_lint import check_file, run_arch_lint
-
-
-def write_py(tmp_path: Path, rel_path: str, content: str) -> Path:
-    target = tmp_path / rel_path
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(textwrap.dedent(content))
-    return target
+from tests.lint.helpers import write_py
 
 
 def test_worker_cross_import_detected(tmp_path: Path) -> None:

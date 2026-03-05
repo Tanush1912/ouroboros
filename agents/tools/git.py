@@ -158,13 +158,15 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
 
     raw = json.loads(out)
     return [
-        PRComment(
-            id=c["id"],
-            author=c["user"]["login"],
-            body=c["body"],
-            path=c.get("path"),
-            line=c.get("line"),
-            created_at=c["created_at"],
+        PRComment.model_validate(
+            {
+                "id": c["id"],
+                "author": c["user"]["login"],
+                "body": c["body"],
+                "path": c.get("path"),
+                "line": c.get("line"),
+                "created_at": c["created_at"],
+            }
         )
         for c in raw
     ]

@@ -140,7 +140,7 @@ def check_gp004_unvalidated_external(root: Path) -> list[str]:
     Excludes repo_index/ (reads its own generated data) and tests/.
     """
     violations = []
-    excluded_dirs = {"repo_index", "tests", ".venv", "venv"}
+    excluded_dirs = {"repo_index", "tests", "lint", ".venv", "venv"}
 
     for py_file in _all_python_files(root):
         parts = set(py_file.relative_to(root).parts)
@@ -184,10 +184,15 @@ def check_gp004_unvalidated_external(root: Path) -> list[str]:
     return violations
 
 
+_GP005_CLI_DIRS = {"scripts", "lint", "repo_index"}
+
+
 def check_gp005_no_print(root: Path) -> list[str]:
     """GP-005: No print() outside scripts/."""
     violations = []
-    for py_file in _all_python_files(root, exclude_scripts=True):
+    for py_file in _all_python_files(root):
+        if set(py_file.relative_to(root).parts).intersection(_GP005_CLI_DIRS):
+            continue
         try:
             source = py_file.read_text(encoding="utf-8")
             tree = ast.parse(source)

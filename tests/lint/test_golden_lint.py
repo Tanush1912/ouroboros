@@ -1,6 +1,5 @@
 """Tests for golden principle lint rules."""
 
-import textwrap
 from pathlib import Path
 
 from lint.golden_lint import (
@@ -8,13 +7,7 @@ from lint.golden_lint import (
     check_gp002_file_size,
     check_gp005_no_print,
 )
-
-
-def write_py(tmp_path: Path, rel_path: str, content: str) -> Path:
-    target = tmp_path / rel_path
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(textwrap.dedent(content))
-    return target
+from tests.lint.helpers import write_py
 
 
 def test_gp002_file_exceeds_500_lines(tmp_path: Path) -> None:
