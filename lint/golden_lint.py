@@ -14,10 +14,28 @@ from agents.core.paths import repo_root as _repo_root
 from lint.rules import RULES_BY_ID
 
 _GP006_ALLOWED_SUFFIXES = (
-    "Output", "Result", "Schema", "Type", "Summary", "State", "Context",
-    "Config", "Snapshot", "Capability", "Rule", "Change", "Comment",
-    "Violation", "Action", "Snippet", "Reference", "Step", "Node", "Metrics",
-    "Status", "Usage",
+    "Output",
+    "Result",
+    "Schema",
+    "Type",
+    "Summary",
+    "State",
+    "Context",
+    "Config",
+    "Snapshot",
+    "Capability",
+    "Rule",
+    "Change",
+    "Comment",
+    "Violation",
+    "Action",
+    "Snippet",
+    "Reference",
+    "Step",
+    "Node",
+    "Metrics",
+    "Status",
+    "Usage",
 )
 
 
@@ -208,8 +226,7 @@ def check_gp006_model_naming(root: Path) -> list[str]:
             if not isinstance(node, ast.ClassDef):
                 continue
             base_names = [
-                b.id if isinstance(b, ast.Name) else
-                b.attr if isinstance(b, ast.Attribute) else ""
+                b.id if isinstance(b, ast.Name) else b.attr if isinstance(b, ast.Attribute) else ""
                 for b in node.bases
             ]
             if "BaseModel" not in base_names:
@@ -229,7 +246,9 @@ def check_gp007_dead_imports(root: Path) -> list[str]:
     """GP-007: No unused imports — delegates to ruff F401."""
     result = subprocess.run(
         ["python", "-m", "ruff", "check", "--select", "F401", "--output-format", "text", "."],
-        capture_output=True, text=True, cwd=root,
+        capture_output=True,
+        text=True,
+        cwd=root,
     )
     if result.returncode == 0:
         return []
@@ -239,10 +258,7 @@ def check_gp007_dead_imports(root: Path) -> list[str]:
     for line in result.stdout.splitlines():
         line = line.strip()
         if line and "F401" in line:
-            violations.append(
-                f"GP-007: {line}\n"
-                f"REMEDIATION: {rule.agent_remediation}"
-            )
+            violations.append(f"GP-007: {line}\nREMEDIATION: {rule.agent_remediation}")
     return violations
 
 
@@ -291,6 +307,7 @@ def check_gp010_quality_score(root: Path) -> list[str]:
         ]
 
     import os
+
     mtime = datetime.fromtimestamp(os.path.getmtime(score_path), tz=UTC)
     age = datetime.now(tz=UTC) - mtime
     if age > timedelta(hours=24):

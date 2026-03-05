@@ -76,10 +76,7 @@ async def health_check():
     assert any("health" in f.path for f in created_files)
     health_file = created_files[0]
     assert health_file.content is not None
-    assert any(
-        suffix in health_file.content
-        for suffix in ("Result", "Schema", "Output")
-    )
+    assert any(suffix in health_file.content for suffix in ("Result", "Schema", "Output"))
 
 
 def test_review_output_approves_clean_implementation() -> None:
@@ -100,6 +97,7 @@ def test_review_output_approves_clean_implementation() -> None:
 def test_review_output_blocks_with_arch_violation() -> None:
     """ReviewOutput correctly models rejection due to architecture violation."""
     from agents.models.reviewer import ReviewComment
+
     review = ReviewOutput(
         approved=False,
         comments=[
@@ -133,8 +131,11 @@ async def test_reviewer_called_with_mock() -> None:
     )
 
     mock_run_reviewer = AsyncMock(return_value=mock_review)
-    with patch.dict("sys.modules", {"agents.workers.reviewer": MagicMock(run_reviewer=mock_run_reviewer)}):
+    with patch.dict(
+        "sys.modules", {"agents.workers.reviewer": MagicMock(run_reviewer=mock_run_reviewer)}
+    ):
         import sys
+
         worker_module = sys.modules["agents.workers.reviewer"]
         result = await worker_module.run_reviewer(pr_number=42, task=FEATURE_TASK)
         assert result.approved

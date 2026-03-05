@@ -28,9 +28,7 @@ class CommandResult(BaseModel):
 
 
 def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
-    result = subprocess.run(
-        cmd, capture_output=True, text=True, cwd=cwd or _repo_root()
-    )
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd or _repo_root())
     return result.returncode, result.stdout, result.stderr
 
 
@@ -38,6 +36,7 @@ def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
 def run_tests(path: str = ".") -> TestResult:
     """Run pytest. Returns structured pass/fail with failure details."""
     import time
+
     start = time.monotonic()
     returncode, stdout, stderr = _run(
         ["python", "-m", "pytest", path, "--tb=short", "-q"],
@@ -85,6 +84,7 @@ def run_lint(path: str = ".") -> LintResult:
 def run_build() -> BuildResult:
     """Build the application. Returns success/failure + build log."""
     import time
+
     start = time.monotonic()
     returncode, stdout, stderr = _run(["python", "-m", "build"])
     duration = time.monotonic() - start
@@ -100,9 +100,7 @@ def run_command(command: str, cwd: str = ".") -> CommandResult:
     """Run an arbitrary shell command. Use sparingly — prefer specific tools."""
     root = _repo_root()
     work_dir = (root / cwd).resolve()
-    result = subprocess.run(
-        shlex.split(command), capture_output=True, text=True, cwd=work_dir
-    )
+    result = subprocess.run(shlex.split(command), capture_output=True, text=True, cwd=work_dir)
     return CommandResult(
         returncode=result.returncode,
         stdout=result.stdout[:4000],

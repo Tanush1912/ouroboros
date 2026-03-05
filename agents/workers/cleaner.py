@@ -36,7 +36,7 @@ async def run_cleaner(
 {scan_report}
 
 ## Domains to Score
-{', '.join(domain_list)}
+{", ".join(domain_list)}
 
 Analyze the scan report and produce a CleanupOutput with all violations,
 quality scores per domain, recommended PRs for auto-fixable clusters,

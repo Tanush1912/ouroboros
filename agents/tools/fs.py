@@ -74,8 +74,12 @@ def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatch]:
     """Search repository contents using ripgrep. Returns file + line matches."""
     root = _repo_root()
     cmd = [
-        "rg", "--json", "--glob", file_pattern,
-        query, str(root),
+        "rg",
+        "--json",
+        "--glob",
+        file_pattern,
+        query,
+        str(root),
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     matches = []
@@ -84,12 +88,14 @@ def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatch]:
             obj = json.loads(line)
             if obj.get("type") == "match":
                 data = obj["data"]
-                matches.append(SearchMatch(
-                    file=str(Path(data["path"]["text"]).relative_to(root)),
-                    line=data["line_number"],
-                    column=data["submatches"][0]["start"] if data["submatches"] else 0,
-                    text=data["lines"]["text"].rstrip(),
-                ))
+                matches.append(
+                    SearchMatch(
+                        file=str(Path(data["path"]["text"]).relative_to(root)),
+                        line=data["line_number"],
+                        column=data["submatches"][0]["start"] if data["submatches"] else 0,
+                        text=data["lines"]["text"].rstrip(),
+                    )
+                )
         except (json.JSONDecodeError, KeyError):
             continue
     return matches
@@ -121,5 +127,6 @@ def reindex(paths: list[str]) -> int:
     Returns the number of symbols in the updated index.
     """
     from repo_index.build_index import reindex as _reindex
+
     symbols, _ = _reindex(paths, root=_repo_root())
     return len(symbols)

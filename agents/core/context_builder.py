@@ -207,8 +207,7 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
 
     all_tools = REGISTRY.all_tools()
     available_tools = [
-        ToolSummary(name=t.name, description=t.description, category=t.category)
-        for t in all_tools
+        ToolSummary(name=t.name, description=t.description, category=t.category) for t in all_tools
     ]
 
     return TaskContext(

@@ -131,8 +131,11 @@ async def test_planner_called_with_mock() -> None:
     )
 
     mock_run_planner = AsyncMock(return_value=mock_plan)
-    with patch.dict("sys.modules", {"agents.workers.planner": MagicMock(run_planner=mock_run_planner)}):
+    with patch.dict(
+        "sys.modules", {"agents.workers.planner": MagicMock(run_planner=mock_run_planner)}
+    ):
         import sys
+
         worker_module = sys.modules["agents.workers.planner"]
         result = await worker_module.run_planner("Fix the off-by-one error")
         assert result.risk_level == "low"

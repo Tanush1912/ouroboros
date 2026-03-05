@@ -29,7 +29,8 @@ class GCState(TypedDict):
 def _collect_domains() -> list[str]:
     root = _repo_root()
     return [
-        d.name for d in root.iterdir()
+        d.name
+        for d in root.iterdir()
         if d.is_dir() and not d.name.startswith(".") and d.name != "__pycache__"
     ]
 
@@ -37,7 +38,9 @@ def _collect_domains() -> list[str]:
 async def entropy_scan_node(state: GCState) -> dict:
     """Run all linters and collect a comprehensive scan report."""
     lint_result = run_lint.fn(".")
-    violations_text = "\n".join(lint_result.violations) if lint_result.violations else "No violations"
+    violations_text = (
+        "\n".join(lint_result.violations) if lint_result.violations else "No violations"
+    )
     scan_report = f"Lint violations:\n{violations_text}\n\nAuto-fixed: {lint_result.auto_fixed}"
     return {"scan_report": scan_report}
 
@@ -114,15 +117,17 @@ async def update_quality_score_node(state: GCState) -> dict:
         lines.append(f"| {domain} | {trend} | {domain_violations} |")
 
     overall = cleanup.overall_score()
-    lines.extend([
-        "",
-        f"**Overall: {overall:.1f} / 10.0**",
-        "",
-        "---",
-        "",
-        "## Active Violations",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            f"**Overall: {overall:.1f} / 10.0**",
+            "",
+            "---",
+            "",
+            "## Active Violations",
+            "",
+        ]
+    )
 
     if cleanup.violations:
         for v in cleanup.violations:
@@ -131,17 +136,18 @@ async def update_quality_score_node(state: GCState) -> dict:
     else:
         lines.append("No violations detected.")
 
-    lines.extend([
-        "",
-        "## PRs Opened This Run",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## PRs Opened This Run",
+            "",
+        ]
+    )
     for pr_url in state["prs_opened"]:
         lines.append(f"- {pr_url}")
 
     score_path = root / "docs" / "QUALITY_SCORE.md"
     score_path.write_text("\n".join(lines) + "\n")
-
 
     commit_result = await commit.fn(
         message=f"chore(gc): update quality scores [{now}]",
@@ -208,5 +214,6 @@ async def run_entropy_gc(update_scores_only: bool = False) -> GCState:
 if __name__ == "__main__":
     import asyncio
     import sys
+
     update_only = "--update-scores-only" in sys.argv
     asyncio.run(run_entropy_gc(update_scores_only=update_only))

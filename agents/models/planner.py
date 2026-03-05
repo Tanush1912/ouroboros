@@ -17,9 +17,7 @@ class ExecutionStep(BaseModel):
 class PlanOutput(BaseModel):
     task_summary: str = Field(description="One-sentence summary of the task")
     steps: list[ExecutionStep] = Field(description="Ordered sequence of execution steps")
-    test_strategy: str = Field(
-        description="How to verify the implementation is correct"
-    )
+    test_strategy: str = Field(description="How to verify the implementation is correct")
     risk_level: Literal["low", "medium", "high"] = Field(
         description="Estimated risk of this change"
     )

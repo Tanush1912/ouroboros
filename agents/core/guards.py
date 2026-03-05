@@ -74,6 +74,7 @@ def pre_node_guard(state: RalphState, node_name: str) -> GuardResult:
     result = check_guards(state)
     if not result.allowed:
         import logfire
+
         logfire.warning(
             "Guard triggered",
             node=node_name,

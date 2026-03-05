@@ -111,12 +111,19 @@ def commit(message: str, files: list[str]) -> CommitResult:
 @tool
 def open_pr(title: str, body: str, base: str = "main") -> PRResult:
     """Open a pull request via gh CLI. Returns PR URL and number."""
-    rc, out, err = _run([
-        "gh", "pr", "create",
-        "--title", title,
-        "--body", body,
-        "--base", base,
-    ])
+    rc, out, err = _run(
+        [
+            "gh",
+            "pr",
+            "create",
+            "--title",
+            title,
+            "--body",
+            body,
+            "--base",
+            base,
+        ]
+    )
     if rc != 0:
         return PRResult(success=False, error=err.strip())
 
@@ -139,10 +146,13 @@ def get_pr_diff(pr_number: int) -> str:
 @tool
 def get_pr_comments(pr_number: int) -> list[PRComment]:
     """Fetch review comments on a PR. Returns structured comment list."""
-    rc, out, err = _run([
-        "gh", "api",
-        f"repos/:owner/:repo/pulls/{pr_number}/comments",
-    ])
+    rc, out, err = _run(
+        [
+            "gh",
+            "api",
+            f"repos/:owner/:repo/pulls/{pr_number}/comments",
+        ]
+    )
     if rc != 0:
         raise RuntimeError(f"gh api failed: {err}")
 

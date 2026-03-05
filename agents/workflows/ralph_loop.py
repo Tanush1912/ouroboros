@@ -68,10 +68,11 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
     import subprocess
     from pathlib import Path
 
-    repo_root = Path(subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    ).stdout.strip())
+    repo_root = Path(
+        subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
+        ).stdout.strip()
+    )
 
     for change in impl.files_changed:
         target = repo_root / change.path
@@ -96,6 +97,7 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     from agents.models.implementer import ImplementOutput
+
     fake_impl = ImplementOutput(
         files_changed=state["files_changed"],
         commit_message="",
@@ -140,6 +142,7 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
 
     try:
         from agents.tools.browser import snapshot_dom, take_screenshot
+
         screenshot = await take_screenshot.fn(app_url)
         dom = await snapshot_dom.fn(app_url)
         logfire.info(

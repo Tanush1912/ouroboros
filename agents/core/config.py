@@ -32,5 +32,3 @@ def get_model() -> VertexAIModel:
     """Return the configured Vertex AI model instance."""
     _ensure_initialized()
     return VertexAIModel(MODEL_NAME)
-
-

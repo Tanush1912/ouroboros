@@ -13,7 +13,9 @@ def repo_root() -> Path:
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True,
+            capture_output=True,
+            text=True,
+            check=True,
         )
         return Path(result.stdout.strip())
     except subprocess.CalledProcessError:

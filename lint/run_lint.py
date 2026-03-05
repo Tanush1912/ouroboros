@@ -23,8 +23,7 @@ def run_all(path: str) -> int:
 
     print("Running ruff...")
     ruff_result = subprocess.run(
-        ["python", "-m", "ruff", "check", path],
-        capture_output=True, text=True, cwd=root
+        ["python", "-m", "ruff", "check", path], capture_output=True, text=True, cwd=root
     )
     if ruff_result.returncode != 0:
         print(ruff_result.stdout)
@@ -68,6 +67,7 @@ def main() -> int:
 
     if "--arch-only" in args:
         from lint.arch_lint import run_arch_lint
+
         path = args[-1] if len(args) > 1 else "."
         violations = run_arch_lint(path)
         for v in violations:
@@ -76,6 +76,7 @@ def main() -> int:
 
     if "--golden-only" in args:
         from lint.golden_lint import run_golden_lint
+
         path = args[-1] if len(args) > 1 else "."
         violations = run_golden_lint(path)
         for v in violations:
@@ -84,6 +85,7 @@ def main() -> int:
 
     if "--doc-only" in args:
         from lint.doc_lint import run_doc_lint
+
         path = args[-1] if len(args) > 1 else "."
         violations = run_doc_lint(path)
         for v in violations:

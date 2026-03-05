@@ -44,21 +44,25 @@ def _extract_symbols(file_path: Path, root: Path) -> list[dict]:
 
     for node in ast.walk(tree):
         if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            symbols.append({
-                "name": node.name,
-                "file": rel_path,
-                "line": node.lineno,
-                "kind": "class" if isinstance(node, ast.ClassDef) else "function",
-            })
+            symbols.append(
+                {
+                    "name": node.name,
+                    "file": rel_path,
+                    "line": node.lineno,
+                    "kind": "class" if isinstance(node, ast.ClassDef) else "function",
+                }
+            )
         elif isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id.isupper():
-                    symbols.append({
-                        "name": target.id,
-                        "file": rel_path,
-                        "line": node.lineno,
-                        "kind": "constant",
-                    })
+                    symbols.append(
+                        {
+                            "name": target.id,
+                            "file": rel_path,
+                            "line": node.lineno,
+                            "kind": "constant",
+                        }
+                    )
 
     return symbols
 
@@ -91,7 +95,9 @@ def _extract_exports(file_path: Path) -> list[str]:
 
     exports = []
     for node in ast.walk(tree):
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
+        if isinstance(
+            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ) and not node.name.startswith("_"):
             exports.append(node.name)
     return exports
 
@@ -150,7 +156,9 @@ def reindex(paths: list[str], root: Path | None = None) -> tuple[dict, dict]:
     file_map_path = index_dir / "file_map.json"
 
     symbols: dict[str, dict] = json.loads(symbols_path.read_text()) if symbols_path.exists() else {}
-    file_map: dict[str, dict] = json.loads(file_map_path.read_text()) if file_map_path.exists() else {}
+    file_map: dict[str, dict] = (
+        json.loads(file_map_path.read_text()) if file_map_path.exists() else {}
+    )
 
     stale_files = set(paths)
     symbols = {k: v for k, v in symbols.items() if v["file"] not in stale_files}

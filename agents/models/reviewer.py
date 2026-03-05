@@ -20,9 +20,7 @@ class ReviewComment(BaseModel):
 class ReviewOutput(BaseModel):
     approved: bool = Field(description="True if the PR is approved for merge")
     comments: list[ReviewComment] = Field(description="All review comments")
-    blocking_issues: list[str] = Field(
-        description="Issues that must be resolved before merge"
-    )
+    blocking_issues: list[str] = Field(description="Issues that must be resolved before merge")
     summary: str = Field(description="One-paragraph review summary")
     arch_violations: list[str] = Field(
         default_factory=list,

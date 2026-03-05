@@ -34,9 +34,7 @@ class DOMSnapshot(BaseModel):
 
 
 class UIAction(BaseModel):
-    action: Literal["click", "fill", "navigate", "press", "wait"] = Field(
-        description="Action type"
-    )
+    action: Literal["click", "fill", "navigate", "press", "wait"] = Field(description="Action type")
     selector: str | None = Field(default=None, description="CSS selector for the target element")
     value: str | None = Field(default=None, description="Value for fill/press actions")
     url: str | None = Field(default=None, description="URL for navigate actions")
@@ -54,6 +52,7 @@ class UIFlowResult(BaseModel):
 async def _get_page() -> Any:
     """Get a Playwright page instance."""
     from playwright.async_api import async_playwright
+
     playwright = await async_playwright().start()
     browser = await playwright.chromium.launch()
     context = await browser.new_context()

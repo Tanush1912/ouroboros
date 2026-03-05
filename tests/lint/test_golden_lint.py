@@ -32,19 +32,27 @@ def test_gp002_file_under_limit_passes(tmp_path: Path) -> None:
 
 
 def test_gp005_print_detected_outside_scripts(tmp_path: Path) -> None:
-    write_py(tmp_path, "agents/workers/planner.py", """
+    write_py(
+        tmp_path,
+        "agents/workers/planner.py",
+        """
         def run():
             print("hello")
-    """)
+    """,
+    )
     violations = check_gp005_no_print(tmp_path)
     assert any("GP-005" in v and "planner.py" in v for v in violations)
 
 
 def test_gp005_print_allowed_in_scripts(tmp_path: Path) -> None:
-    write_py(tmp_path, "scripts/setup.py", """
+    write_py(
+        tmp_path,
+        "scripts/setup.py",
+        """
         def main():
             print("Setting up...")
-    """)
+    """,
+    )
     violations = check_gp005_no_print(tmp_path)
     assert not any("scripts" in v for v in violations)
 
@@ -62,14 +70,22 @@ def test_gp001_duplicate_function_detected(tmp_path: Path) -> None:
 
 
 def test_gp001_unique_functions_pass(tmp_path: Path) -> None:
-    write_py(tmp_path, "agents/core/utils.py", """
+    write_py(
+        tmp_path,
+        "agents/core/utils.py",
+        """
         def compute_hash(s: str) -> str:
             import hashlib
             return hashlib.sha256(s.encode()).hexdigest()
-    """)
-    write_py(tmp_path, "agents/tools/helpers.py", """
+    """,
+    )
+    write_py(
+        tmp_path,
+        "agents/tools/helpers.py",
+        """
         def slugify(s: str) -> str:
             return s.lower().replace(" ", "-")
-    """)
+    """,
+    )
     violations = check_gp001_duplicates(tmp_path)
     assert violations == []
