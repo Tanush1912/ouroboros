@@ -6,17 +6,10 @@ Cross-references against the repo index to detect stale references.
 
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
-
-def _repo_root() -> Path:
-    result = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    )
-    return Path(result.stdout.strip())
+from agents.core.paths import repo_root as _repo_root
 
 
 def _load_symbols(root: Path) -> set[str]:
@@ -33,8 +26,19 @@ def _load_file_map(root: Path) -> set[str]:
     return set(json.loads(file_map_path.read_text()).keys())
 
 
-def check_doc_references(doc_path: Path, root: Path, known_files: set[str], known_symbols: set[str]) -> list[str]:
-    """Check a single .md file for stale references."""
+_COMMON_NON_SYMBOLS = {
+    "True", "False", "None", "GitHub", "Google", "Python", "Docker",
+    "Logfire", "LangGraph", "PydanticAI", "VictoriaLogs", "VictoriaMetrics",
+    "Grafana", "Playwright", "Vertex", "Gemini", "OpenTelemetry",
+    "FastAPI", "PostgreSQL", "TypedDict", "BaseModel", "TypeVar",
+    "CI", "PR", "API", "GCP", "JSON", "YAML", "TOML",
+}
+
+
+def check_doc_references(
+    doc_path: Path, root: Path, known_files: set[str], known_symbols: set[str]
+) -> list[str]:
+    """Check a single .md file for stale file path and symbol references."""
     content = doc_path.read_text(encoding="utf-8")
     violations = []
     rel_doc = str(doc_path.relative_to(root))
@@ -53,6 +57,20 @@ def check_doc_references(doc_path: Path, root: Path, known_files: set[str], know
                     f"REMEDIATION: Update the reference to the current file location, "
                     f"or remove the reference if the file was deleted."
                 )
+            continue
+
+        if (
+            re.match(r"^[A-Z][a-zA-Z0-9]{4,}$", ref)
+            and re.search(r"[a-z]", ref)  
+            and ref not in _COMMON_NON_SYMBOLS
+            and known_symbols 
+            and ref not in known_symbols
+        ):
+            violations.append(
+                f"GP-008: {rel_doc} references symbol `{ref}` which is not in the repo index.\n"
+                f"REMEDIATION: Update the reference to the current symbol name, "
+                f"or run python repo_index/build_index.py to refresh the index."
+            )
 
     return violations
 

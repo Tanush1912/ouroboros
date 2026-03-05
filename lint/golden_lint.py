@@ -10,15 +10,16 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from agents.core.paths import repo_root as _repo_root
 from lint.rules import RULES_BY_ID
 
 
-def _repo_root() -> Path:
-    result = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    )
-    return Path(result.stdout.strip())
+_GP006_ALLOWED_SUFFIXES = (
+    "Output", "Result", "Schema", "Type", "Summary", "State", "Context",
+    "Config", "Snapshot", "Capability", "Rule", "Change", "Comment",
+    "Violation", "Action", "Snippet", "Reference", "Step", "Node", "Metrics",
+    "Status", "Usage",
+)
 
 
 def _all_python_files(root: Path, exclude_scripts: bool = False) -> list[Path]:
@@ -80,6 +81,92 @@ def check_gp002_file_size(root: Path) -> list[str]:
     return violations
 
 
+def check_gp003_hand_rolled(root: Path) -> list[str]:
+    """GP-003: Detect hand-rolled reimplementations of standard patterns.
+
+    Specifically catches while-loop + sleep retry patterns that should use tenacity.
+    """
+    violations = []
+    for py_file in _all_python_files(root):
+        try:
+            source = py_file.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+
+            has_while = any(isinstance(n, ast.While) for n in ast.walk(node))
+            has_sleep = any(
+                isinstance(n, ast.Call)
+                and isinstance(n.func, ast.Attribute)
+                and n.func.attr == "sleep"
+                for n in ast.walk(node)
+            )
+            if has_while and has_sleep:
+                rule = RULES_BY_ID["GP-003"]
+                violations.append(
+                    f"GP-003: {py_file.relative_to(root)}:{node.lineno} "
+                    f"'{node.name}' implements a hand-rolled retry (while + sleep). "
+                    f"Use tenacity.retry instead.\n"
+                    f"REMEDIATION: {rule.agent_remediation}"
+                )
+    return violations
+
+
+def check_gp004_unvalidated_external(root: Path) -> list[str]:
+    """GP-004: External data (json.loads from subprocess/HTTP) must go through Pydantic.
+
+    Flags functions that call json.loads() without a corresponding model_validate call.
+    Excludes repo_index/ (reads its own generated data) and tests/.
+    """
+    violations = []
+    excluded_dirs = {"repo_index", "tests", ".venv", "venv"}
+
+    for py_file in _all_python_files(root):
+        parts = set(py_file.relative_to(root).parts)
+        if parts.intersection(excluded_dirs):
+            continue
+
+        try:
+            source = py_file.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+
+            has_json_loads = any(
+                isinstance(n, ast.Call)
+                and isinstance(n.func, ast.Attribute)
+                and n.func.attr == "loads"
+                and isinstance(n.func.value, ast.Name)
+                and n.func.value.id == "json"
+                for n in ast.walk(node)
+            )
+            if not has_json_loads:
+                continue
+
+            has_validation = any(
+                isinstance(n, ast.Call)
+                and isinstance(n.func, ast.Attribute)
+                and n.func.attr in ("model_validate", "model_validate_json", "parse_obj")
+                for n in ast.walk(node)
+            )
+            if not has_validation:
+                rule = RULES_BY_ID["GP-004"]
+                violations.append(
+                    f"GP-004: {py_file.relative_to(root)}:{node.lineno} "
+                    f"'{node.name}' calls json.loads() without Pydantic validation.\n"
+                    f"REMEDIATION: {rule.agent_remediation}"
+                )
+    return violations
+
+
 def check_gp005_no_print(root: Path) -> list[str]:
     """GP-005: No print() outside scripts/."""
     violations = []
@@ -101,6 +188,62 @@ def check_gp005_no_print(root: Path) -> list[str]:
                     f"GP-005: print() call in {py_file.relative_to(root)}:{node.lineno}\n"
                     f"REMEDIATION: {rule.agent_remediation}"
                 )
+    return violations
+
+
+def check_gp006_model_naming(root: Path) -> list[str]:
+    """GP-006: Pydantic BaseModel subclasses in agents/models/ must use approved suffixes."""
+    violations = []
+    models_dir = root / "agents" / "models"
+    if not models_dir.exists():
+        return []
+
+    for py_file in models_dir.glob("*.py"):
+        try:
+            source = py_file.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            base_names = [
+                b.id if isinstance(b, ast.Name) else
+                b.attr if isinstance(b, ast.Attribute) else ""
+                for b in node.bases
+            ]
+            if "BaseModel" not in base_names:
+                continue
+            if not any(node.name.endswith(s) for s in _GP006_ALLOWED_SUFFIXES):
+                rule = RULES_BY_ID["GP-006"]
+                violations.append(
+                    f"GP-006: {py_file.relative_to(root)}:{node.lineno} "
+                    f"'{node.name}' does not follow naming convention "
+                    f"(*Output/*Result/*Schema/etc).\n"
+                    f"REMEDIATION: {rule.agent_remediation}"
+                )
+    return violations
+
+
+def check_gp007_dead_imports(root: Path) -> list[str]:
+    """GP-007: No unused imports — delegates to ruff F401."""
+    result = subprocess.run(
+        ["python", "-m", "ruff", "check", "--select", "F401", "--output-format", "text", "."],
+        capture_output=True, text=True, cwd=root,
+    )
+    if result.returncode == 0:
+        return []
+
+    rule = RULES_BY_ID["GP-007"]
+    violations = []
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line and "F401" in line:
+            violations.append(
+                f"GP-007: {line}\n"
+                f"REMEDIATION: {rule.agent_remediation}"
+            )
     return violations
 
 
@@ -154,7 +297,7 @@ def check_gp010_quality_score(root: Path) -> list[str]:
     if age > timedelta(hours=24):
         rule = RULES_BY_ID["GP-010"]
         return [
-            f"GP-010: docs/QUALITY_SCORE.md is {age.seconds // 3600}h old (max 24h).\n"
+            f"GP-010: docs/QUALITY_SCORE.md is {int(age.total_seconds()) // 3600}h old (max 24h).\n"
             f"REMEDIATION: {rule.agent_remediation}"
         ]
     return []
@@ -167,7 +310,11 @@ def run_golden_lint(path: str, repo_root: Path | None = None) -> list[str]:
 
     violations = []
     violations.extend(check_gp002_file_size(repo_root))
+    violations.extend(check_gp003_hand_rolled(repo_root))
+    violations.extend(check_gp004_unvalidated_external(repo_root))
     violations.extend(check_gp005_no_print(repo_root))
+    violations.extend(check_gp006_model_naming(repo_root))
+    violations.extend(check_gp007_dead_imports(repo_root))
     violations.extend(check_gp009_active_plans(repo_root))
     violations.extend(check_gp010_quality_score(repo_root))
     violations.extend(check_gp001_duplicates(repo_root))
