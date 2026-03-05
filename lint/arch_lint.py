@@ -8,6 +8,7 @@ import ast
 import sys
 from pathlib import Path
 
+from agents.core.paths import repo_root as _get_repo_root
 from lint.rules import ARCH_RULES, RULES_BY_ID
 
 LAYER_ORDER = ["models", "config", "core", "tools", "workers", "workflows"]
@@ -111,13 +112,8 @@ def _get_rule_id(file_layer: str, imported_layer: str) -> str:
 
 def run_arch_lint(path: str, repo_root: Path | None = None) -> list[str]:
     """Run architecture lint on a path. Returns all violation messages."""
-    import subprocess
     if repo_root is None:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True
-        )
-        repo_root = Path(result.stdout.strip())
+        repo_root = _get_repo_root()
 
     target = (repo_root / path).resolve()
     py_files = list(target.rglob("*.py")) if target.is_dir() else [target]

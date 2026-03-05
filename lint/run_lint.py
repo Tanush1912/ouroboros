@@ -11,13 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-
-def _repo_root() -> Path:
-    result = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        capture_output=True, text=True
-    )
-    return Path(result.stdout.strip())
+from agents.core.paths import repo_root as _repo_root
 
 
 def run_all(path: str) -> int:

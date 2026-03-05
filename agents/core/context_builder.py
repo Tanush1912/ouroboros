@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from agents.core.paths import repo_root as _repo_root
 from agents.tools.registry import REGISTRY, ToolCapability
 
 
@@ -76,18 +77,6 @@ class TaskContext(BaseModel):
 
         parts.append(f"\n_Token budget remaining: {self.token_budget_remaining}_")
         return "\n\n".join(parts)
-
-
-def _repo_root() -> Path:
-    import subprocess
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True
-        )
-        return Path(result.stdout.strip())
-    except subprocess.CalledProcessError:
-        return Path.cwd()
 
 
 def _estimate_tokens(text: str) -> int:
