@@ -17,7 +17,15 @@
 
 ---
 
-**Ouroboros** is an agent-first software factory. It takes a natural language task as input and produces a merged, tested, reviewed pull request as output. Five specialized AI agents — planner, implementer, reviewer, validator, and cleaner — collaborate through typed contracts to autonomously write code, run tests, open PRs, review changes, and merge them.
+Ouroboros is an agent-first software engineering system.
+
+**Input:** natural language task | **Output:** merged pull request
+
+Five specialized agents — planner, implementer, validator, reviewer, cleaner — plan, write, test, review, and merge code autonomously inside a constrained architecture.
+
+---
+
+**Ouroboros** is an agent-first software factory. It takes a natural language task as input and produces a merged, tested, reviewed pull request as output. The agents collaborate through typed Pydantic contracts — no text parsing, no regex, no string matching at any boundary.
 
 The system is self-referential: agents can be tasked to improve the agent infrastructure itself — better prompts, tighter lint rules, new tools — all flowing through the same PR review process.
 
@@ -33,19 +41,48 @@ flowchart LR
     Merge --> Done["Merged PR #42"]
 ```
 
+### Quick Example
+
+> **Task:** "Fix the off-by-one error in utils/counter.py"
+>
+> 1. **Planner** decomposes the task into typed execution steps
+> 2. **Implementer** writes the patch, returns `FileChange[]`
+> 3. **Validator** runs pytest + ruff + arch_lint — all pass
+> 4. **PR opened** via `gh pr create`
+> 5. **Reviewer** agent inspects the diff, approves
+> 6. **PR merged** via `gh pr merge --squash`
+>
+> **Total cost:** $0.0087 | **Iterations:** 2 | **Time:** ~30s
+
+---
+
+### Current Status
+
+> **Status: Early prototype**
+
+| Done | Upcoming |
+|------|----------|
+| Core workflow (plan → implement → validate → review → merge) | Full sandbox execution |
+| Architecture linting with AGENT_REMEDIATION | Live agent integration tests with Vertex AI |
+| 10 Golden Principles with machine-checkable lint | Larger repo benchmarks |
+| Repository index (189 symbols, 47 files) | Screenshot diff tool for UI validation |
+| Per-node token tracking and cost metrics | Prompt tuning from Logfire trace data |
+| 46 tests passing (no GCP credentials required) | End-to-end Ralph Loop on real tasks |
+
 ---
 
 ## Table of Contents
 
+- [Why This Project Exists](#why-this-project-exists)
 - [Why Ouroboros?](#why-ouroboros)
 - [Architecture Overview](#architecture-overview)
-- [The Ralph Loop — PR Lifecycle Workflow](#the-ralph-loop--pr-lifecycle-workflow)
+- [The Ralph Loop](#the-ralph-loop--pr-lifecycle-workflow)
 - [Agent Workers](#agent-workers)
 - [Typed Output Models](#typed-output-models)
 - [Tool System](#tool-system)
 - [Guard Rails](#guard-rails)
 - [Cost Awareness](#cost-awareness)
-- [Entropy Management & Garbage Collection](#entropy-management--garbage-collection)
+- [Entropy Management & GC](#entropy-management--garbage-collection)
 - [Repository Index](#repository-index)
 - [Context Builder](#context-builder)
 - [Lint Framework](#lint-framework)
@@ -58,6 +95,22 @@ flowchart LR
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
 - [CI/CD Pipelines](#cicd-pipelines)
+
+---
+
+## Why This Project Exists
+
+Recent research suggests software engineering is shifting from *writing code* to *designing environments where agents write code*. The bottleneck moves from implementation speed to infrastructure quality — how well constrained, observable, and self-correcting the agent environment is.
+
+Ouroboros explores what that environment looks like in practice:
+
+- **Strict architectural constraints** — layered imports enforced by AST-based linting, not convention
+- **Typed agent contracts** — every handoff is a Pydantic model, not a string to parse
+- **Deterministic validation** — test/lint routing is a pure function, not an LLM guess
+- **Automated entropy management** — daily GC workflow prevents codebase drift before it compounds
+- **Cost as a first-class signal** — every run tracks tokens, dollars, and per-node breakdowns
+
+The name is intentional: the system can be tasked to improve itself, and those improvements flow through the same constrained pipeline as any other change.
 
 ---
 
