@@ -151,7 +151,7 @@
   },
   "initial_state": {
     "file": "agents/core/state.py",
-    "line": 38,
+    "line": 41,
     "kind": "function"
   },
   "EntropyViolation": {
@@ -303,6 +303,11 @@
     "file": "agents/models/validator.py",
     "line": 27,
     "kind": "class"
+  },
+  "determine_next_action": {
+    "file": "agents/models/validator.py",
+    "line": 45,
+    "kind": "function"
   },
   "ScreenshotResult": {
     "file": "agents/tools/browser.py",
@@ -461,7 +466,7 @@
   },
   "merge_pr": {
     "file": "agents/tools/git.py",
-    "line": 176,
+    "line": 179,
     "kind": "function"
   },
   "VICTORIA_LOGS_URL": {
@@ -569,14 +574,9 @@
     "line": 33,
     "kind": "function"
   },
-  "_determine_next_action": {
-    "file": "agents/workers/validator.py",
-    "line": 14,
-    "kind": "function"
-  },
   "run_validator": {
     "file": "agents/workers/validator.py",
-    "line": 41,
+    "line": 18,
     "kind": "function"
   },
   "GCState": {
@@ -611,87 +611,87 @@
   },
   "update_quality_score_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 92,
+    "line": 98,
     "kind": "function"
   },
   "build_gc_graph": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 160,
+    "line": 166,
     "kind": "function"
   },
   "build_scores_only_graph": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 177,
+    "line": 183,
     "kind": "function"
   },
   "run_entropy_gc": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 190,
+    "line": 196,
     "kind": "function"
   },
-  "_accumulate_cost": {
+  "_accumulate_usage": {
     "file": "agents/workflows/ralph_loop.py",
     "line": 30,
     "kind": "function"
   },
   "plan_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 35,
+    "line": 46,
     "kind": "function"
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 50,
+    "line": 61,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 94,
+    "line": 100,
     "kind": "function"
   },
   "route_after_validate": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 115,
+    "line": 113,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 128,
+    "line": 127,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 160,
+    "line": 159,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 199,
+    "line": 198,
     "kind": "function"
   },
   "route_after_review": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 213,
+    "line": 212,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 224,
+    "line": 223,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 234,
+    "line": 233,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 245,
+    "line": 244,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 270,
+    "line": 269,
     "kind": "function"
   },
   "ReviewerState": {
@@ -701,22 +701,22 @@
   },
   "review_node": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 25,
+    "line": 26,
     "kind": "function"
   },
   "route_review": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 34,
+    "line": 36,
     "kind": "function"
   },
   "build_reviewer_graph": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 42,
+    "line": 44,
     "kind": "function"
   },
   "run_reviewer_loop": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 54,
+    "line": 56,
     "kind": "function"
   },
   "LAYER_ORDER": {
@@ -771,12 +771,12 @@
   },
   "check_doc_references": {
     "file": "lint/doc_lint.py",
-    "line": 62,
+    "line": 72,
     "kind": "function"
   },
   "run_doc_lint": {
     "file": "lint/doc_lint.py",
-    "line": 102,
+    "line": 124,
     "kind": "function"
   },
   "_GP006_ALLOWED_SUFFIXES": {
@@ -1004,6 +1004,71 @@
     "line": 123,
     "kind": "function"
   },
+  "_state_with": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 13,
+    "kind": "function"
+  },
+  "test_fresh_state_allowed": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 19,
+    "kind": "function"
+  },
+  "test_max_implement_iterations_escalates": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 25,
+    "kind": "function"
+  },
+  "test_max_review_iterations_escalates": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 33,
+    "kind": "function"
+  },
+  "test_tool_call_budget_aborts": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 41,
+    "kind": "function"
+  },
+  "test_cost_budget_escalates": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 49,
+    "kind": "function"
+  },
+  "test_under_budget_allowed": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 57,
+    "kind": "function"
+  },
+  "test_all_pass_proceeds": {
+    "file": "tests/agent_eval/test_validator_logic.py",
+    "line": 6,
+    "kind": "function"
+  },
+  "test_test_failure_retries": {
+    "file": "tests/agent_eval/test_validator_logic.py",
+    "line": 17,
+    "kind": "function"
+  },
+  "test_lint_failure_retries": {
+    "file": "tests/agent_eval/test_validator_logic.py",
+    "line": 28,
+    "kind": "function"
+  },
+  "test_arch_lint_failure_retries": {
+    "file": "tests/agent_eval/test_validator_logic.py",
+    "line": 39,
+    "kind": "function"
+  },
+  "test_import_error_escalates": {
+    "file": "tests/agent_eval/test_validator_logic.py",
+    "line": 50,
+    "kind": "function"
+  },
+  "test_missing_module_escalates": {
+    "file": "tests/agent_eval/test_validator_logic.py",
+    "line": 61,
+    "kind": "function"
+  },
   "write_py": {
     "file": "tests/lint/helpers.py",
     "line": 7,
@@ -1036,32 +1101,62 @@
   },
   "test_gp002_file_exceeds_500_lines": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 13,
+    "line": 16,
     "kind": "function"
   },
   "test_gp002_file_under_limit_passes": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 20,
+    "line": 23,
     "kind": "function"
   },
   "test_gp005_print_detected_outside_scripts": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 27,
+    "line": 30,
     "kind": "function"
   },
   "test_gp005_print_allowed_in_scripts": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 40,
+    "line": 43,
     "kind": "function"
   },
   "test_gp001_duplicate_function_detected": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 53,
+    "line": 56,
     "kind": "function"
   },
   "test_gp001_unique_functions_pass": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 65,
+    "line": 68,
+    "kind": "function"
+  },
+  "test_gp003_hand_rolled_retry_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 90,
+    "kind": "function"
+  },
+  "test_gp003_no_false_positive_on_while_without_sleep": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 108,
+    "kind": "function"
+  },
+  "test_gp004_json_loads_without_validation_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 123,
+    "kind": "function"
+  },
+  "test_gp004_json_loads_with_model_validate_passes": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 139,
+    "kind": "function"
+  },
+  "test_gp006_bad_model_name_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 156,
+    "kind": "function"
+  },
+  "test_gp006_approved_suffix_passes": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 170,
     "kind": "function"
   }
 }
