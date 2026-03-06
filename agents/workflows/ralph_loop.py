@@ -19,7 +19,9 @@ from langgraph.graph import END, StateGraph
 from agents.core.context_builder import build_context
 from agents.core.guards import pre_node_guard
 from agents.core.state import RalphState, initial_state
+from agents.models.benchmark import PerfComparisonResult
 from agents.models.cost import CostSummary, RunMetrics, TokenUsage
+from agents.models.reproducer import ErrorContext, ReproductionResult
 from agents.tools.git import commit, merge_pr, open_pr
 from agents.workers.implementer import run_implementer
 from agents.workers.planner import run_planner
@@ -58,6 +60,76 @@ async def plan_node(state: RalphState) -> dict[str, Any]:
     }
 
 
+_BUG_FIX_KEYWORDS = {"fix", "bug", "error", "broken", "failing", "crash"}
+
+
+def route_after_plan(state: RalphState) -> str:
+    """Route to reproduce_node for bug-fix tasks, otherwise straight to implement."""
+    if state["status"] == "escalated":
+        return "implement_node"
+
+    has_prior_failure = state["validation"] is not None and not state["validation"].overall_pass
+    task_lower = state["task"].lower()
+    has_bug_keywords = any(kw in task_lower for kw in _BUG_FIX_KEYWORDS)
+
+    if has_prior_failure or has_bug_keywords:
+        return "reproduce_node"
+    return "implement_node"
+
+
+async def reproduce_node(state: RalphState) -> dict[str, Any]:
+    """Attempt to reproduce a bug by running tests and capturing error context."""
+    from agents.tools.shell import _extract_traceback, _run
+
+    root_path = None
+    try:
+        from agents.core.paths import repo_root as _repo_root
+
+        root_path = _repo_root()
+    except Exception:
+        pass
+
+    steps = ["pytest --tb=long -x"]
+    returncode, stdout, stderr = _run(
+        ["python", "-m", "pytest", "--tb=long", "-x", "-q"],
+        cwd=root_path,
+    )
+    combined = stdout + stderr
+    traceback_text = _extract_traceback(combined)
+    reproduced = returncode != 0
+
+    error_context = None
+    if reproduced:
+        relevant_logs = [
+            line.strip()
+            for line in combined.splitlines()
+            if any(kw in line.lower() for kw in ("error", "failed", "exception", "assert"))
+        ][:20]
+        error_context = ErrorContext(
+            command="pytest --tb=long -x",
+            returncode=returncode,
+            stdout=stdout[:4000],
+            stderr=stderr[:4000],
+            traceback=traceback_text,
+            relevant_logs=relevant_logs,
+        )
+
+    result = ReproductionResult(
+        reproduced=reproduced,
+        steps_attempted=steps,
+        error_context=error_context,
+        summary=f"Bug {'reproduced' if reproduced else 'not reproduced'} via pytest",
+    )
+
+    logfire.info(
+        "reproduce_complete",
+        reproduced=reproduced,
+        traceback_length=len(traceback_text),
+    )
+
+    return {"reproduction_evidence": result, "total_tool_calls": state["total_tool_calls"] + 1}
+
+
 async def implement_node(state: RalphState) -> dict[str, Any]:
     guard = pre_node_guard(state, "implement_node")
     if not guard.allowed:
@@ -74,6 +146,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         context=context,
         previous_validation=state["validation"],
         iteration=iteration,
+        reproduction_evidence=state.get("reproduction_evidence"),
     )
 
     from agents.core.paths import repo_root as _repo_root
@@ -117,11 +190,38 @@ def route_after_validate(state: RalphState) -> str:
     if validation is None:
         return "human_checkpoint"
     route_map = {
-        "proceed": "ui_validate_node",
+        "proceed": "perf_validate_node",
         "retry": "implement_node",
         "escalate": "human_checkpoint",
     }
     return route_map[validation.next_action]
+
+
+async def perf_validate_node(state: RalphState) -> dict[str, Any]:
+    """Run benchmarks and compare against baseline. Informational only in v1."""
+    plan = state["plan"]
+    if plan and plan.risk_level == "low":
+        logfire.info("perf_validate_skipped", reason="low risk change")
+        return {}
+
+    try:
+        from agents.tools.benchmark import compare_benchmarks, run_benchmark
+
+        current = await run_benchmark.fn()
+        baseline = state["perf_baseline"]
+        if baseline is None:
+            comparison = PerfComparisonResult(current=current, verdict="no_baseline")
+        else:
+            comparison = await compare_benchmarks.fn(baseline=baseline, current=current)
+        if comparison.verdict == "regressed":
+            logfire.warning(
+                "perf_regression_detected",
+                regressions=comparison.regressions,
+            )
+        return {"perf_result": comparison, "total_tool_calls": state["total_tool_calls"] + 1}
+    except Exception as e:
+        logfire.warning("perf_validate_failed", error=str(e))
+        return {}
 
 
 async def ui_validate_node(state: RalphState) -> dict[str, Any]:
@@ -138,6 +238,15 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
     if not app_url:
         logfire.warning("ui_validate_skipped", reason="APP_URL env var not set")
         return {}
+
+    try:
+        from agents.tools.harness import run_app_and_probe
+
+        startup = await run_app_and_probe.fn()
+        if not startup.started:
+            logfire.warning("ui_validate_app_not_started", error=startup.error)
+    except Exception as e:
+        logfire.warning("ui_validate_harness_probe_failed", error=str(e))
 
     try:
         from agents.tools.browser import snapshot_dom, take_screenshot
@@ -245,8 +354,10 @@ def build_ralph_graph() -> StateGraph:
     graph = StateGraph(RalphState)
 
     graph.add_node("plan_node", plan_node)
+    graph.add_node("reproduce_node", reproduce_node)
     graph.add_node("implement_node", implement_node)
     graph.add_node("validate_node", validate_node)
+    graph.add_node("perf_validate_node", perf_validate_node)
     graph.add_node("ui_validate_node", ui_validate_node)
     graph.add_node("open_pr_node", open_pr_node)
     graph.add_node("review_loop_node", review_loop_node)
@@ -254,9 +365,11 @@ def build_ralph_graph() -> StateGraph:
     graph.add_node("human_checkpoint", human_checkpoint)
 
     graph.set_entry_point("plan_node")
-    graph.add_edge("plan_node", "implement_node")
+    graph.add_conditional_edges("plan_node", route_after_plan)
+    graph.add_edge("reproduce_node", "implement_node")
     graph.add_edge("implement_node", "validate_node")
     graph.add_conditional_edges("validate_node", route_after_validate)
+    graph.add_edge("perf_validate_node", "ui_validate_node")
     graph.add_edge("ui_validate_node", "open_pr_node")
     graph.add_edge("open_pr_node", "review_loop_node")
     graph.add_conditional_edges("review_loop_node", route_after_review)
