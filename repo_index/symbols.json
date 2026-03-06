@@ -509,39 +509,44 @@
     "line": 64,
     "kind": "class"
   },
+  "_check_gh_auth": {
+    "file": "agents/tools/git.py",
+    "line": 73,
+    "kind": "function"
+  },
   "_run": {
     "file": "agents/tools/git.py",
-    "line": 70,
+    "line": 91,
     "kind": "function"
   },
   "git_status": {
     "file": "agents/tools/git.py",
-    "line": 76,
+    "line": 99,
     "kind": "function"
   },
   "commit": {
     "file": "agents/tools/git.py",
-    "line": 105,
+    "line": 128,
     "kind": "function"
   },
   "open_pr": {
     "file": "agents/tools/git.py",
-    "line": 128,
+    "line": 151,
     "kind": "function"
   },
   "get_pr_diff": {
     "file": "agents/tools/git.py",
-    "line": 154,
+    "line": 177,
     "kind": "function"
   },
   "get_pr_comments": {
     "file": "agents/tools/git.py",
-    "line": 163,
+    "line": 186,
     "kind": "function"
   },
   "merge_pr": {
     "file": "agents/tools/git.py",
-    "line": 195,
+    "line": 218,
     "kind": "function"
   },
   "run_app_and_probe": {
@@ -1287,6 +1292,106 @@
   "test_missing_module_escalates": {
     "file": "tests/agent_eval/test_validator_logic.py",
     "line": 61,
+    "kind": "function"
+  },
+  "_PASS_TESTS": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 36,
+    "kind": "constant"
+  },
+  "_PASS_LINT": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 37,
+    "kind": "constant"
+  },
+  "_FAIL_TESTS": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 38,
+    "kind": "constant"
+  },
+  "_FAIL_LINT": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 39,
+    "kind": "constant"
+  },
+  "_state": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 42,
+    "kind": "function"
+  },
+  "test_graph_compiles": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 52,
+    "kind": "function"
+  },
+  "test_route_after_plan_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 61,
+    "kind": "function"
+  },
+  "test_route_after_plan_bug_keyword": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 66,
+    "kind": "function"
+  },
+  "test_route_after_plan_prior_failure": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 71,
+    "kind": "function"
+  },
+  "test_route_after_plan_normal_task": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 83,
+    "kind": "function"
+  },
+  "test_route_after_validate_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 91,
+    "kind": "function"
+  },
+  "test_route_after_validate_no_validation": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 96,
+    "kind": "function"
+  },
+  "test_route_after_validate_proceed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 101,
+    "kind": "function"
+  },
+  "test_route_after_validate_retry": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 113,
+    "kind": "function"
+  },
+  "test_route_after_validate_escalate": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 125,
+    "kind": "function"
+  },
+  "test_route_after_review_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 140,
+    "kind": "function"
+  },
+  "test_route_after_review_approved": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 145,
+    "kind": "function"
+  },
+  "test_route_after_review_not_approved_retries": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 156,
+    "kind": "function"
+  },
+  "test_route_after_review_max_iterations_escalates": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 167,
+    "kind": "function"
+  },
+  "test_route_after_review_no_review": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 178,
     "kind": "function"
   },
   "write_py": {
