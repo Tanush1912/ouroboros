@@ -134,9 +134,29 @@
     "line": 169,
     "kind": "function"
   },
-  "build_context": {
+  "_discover_doc_files": {
     "file": "agents/core/context_builder.py",
     "line": 181,
+    "kind": "function"
+  },
+  "_chunk_markdown": {
+    "file": "agents/core/context_builder.py",
+    "line": 195,
+    "kind": "function"
+  },
+  "_score_doc_chunk": {
+    "file": "agents/core/context_builder.py",
+    "line": 224,
+    "kind": "function"
+  },
+  "_find_relevant_docs": {
+    "file": "agents/core/context_builder.py",
+    "line": 237,
+    "kind": "function"
+  },
+  "build_context": {
+    "file": "agents/core/context_builder.py",
+    "line": 253,
     "kind": "function"
   },
   "to_prompt_text": {
