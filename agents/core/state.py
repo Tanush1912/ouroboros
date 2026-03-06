@@ -2,8 +2,10 @@
 
 from typing import Literal, TypedDict
 
+from agents.models.benchmark import BenchmarkResult, PerfComparisonResult
 from agents.models.implementer import FileChange
 from agents.models.planner import PlanOutput
+from agents.models.reproducer import ReproductionResult
 from agents.models.reviewer import ReviewOutput
 from agents.models.validator import ValidationOutput
 
@@ -36,6 +38,9 @@ class RalphState(TypedDict):
     error_log: list[str]
     ui_screenshots: list[str]
     node_token_usage: dict[str, dict[str, int]]
+    reproduction_evidence: ReproductionResult | None
+    perf_baseline: BenchmarkResult | None
+    perf_result: PerfComparisonResult | None
 
 
 def initial_state(task: str) -> RalphState:
@@ -59,4 +64,7 @@ def initial_state(task: str) -> RalphState:
         error_log=[],
         ui_screenshots=[],
         node_token_usage={},
+        reproduction_evidence=None,
+        perf_baseline=None,
+        perf_result=None,
     )

@@ -130,6 +130,83 @@ REGISTRY.register(
         category="shell",
     )
 )
+REGISTRY.register(
+    ToolCapability(
+        name="run_single_test",
+        description="Run a single test file or function with full traceback output for debugging.",
+        input_schema={
+            "test_path": {"type": "string", "description": "pytest node ID (file::test)"}
+        },
+        output_type="TestResult",
+        category="shell",
+    )
+)
+REGISTRY.register(
+    ToolCapability(
+        name="capture_error_context",
+        description="Run a command and capture structured error context including Python traceback extraction.",
+        input_schema={
+            "command": {"type": "string"},
+            "cwd": {"type": "string", "default": "."},
+        },
+        output_type="ErrorContext",
+        category="shell",
+    )
+)
+REGISTRY.register(
+    ToolCapability(
+        name="run_app_and_probe",
+        description="Start app via docker compose and probe the health endpoint. Returns startup status.",
+        input_schema={
+            "compose_file": {"type": "string", "default": "harness/sandbox/docker-compose.yml"},
+            "health_path": {"type": "string", "default": "/health"},
+            "timeout_seconds": {"type": "integer", "default": 30},
+        },
+        output_type="AppStartupResult",
+        category="shell",
+        requires_sandbox=True,
+    )
+)
+REGISTRY.register(
+    ToolCapability(
+        name="probe_endpoint",
+        description="Send a single HTTP request to a URL and return structured result with latency.",
+        input_schema={
+            "url": {"type": "string"},
+            "method": {"type": "string", "default": "GET"},
+            "expected_status": {"type": "integer", "default": 200},
+            "body": {"type": "string"},
+        },
+        output_type="ProbeResult",
+        category="shell",
+        requires_sandbox=True,
+    )
+)
+REGISTRY.register(
+    ToolCapability(
+        name="run_benchmark",
+        description="Run benchmark suite via pytest-benchmark. Returns structured timing results.",
+        input_schema={
+            "suite_path": {"type": "string", "default": "benchmarks/"},
+            "marker": {"type": "string", "default": "benchmark"},
+        },
+        output_type="BenchmarkResult",
+        category="shell",
+    )
+)
+REGISTRY.register(
+    ToolCapability(
+        name="compare_benchmarks",
+        description="Compare two benchmark results and detect regressions above threshold.",
+        input_schema={
+            "baseline": {"type": "object", "description": "BenchmarkResult baseline"},
+            "current": {"type": "object", "description": "BenchmarkResult current"},
+            "threshold_pct": {"type": "number", "default": 10.0},
+        },
+        output_type="PerfComparison",
+        category="shell",
+    )
+)
 
 REGISTRY.register(
     ToolCapability(
