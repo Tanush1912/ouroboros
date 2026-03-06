@@ -6,40 +6,16 @@ next_action is determined deterministically from test/lint results — no LLM ca
 
 import logfire
 
-from agents.models.implementer import ImplementOutput
-from agents.models.validator import LintResult, TestResult, ValidationOutput
+from agents.models.validator import (
+    LintResult,
+    TestResult,
+    ValidationOutput,
+    determine_next_action,
+)
 from agents.tools.shell import run_lint, run_tests
 
 
-def _determine_next_action(
-    test_result: TestResult,
-    lint_result: LintResult,
-    arch_lint_result: LintResult,
-    iteration: int,
-) -> tuple[str, str]:
-    """Deterministically compute next_action and failure_summary from results."""
-    if test_result.passed and lint_result.passed and arch_lint_result.passed:
-        return "proceed", ""
-
-    failures = []
-    if not test_result.passed:
-        failures.extend(test_result.failures[:5])
-    if not lint_result.passed:
-        failures.extend(lint_result.violations[:3])
-    if not arch_lint_result.passed:
-        failures.extend(arch_lint_result.violations[:3])
-
-    unrecoverable = ("ModuleNotFoundError", "ImportError", "missing external", "No module named")
-    for f in failures:
-        for signal in unrecoverable:
-            if signal in f:
-                return "escalate", "\n".join(failures)
-
-    return "retry", "\n".join(failures)
-
-
 async def run_validator(
-    implement_output: ImplementOutput,
     iteration: int = 1,
 ) -> ValidationOutput:
     """Run tests and lint on the implementation, return structured validation result."""
@@ -61,7 +37,7 @@ async def run_validator(
         )
 
         overall_pass = test_result.passed and ruff_lint_result.passed and arch_lint_result.passed
-        next_action, failure_summary = _determine_next_action(
+        next_action, failure_summary = determine_next_action(
             test_result, ruff_lint_result, arch_lint_result, iteration
         )
 

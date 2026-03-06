@@ -40,3 +40,33 @@ class ValidationOutput(BaseModel):
         default="",
         description="Human-readable summary of what failed and why",
     )
+
+
+def determine_next_action(
+    test_result: TestResult,
+    lint_result: LintResult,
+    arch_lint_result: LintResult,
+    iteration: int,
+) -> tuple[str, str]:
+    """Deterministically compute next_action and failure_summary from results.
+
+    Pure function — no LLM call, no I/O.
+    """
+    if test_result.passed and lint_result.passed and arch_lint_result.passed:
+        return "proceed", ""
+
+    failures = []
+    if not test_result.passed:
+        failures.extend(test_result.failures[:5])
+    if not lint_result.passed:
+        failures.extend(lint_result.violations[:3])
+    if not arch_lint_result.passed:
+        failures.extend(arch_lint_result.violations[:3])
+
+    unrecoverable = ("ModuleNotFoundError", "ImportError", "missing external", "No module named")
+    for f in failures:
+        for signal in unrecoverable:
+            if signal in f:
+                return "escalate", "\n".join(failures)
+
+    return "retry", "\n".join(failures)
