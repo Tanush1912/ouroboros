@@ -1,7 +1,7 @@
 # QUALITY_SCORE.md — Per-Domain Quality Grades
 
 > Auto-updated by the entropy GC workflow (`agents/workflows/entropy_gc.py`).
-> Last updated: 2026-03-05 (initial baseline)
+> Last updated: 2026-03-06
 
 ---
 
@@ -26,16 +26,16 @@
 
 | Principle | Status | Last Checked |
 |---|---|---|
-| GP-001: No duplicate utilities | PASS | 2026-03-05 |
-| GP-002: No file > 500 lines | PASS | 2026-03-05 |
-| GP-003: No hand-rolled duplicates | PASS | 2026-03-05 |
-| GP-004: All external data validated | PASS | 2026-03-05 |
-| GP-005: No print() outside scripts/ | PASS | 2026-03-05 |
-| GP-006: Schema naming conventions | PASS | 2026-03-05 |
-| GP-007: No dead imports | PASS | 2026-03-05 |
-| GP-008: Docs reference real code | PASS | 2026-03-05 |
-| GP-009: Active plans updated < 7 days | PASS | 2026-03-05 |
-| GP-010: Quality score current | PASS | 2026-03-05 |
+| GP-001: No duplicate utilities | PASS | 2026-03-06 |
+| GP-002: No file > 500 lines | PASS | 2026-03-06 |
+| GP-003: No hand-rolled duplicates | PASS | 2026-03-06 |
+| GP-004: All external data validated | PASS | 2026-03-06 |
+| GP-005: No print() outside scripts/ | PASS | 2026-03-06 |
+| GP-006: Schema naming conventions | PASS | 2026-03-06 |
+| GP-007: No dead imports | PASS | 2026-03-06 |
+| GP-008: Docs reference real code | PASS | 2026-03-06 |
+| GP-009: Active plans updated < 7 days | PASS | 2026-03-06 |
+| GP-010: Quality score current | PASS | 2026-03-06 |
 
 ---
 

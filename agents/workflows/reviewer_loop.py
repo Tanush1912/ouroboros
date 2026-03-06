@@ -1,7 +1,7 @@
 """Reviewer Loop — agent-to-agent review workflow.
 
-Runs reviewer against a PR, collects feedback, loops back to implementer
-if there are blocking issues. Max MAX_REVIEW_ITERATIONS cycles.
+Runs reviewer against a PR, collects feedback, routes to implementer
+to address change requests, then re-reviews. Max MAX_REVIEW_ITERATIONS cycles.
 """
 
 from typing import TypedDict
@@ -10,7 +10,9 @@ import logfire
 from langgraph.graph import END, StateGraph
 
 from agents.core.guards import MAX_REVIEW_ITERATIONS
+from agents.models.planner import ExecutionStep, PlanOutput
 from agents.models.reviewer import ReviewOutput
+from agents.workers.implementer import run_implementer
 from agents.workers.reviewer import run_reviewer
 
 
@@ -33,22 +35,77 @@ async def review_node(state: ReviewerState) -> dict:
     }
 
 
+async def address_feedback_node(state: ReviewerState) -> dict:
+    """Run the implementer to address blocking review feedback, then re-review."""
+    review = state["review"]
+    if not review or not review.blocking_issues:
+        return {}
+
+    feedback_task = (
+        f"Address review feedback for: {state['task']}\n\n"
+        f"Blocking issues:\n" + "\n".join(f"- {issue}" for issue in review.blocking_issues)
+    )
+    feedback_plan = PlanOutput(
+        task_summary=f"Address review feedback ({len(review.blocking_issues)} blocking issues)",
+        steps=[
+            ExecutionStep(
+                description=issue,
+                files_affected=[],
+                tool="fs",
+            )
+            for issue in review.blocking_issues
+        ],
+        test_strategy="Re-run reviewer after changes",
+        risk_level="low",
+        requires_human_review=False,
+    )
+
+    impl, usage = await run_implementer(
+        task=feedback_task,
+        plan=feedback_plan,
+        iteration=state["iteration"],
+    )
+
+    from agents.core.paths import repo_root as _repo_root
+
+    root = _repo_root()
+    for change in impl.files_changed:
+        target = root / change.path
+        if change.operation == "delete":
+            target.unlink(missing_ok=True)
+        elif change.content is not None:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(change.content, encoding="utf-8")
+
+    logfire.info(
+        "address_feedback_complete",
+        files_changed=len(impl.files_changed),
+        blocking_issues=len(review.blocking_issues),
+    )
+
+    return {
+        "estimated_cost_usd": state["estimated_cost_usd"] + usage.cost_usd(),
+    }
+
+
 def route_review(state: ReviewerState) -> str:
     if state["resolved"]:
         return "approved"
     if state["iteration"] >= MAX_REVIEW_ITERATIONS:
         return "escalate"
-    return "continue_review"
+    return "address_feedback"
 
 
 def build_reviewer_graph() -> StateGraph:
     graph = StateGraph(ReviewerState)
     graph.add_node("review_node", review_node)
+    graph.add_node("address_feedback_node", address_feedback_node)
     graph.add_conditional_edges(
         "review_node",
         route_review,
-        {"approved": END, "escalate": END, "continue_review": "review_node"},
+        {"approved": END, "escalate": END, "address_feedback": "address_feedback_node"},
     )
+    graph.add_edge("address_feedback_node", "review_node")
     graph.set_entry_point("review_node")
     return graph
 

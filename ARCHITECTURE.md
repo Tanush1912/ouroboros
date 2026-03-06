@@ -26,6 +26,10 @@ Cross-cutting concerns (logging, metrics, auth) enter only via `agents/core/`.
 Workers **cannot** cross-import each other. If two workers share logic, extract to `agents/core/`.
 Tools **cannot** import workers. Tools are stateless utilities; workers orchestrate them.
 
+### Documented Exceptions
+
+Workflows may import directly from `agents.tools.*` for **infrastructure operations** — git commits, PR creation, merges, and lint execution. These are mechanical side-effects (no LLM reasoning), so routing them through worker wrappers would add indirection without value. Agent reasoning must always go through workers.
+
 ---
 
 ## Domain Map
