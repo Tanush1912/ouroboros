@@ -61,7 +61,7 @@ modules into dedicated `.txt` files, making them easier to tune without touching
 | 2.4 | `observability.py` no auth/rate-limiting on query tools | **DEFERRED** — internal tooling, low risk for v1 |
 | 3.1 | Workflows import tools directly (ARCH-004 violation) | **DEFERRED ARCHITECTURAL DEBT** — `ralph_loop.py` and `entropy_gc.py` still call tool `.fn()` directly for git/lint ops. Documented known violation. |
 | 3.2 | `reviewer.py` calls `get_pr_diff.fn()` directly | **DEFERRED** — pragmatic choice acknowledged in module comment |
-| 3.3 | `_repo_root()` duplicated in 8+ files (GP-001 violation) | **DEFERRED** — tracked as `agents/core/paths.py` future extraction |
+| 3.3 | `_repo_root()` duplicated in 8+ files (GP-001 violation) | **FIXED** — extracted to `agents/core/paths.py`, all modules import from there |
 | 6.1 | Mutable global `_agent` singleton not thread-safe | **DEFERRED** — single-process use only for v1 |
 
 ---
@@ -122,16 +122,11 @@ repo_index/build_index.py            — added reindex() incremental update func
 
 ### Still Missing — From CRITICAL-BUGS
 
-1. **GP checkers GP-003, GP-004, GP-006, GP-007, GP-008** — rules exist in `lint/rules.py` with `AGENT_REMEDIATION` text but detection functions are not in `lint/golden_lint.py`.
-   - GP-003: hand-rolled reimplementations (no checker)
-   - GP-004: unvalidated external data access (no checker)
-   - GP-006: BaseModel naming convention (no checker)
-   - GP-007: dead imports — ruff catches F401 but not surfaced as named GP violation
-   - GP-008: doc lint checks file paths but not symbol names
+1. ~~**GP checkers GP-003, GP-004, GP-006, GP-007, GP-008**~~ — **FIXED** in CHECKPOINT-3. All checkers implemented in `golden_lint.py`. GP-008 wired via `doc_lint.run_doc_lint()`.
 
-2. **`_repo_root()` duplicated** (GP-001 self-violation) — present in `fs.py`, `git.py`, `shell.py`, `entropy_gc.py`, `build_index.py`, `golden_lint.py`, `run_lint.py`. Should be extracted to `agents/core/paths.py`.
+2. ~~**`_repo_root()` duplicated**~~ — **FIXED** in commit `3b7da54`. Extracted to `agents/core/paths.py`, all modules import from there.
 
-3. **Cost tracking is stubbed** — `ralph_loop.py` still emits `tokens_in=0, tokens_out=0, cost_usd=0.0`. Real token counts from `RunResult.usage()` are not wired up.
+3. ~~**Cost tracking is stubbed**~~ — **FIXED** in CHECKPOINT-3. `total_tokens_in`/`total_tokens_out` added to `RalphState` and accumulated via `_accumulate_usage()`. `RunMetrics` now reports actual token counts.
 
 4. **Blocking I/O in async nodes** — `implement_node` in `ralph_loop.py` still calls `Path.write_text()` and `subprocess.run()` synchronously. Use `asyncio.to_thread()` if concurrent workflows are introduced.
 
@@ -176,12 +171,11 @@ repo_index/build_index.py            — added reindex() incremental update func
 
 ## Next Steps (Priority Order)
 
-1. **Extract `_repo_root()` to `agents/core/paths.py`** — removes the most glaring GP-001 self-violation (8 duplicates)
-2. **Implement missing GP checkers** — GP-003, GP-004, GP-006, GP-007, GP-008 in `lint/golden_lint.py`
+1. ~~**Extract `_repo_root()` to `agents/core/paths.py`**~~ — **DONE**
+2. ~~**Implement missing GP checkers**~~ — **DONE** (GP-003 through GP-008 all in golden_lint.py)
 3. **`gh repo create project-ouroboros --private --source=. --remote=origin`** — push to GitHub so CI runs
 4. **`uv sync --all-extras`** — install deps, verify `from agents.workers.planner import run_planner` works
 5. **Set env vars** — `GCP_PROJECT`, `GCP_LOCATION`, `LOGFIRE_TOKEN`
-6. **Wire up token counting** — `RunResult.usage()` into `estimated_cost_usd` in state after each node
-7. **Add `ui_validate_node`** to `ralph_loop.py` (conditional on `plan.requires_browser_validation`)
-8. **Add screenshot diff tool** to `browser.py` (Task 48)
-9. **Run Ralph Loop e2e** on a real task once infra is live
+6. ~~**Wire up token counting**~~ — **DONE** (`total_tokens_in`/`total_tokens_out` in RalphState)
+7. **Add screenshot diff tool** to `browser.py` (Task 48)
+8. **Run Ralph Loop e2e** on a real task once infra is live

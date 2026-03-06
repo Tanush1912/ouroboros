@@ -6,7 +6,7 @@ opens one atomic PR per cluster, updates QUALITY_SCORE.md.
 Schedule: daily via .github/workflows/entropy_gc.yml
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TypedDict
 
 import logfire
@@ -63,7 +63,12 @@ def _cluster_violations(violations: list[EntropyViolation]) -> dict[str, list[En
 
 
 async def open_cleanup_prs_node(state: GCState) -> dict:
-    """Open one PR per auto-fixable violation cluster."""
+    """Open one tracking PR per auto-fixable violation cluster.
+
+    NOTE: This node opens PRs that describe the violations to fix, but does not
+    implement the fixes itself. The actual fix implementation is handled by
+    running Ralph Loop on each PR's description as a task.
+    """
     if not state["cleanup"]:
         return {"prs_opened": []}
 
@@ -71,8 +76,9 @@ async def open_cleanup_prs_node(state: GCState) -> dict:
     prs_opened = []
 
     for principle, violations in clusters.items():
-        list({v.file for v in violations})
+        affected_files = sorted({v.file for v in violations})
         body = f"## Entropy GC — {principle}\n\n"
+        body += f"**Affected files:** {', '.join(f'`{f}`' for f in affected_files)}\n\n"
         body += "**Violations:**\n"
         for v in violations:
             body += f"- `{v.file}`: {v.description}\n"
@@ -96,7 +102,7 @@ async def update_quality_score_node(state: GCState) -> dict:
 
     cleanup = state["cleanup"]
     root = _repo_root()
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M UTC")
 
     lines = [
         "# QUALITY_SCORE.md — Per-Domain Quality Grades",

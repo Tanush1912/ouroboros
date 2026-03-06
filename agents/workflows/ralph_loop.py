@@ -27,9 +27,20 @@ from agents.workers.reviewer import run_reviewer
 from agents.workers.validator import run_validator
 
 
-def _accumulate_cost(state: RalphState, usage: TokenUsage) -> float:
-    """Return updated estimated_cost_usd after adding usage."""
-    return state["estimated_cost_usd"] + usage.cost_usd()
+def _accumulate_usage(state: RalphState, usage: TokenUsage, node_name: str) -> dict:
+    """Return state updates for token/cost accumulation, including per-node tracking."""
+    prev = state["node_token_usage"].get(node_name, {"tokens_in": 0, "tokens_out": 0})
+    updated_node_usage = dict(state["node_token_usage"])
+    updated_node_usage[node_name] = {
+        "tokens_in": prev["tokens_in"] + usage.tokens_in,
+        "tokens_out": prev["tokens_out"] + usage.tokens_out,
+    }
+    return {
+        "total_tokens_in": state["total_tokens_in"] + usage.tokens_in,
+        "total_tokens_out": state["total_tokens_out"] + usage.tokens_out,
+        "estimated_cost_usd": state["estimated_cost_usd"] + usage.cost_usd(),
+        "node_token_usage": updated_node_usage,
+    }
 
 
 async def plan_node(state: RalphState) -> dict[str, Any]:
@@ -42,7 +53,7 @@ async def plan_node(state: RalphState) -> dict[str, Any]:
     return {
         "plan": plan,
         "status": "implementing",
-        "estimated_cost_usd": _accumulate_cost(state, usage),
+        **_accumulate_usage(state, usage, "plan_node"),
         "total_tool_calls": state["total_tool_calls"] + 1,
     }
 
@@ -65,17 +76,12 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         iteration=iteration,
     )
 
-    import subprocess
-    from pathlib import Path
+    from agents.core.paths import repo_root as _repo_root
 
-    repo_root = Path(
-        subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
-        ).stdout.strip()
-    )
+    root = _repo_root()
 
     for change in impl.files_changed:
-        target = repo_root / change.path
+        target = root / change.path
         if change.operation == "delete":
             target.unlink(missing_ok=True)
         elif change.content is not None:
@@ -85,7 +91,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
     return {
         "files_changed": impl.files_changed,
         "iteration_count": iteration,
-        "estimated_cost_usd": _accumulate_cost(state, usage),
+        **_accumulate_usage(state, usage, "implement_node"),
         "total_tool_calls": state["total_tool_calls"] + 1,
         "status": "validating",
     }
@@ -96,15 +102,7 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    from agents.models.implementer import ImplementOutput
-
-    fake_impl = ImplementOutput(
-        files_changed=state["files_changed"],
-        commit_message="",
-        implementation_notes="",
-        test_commands=[],
-    )
-    validation = await run_validator(fake_impl, iteration=state["iteration_count"])
+    validation = await run_validator(iteration=state["iteration_count"])
     return {
         "validation": validation,
         "total_tool_calls": state["total_tool_calls"] + 2,  # run_tests + run_lint
@@ -118,11 +116,12 @@ def route_after_validate(state: RalphState) -> str:
     validation = state["validation"]
     if validation is None:
         return "human_checkpoint"
-    return {
+    route_map = {
         "proceed": "ui_validate_node",
         "retry": "implement_node",
         "escalate": "human_checkpoint",
-    }.get(validation.next_action, "human_checkpoint")
+    }
+    return route_map[validation.next_action]
 
 
 async def ui_validate_node(state: RalphState) -> dict[str, Any]:
@@ -131,7 +130,7 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
     Requires APP_URL env var (set by worktree_up.sh). Skips gracefully if not set
     or if plan.requires_browser_validation is False.
     """
-    plan = state.get("plan")
+    plan = state["plan"]
     if not plan or not plan.requires_browser_validation:
         return {}
 
@@ -205,7 +204,7 @@ async def review_loop_node(state: RalphState) -> dict[str, Any]:
     return {
         "review": review,
         "review_iteration_count": state["review_iteration_count"] + 1,
-        "estimated_cost_usd": _accumulate_cost(state, usage),
+        **_accumulate_usage(state, usage, "review_loop_node"),
         "total_tool_calls": state["total_tool_calls"] + 1,  # get_pr_diff in reviewer
     }
 
@@ -290,10 +289,35 @@ async def run_ralph_loop(task: str) -> RalphState:
             cost_usd=total_cost,
         )
 
+        node_usage = final_state["node_token_usage"]
+        per_node_costs = {}
+        for node_name, usage_data in node_usage.items():
+            node_cost = TokenUsage(
+                tokens_in=usage_data["tokens_in"],
+                tokens_out=usage_data["tokens_out"],
+            ).cost_usd()
+            per_node_costs[node_name] = CostSummary(
+                tokens_in=usage_data["tokens_in"],
+                tokens_out=usage_data["tokens_out"],
+                cost_usd=node_cost,
+                model="gemini-3.0-flash-preview",
+                task=task[:200],
+                workflow="ralph_loop",
+                duration_seconds=duration,
+                iterations=final_state["iteration_count"],
+                tool_calls=0,
+            )
+
+        highest_cost_node = (
+            max(per_node_costs, key=lambda n: per_node_costs[n].cost_usd)
+            if per_node_costs
+            else "none"
+        )
+
         metrics = RunMetrics(
             cost=CostSummary(
-                tokens_in=0,
-                tokens_out=0,
+                tokens_in=final_state["total_tokens_in"],
+                tokens_out=final_state["total_tokens_out"],
                 cost_usd=total_cost,
                 model="gemini-3.0-flash-preview",
                 task=task[:200],
@@ -302,8 +326,8 @@ async def run_ralph_loop(task: str) -> RalphState:
                 iterations=final_state["iteration_count"],
                 tool_calls=final_state["total_tool_calls"],
             ),
-            per_node_costs={},
-            highest_cost_node="unknown",
+            per_node_costs=per_node_costs,
+            highest_cost_node=highest_cost_node,
         )
         logfire.info("run_metrics", **metrics.model_dump())
 

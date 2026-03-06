@@ -58,8 +58,8 @@ def check_guards(state: RalphState) -> GuardResult:
             action="abort",
         )
 
-    budget = state.get("cost_budget_usd", MAX_COST_USD_PER_RUN)
-    if state.get("estimated_cost_usd", 0.0) >= budget:
+    budget = state["cost_budget_usd"]
+    if state["estimated_cost_usd"] >= budget:
         return GuardResult(
             allowed=False,
             reason=f"Cost budget ${budget:.2f} reached — escalating.",

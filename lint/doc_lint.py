@@ -30,13 +30,25 @@ _COMMON_NON_SYMBOLS = {
     "True",
     "False",
     "None",
+    "ValueError",
+    "TypeError",
+    "KeyError",
+    "RuntimeError",
+    "ImportError",
+    "ModuleNotFoundError",
+    "Agent",
+    "TypedDict",
+    "BaseModel",
+    "TypeVar",
     "GitHub",
     "Google",
     "Python",
     "Docker",
     "Logfire",
     "LangGraph",
+    "StateGraph",
     "PydanticAI",
+    "VertexAIModel",
     "VictoriaLogs",
     "VictoriaMetrics",
     "Grafana",
@@ -46,9 +58,7 @@ _COMMON_NON_SYMBOLS = {
     "OpenTelemetry",
     "FastAPI",
     "PostgreSQL",
-    "TypedDict",
-    "BaseModel",
-    "TypeVar",
+    # Acronyms
     "CI",
     "PR",
     "API",
@@ -73,8 +83,20 @@ def check_doc_references(
         if len(ref) < 3 or " " in ref or ref.startswith("$") or "=" in ref:
             continue
 
-        if "/" in ref or ref.endswith(".py") or ref.endswith(".md") or ref.endswith(".json"):
-            normalized = ref.lstrip("./")
+        if any(c in ref for c in ("{", "<", "*", "?")):
+            continue
+        if ref.startswith("/") or ref.startswith(":"):
+            continue
+        if re.search(r":[^/\d]", ref):
+            continue
+
+        if ref.endswith("/"):
+            continue
+        if "/" in ref:
+            normalized = ref
+            while normalized.startswith("./"):
+                normalized = normalized[2:]
+            normalized = re.sub(r":\d+$", "", normalized)
             if normalized and normalized not in known_files and not (root / normalized).exists():
                 violations.append(
                     f"GP-008: {rel_doc} references `{ref}` which does not exist.\n"
@@ -107,9 +129,15 @@ def run_doc_lint(path: str, repo_root: Path | None = None) -> list[str]:
     known_files = _load_file_map(repo_root)
     known_symbols = _load_symbols(repo_root)
 
+    _excluded_dirs = {".venv", "venv", ".git", "node_modules", "dist", "build", "__pycache__"}
+
     target = (repo_root / path).resolve()
     if target.is_dir():
-        doc_files = list(target.rglob("*.md"))
+        doc_files = [
+            f
+            for f in target.rglob("*.md")
+            if not _excluded_dirs.intersection(f.relative_to(repo_root).parts)
+        ]
     elif target.suffix == ".md":
         doc_files = [target]
     else:

@@ -16,7 +16,7 @@ class TokenUsage(BaseModel):
     tokens_out: int = 0
 
     def cost_usd(self) -> float:
-        """Compute estimated cost using Gemini 2.0 Flash pricing."""
+        """Compute estimated cost using Gemini 3.0 Flash Preview pricing."""
         return (
             self.tokens_in * _INPUT_COST_PER_M + self.tokens_out * _OUTPUT_COST_PER_M
         ) / 1_000_000

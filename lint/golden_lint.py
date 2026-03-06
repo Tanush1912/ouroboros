@@ -329,16 +329,19 @@ def run_golden_lint(path: str, repo_root: Path | None = None) -> list[str]:
     if repo_root is None:
         repo_root = _repo_root()
 
+    from lint.doc_lint import run_doc_lint
+
     violations = []
+    violations.extend(check_gp001_duplicates(repo_root))
     violations.extend(check_gp002_file_size(repo_root))
     violations.extend(check_gp003_hand_rolled(repo_root))
     violations.extend(check_gp004_unvalidated_external(repo_root))
     violations.extend(check_gp005_no_print(repo_root))
     violations.extend(check_gp006_model_naming(repo_root))
     violations.extend(check_gp007_dead_imports(repo_root))
+    violations.extend(run_doc_lint(path, repo_root=repo_root))  # GP-008
     violations.extend(check_gp009_active_plans(repo_root))
     violations.extend(check_gp010_quality_score(repo_root))
-    violations.extend(check_gp001_duplicates(repo_root))
     return violations
 
 

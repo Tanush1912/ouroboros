@@ -5,7 +5,10 @@ from pathlib import Path
 from lint.golden_lint import (
     check_gp001_duplicates,
     check_gp002_file_size,
+    check_gp003_hand_rolled,
+    check_gp004_unvalidated_external,
     check_gp005_no_print,
+    check_gp006_model_naming,
 )
 from tests.lint.helpers import write_py
 
@@ -81,4 +84,98 @@ def test_gp001_unique_functions_pass(tmp_path: Path) -> None:
     """,
     )
     violations = check_gp001_duplicates(tmp_path)
+    assert violations == []
+
+
+def test_gp003_hand_rolled_retry_detected(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/core/fetcher.py",
+        """
+        import time
+        def fetch_with_retry(url):
+            while True:
+                try:
+                    return do_fetch(url)
+                except Exception:
+                    time.sleep(1)
+    """,
+    )
+    violations = check_gp003_hand_rolled(tmp_path)
+    assert any("GP-003" in v and "fetch_with_retry" in v for v in violations)
+
+
+def test_gp003_no_false_positive_on_while_without_sleep(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/core/processor.py",
+        """
+        def process_queue(queue):
+            while queue:
+                item = queue.pop()
+                handle(item)
+    """,
+    )
+    violations = check_gp003_hand_rolled(tmp_path)
+    assert violations == []
+
+
+def test_gp004_json_loads_without_validation_detected(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/core/api_client.py",
+        """
+        import json
+        import subprocess
+        def get_status():
+            result = subprocess.run(["cmd"], capture_output=True, text=True)
+            return json.loads(result.stdout)
+    """,
+    )
+    violations = check_gp004_unvalidated_external(tmp_path)
+    assert any("GP-004" in v and "get_status" in v for v in violations)
+
+
+def test_gp004_json_loads_with_model_validate_passes(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/core/api_client.py",
+        """
+        import json
+        import subprocess
+        def get_status():
+            result = subprocess.run(["cmd"], capture_output=True, text=True)
+            data = json.loads(result.stdout)
+            return StatusModel.model_validate(data)
+    """,
+    )
+    violations = check_gp004_unvalidated_external(tmp_path)
+    assert violations == []
+
+
+def test_gp006_bad_model_name_detected(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/models/planner.py",
+        """
+        from pydantic import BaseModel
+        class PlanData(BaseModel):
+            task: str
+    """,
+    )
+    violations = check_gp006_model_naming(tmp_path)
+    assert any("GP-006" in v and "PlanData" in v for v in violations)
+
+
+def test_gp006_approved_suffix_passes(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/models/planner.py",
+        """
+        from pydantic import BaseModel
+        class PlanOutput(BaseModel):
+            task: str
+    """,
+    )
+    violations = check_gp006_model_naming(tmp_path)
     assert violations == []
