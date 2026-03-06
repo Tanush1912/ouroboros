@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Agent-first engineering infrastructure — the system that manages and improves itself"
 requires-python = ">=3.12"
 dependencies = [
-    "pydantic-ai>=0.0.14",
+    "pydantic-ai>=0.0.14,<2.0",
     "langgraph>=0.2.0",
     "logfire[pydantic-ai]>=1.0.0",
     "google-cloud-aiplatform>=1.60.0",

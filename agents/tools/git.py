@@ -67,7 +67,30 @@ class MergeResult(BaseModel):
     error: str = Field(default="")
 
 
+_gh_auth_verified = False
+
+
+def _check_gh_auth() -> None:
+    """Verify gh CLI is authenticated. Raises RuntimeError if not. Called once lazily."""
+    global _gh_auth_verified
+    if _gh_auth_verified:
+        return
+    result = subprocess.run(
+        ["gh", "auth", "status"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "GitHub CLI is not authenticated. Run 'gh auth login' to configure access.\n"
+            f"Details: {result.stderr.strip()}"
+        )
+    _gh_auth_verified = True
+
+
 def _run(cmd: list[str]) -> tuple[int, str, str]:
+    if cmd[0] == "gh":
+        _check_gh_auth()
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=_repo_root())
     return result.returncode, result.stdout, result.stderr
 
