@@ -4,6 +4,7 @@ All GitHub operations go through the gh CLI. Requires gh to be authenticated.
 """
 
 import contextlib
+import functools
 import json
 import subprocess
 from typing import Literal
@@ -12,6 +13,21 @@ from pydantic import BaseModel, Field
 from pydantic_ai import tool
 
 from agents.core.paths import repo_root as _repo_root
+
+
+@functools.cache
+def _repo_nwo() -> str:
+    """Return 'owner/repo' for the current repository via gh CLI."""
+    result = subprocess.run(
+        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
+        capture_output=True,
+        text=True,
+        cwd=_repo_root(),
+    )
+    nwo = result.stdout.strip()
+    if result.returncode != 0 or not nwo:
+        raise RuntimeError(f"Failed to resolve owner/repo: {result.stderr.strip()}")
+    return nwo
 
 
 class GitStatus(BaseModel):
@@ -150,7 +166,7 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
         [
             "gh",
             "api",
-            f"repos/:owner/:repo/pulls/{pr_number}/comments",
+            f"repos/{_repo_nwo()}/pulls/{pr_number}/comments",
         ]
     )
     if rc != 0:
