@@ -100,6 +100,10 @@ def run_command(command: str, cwd: str = ".") -> CommandResult:
     """Run an arbitrary shell command. Use sparingly — prefer specific tools."""
     root = _repo_root()
     work_dir = (root / cwd).resolve()
+    try:
+        work_dir.relative_to(root.resolve())
+    except ValueError as err:
+        raise ValueError(f"cwd '{cwd}' is outside the repository root") from err
     result = subprocess.run(shlex.split(command), capture_output=True, text=True, cwd=work_dir)
     return CommandResult(
         returncode=result.returncode,

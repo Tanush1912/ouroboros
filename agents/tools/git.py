@@ -156,7 +156,10 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
     if rc != 0:
         raise RuntimeError(f"gh api failed: {err}")
 
-    raw = json.loads(out)
+    try:
+        raw = json.loads(out)
+    except json.JSONDecodeError as err:
+        raise RuntimeError(f"Failed to parse GitHub API response: {err}") from err
     return [
         PRComment.model_validate(
             {
