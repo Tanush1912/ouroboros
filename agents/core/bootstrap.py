@@ -82,8 +82,7 @@ def bootstrap(*, require_gh: bool = True, quiet: bool = False) -> dict[str, str]
     gh_ok = _check_gh_cli()
     if require_gh and not gh_ok:
         raise BootstrapError(
-            "GitHub CLI (gh) is not installed or not authenticated.\n"
-            "Run: gh auth login"
+            "GitHub CLI (gh) is not installed or not authenticated.\nRun: gh auth login"
         )
 
     # Initialise Logfire
