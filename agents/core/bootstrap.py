@@ -109,10 +109,9 @@ def bootstrap(*, require_gh: bool = True, quiet: bool = False) -> dict[str, str]
 
 
 def _print_banner(config: dict[str, str]) -> None:
-    print(
+    sys.stderr.write(
         f"ouroboros | project={config['gcp_project']} "
         f"model={config['model']} "
         f"logfire={config['logfire']} "
-        f"gh={config['gh_cli']}",
-        file=sys.stderr,
+        f"gh={config['gh_cli']}\n"
     )
