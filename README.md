@@ -21,23 +21,16 @@
 
 The system is self-referential: agents can be tasked to improve the agent infrastructure itself — better prompts, tighter lint rules, new tools — all flowing through the same PR review process.
 
-```
-"Fix the off-by-one error in utils/counter.py"
-         │
-         ▼
-┌──────────────────────────────────────────────────────────────┐
-│                      OUROBOROS                                │
-│                                                              │
-│   Plan ──▶ Implement ──▶ Validate ──▶ Open PR ──▶ Review    │
-│                 ▲              │                      │       │
-│                 └──── retry ◀──┘                      │       │
-│                                              approved?│       │
-│                                         yes ──▶ Merge │       │
-│                                         no  ──▶ Fix   │       │
-└──────────────────────────────────────────────────────────────┘
-         │
-         ▼
-   Merged PR #42 ✓
+```mermaid
+flowchart LR
+    Task["'Fix the off-by-one error\nin utils/counter.py'"] --> Plan
+    subgraph OUROBOROS
+        Plan --> Implement --> Validate --> OpenPR["Open PR"] --> Review
+        Validate -- "retry (max 5)" --> Implement
+        Review -- "approved" --> Merge
+        Review -- "not approved" --> Implement
+    end
+    Merge --> Done["Merged PR #42"]
 ```
 
 ---
@@ -90,47 +83,36 @@ Traditional software development is a loop: **plan → write → test → review
 
 Ouroboros uses a strict layered architecture enforced by AST-based linting. Each layer can only import from layers below it:
 
-```
-                    ┌─────────────────────┐
-                    │     WORKFLOWS       │  LangGraph state machines
-                    │  ralph_loop.py      │  (entry points)
-                    │  entropy_gc.py      │
-                    │  reviewer_loop.py   │
-                    └────────┬────────────┘
-                             │ imports ▼
-                    ┌─────────────────────┐
-                    │      WORKERS        │  PydanticAI agents
-                    │  planner.py         │  (one per role)
-                    │  implementer.py     │
-                    │  reviewer.py        │
-                    │  validator.py       │
-                    │  cleaner.py         │
-                    └────────┬────────────┘
-                             │ imports ▼
-                    ┌─────────────────────┐
-                    │       TOOLS         │  @tool functions
-                    │  fs.py  shell.py    │  + ToolRegistry
-                    │  git.py browser.py  │
-                    │  observability.py   │
-                    └────────┬────────────┘
-                             │ imports ▼
-                    ┌─────────────────────┐
-                    │       CORE          │  Guards, state, context
-                    │  guards.py          │  builder, instrumentation
-                    │  state.py           │
-                    │  context_builder.py │
-                    │  config.py          │
-                    └────────┬────────────┘
-                             │ imports ▼
-                    ┌─────────────────────┐
-                    │      MODELS         │  Pure Pydantic types
-                    │  PlanOutput         │  (zero dependencies)
-                    │  ImplementOutput    │
-                    │  ReviewOutput       │
-                    │  ValidationOutput   │
-                    │  CleanupOutput      │
-                    │  CostSummary        │
-                    └─────────────────────┘
+```mermaid
+block-beta
+    columns 1
+    block:workflows["WORKFLOWS — LangGraph state machines"]
+        w1["ralph_loop.py"] w2["entropy_gc.py"] w3["reviewer_loop.py"]
+    end
+    space
+    block:workers["WORKERS — PydanticAI agents"]
+        a1["planner.py"] a2["implementer.py"] a3["reviewer.py"] a4["validator.py"] a5["cleaner.py"]
+    end
+    space
+    block:tools["TOOLS — @tool functions + ToolRegistry"]
+        t1["fs.py"] t2["shell.py"] t3["git.py"] t4["browser.py"] t5["observability.py"]
+    end
+    space
+    block:core["CORE — Guards, state, context builder"]
+        c1["guards.py"] c2["state.py"] c3["context_builder.py"] c4["config.py"]
+    end
+    space
+    block:models["MODELS — Pure Pydantic types (zero dependencies)"]
+        m1["PlanOutput"] m2["ImplementOutput"] m3["ReviewOutput"] m4["ValidationOutput"] m5["CostSummary"]
+    end
+
+    workflows --> workers --> tools --> core --> models
+
+    style workflows fill:#4a9eff,color:#fff
+    style workers fill:#7c5cbf,color:#fff
+    style tools fill:#2e8b57,color:#fff
+    style core fill:#d4a017,color:#fff
+    style models fill:#c0392b,color:#fff
 ```
 
 **Enforced invariants:**
@@ -146,72 +128,46 @@ Violations are caught by `lint/arch_lint.py` with actionable `AGENT_REMEDIATION`
 
 The Ralph Loop (`agents/workflows/ralph_loop.py`) is the main workflow. It takes a task string and produces a merged PR:
 
-```
-                              ┌─────────┐
-                              │  START  │
-                              └────┬────┘
-                                   │
-                                   ▼
-                           ┌───────────────┐
-                           │   plan_node   │ ← PlannerAgent
-                           │               │   → PlanOutput
-                           └───────┬───────┘
-                                   │
-                                   ▼
-                        ┌────────────────────┐
-                   ┌───▶│  implement_node    │ ← ImplementerAgent
-                   │    │                    │   → ImplementOutput
-                   │    │  writes files      │   → FileChange[]
-                   │    └────────┬───────────┘
-                   │             │
-                   │             ▼
-                   │    ┌────────────────────┐
-                   │    │  validate_node     │ ← ValidatorWorker (deterministic)
-                   │    │                    │   runs pytest + ruff + arch_lint
-                   │    │  → ValidationOutput│
-                   │    └────────┬───────────┘
-                   │             │
-                   │             ▼
-                   │    ┌────────────────────┐
-                   │    │  route decision    │
-                   │    └──┬──────┬──────┬───┘
-                   │       │      │      │
-                   │  retry │  proceed  escalate
-                   │  (max 5)│      │      │
-                   └───────┘      │      ▼
-                                  │  ┌──────────────────┐
-                                  │  │ human_checkpoint  │
-                                  │  └──────────────────┘
-                                  ▼
-                        ┌────────────────────┐
-                        │  ui_validate_node  │ ← Optional: Playwright screenshots
-                        └────────┬───────────┘
-                                 │
-                                 ▼
-                        ┌────────────────────┐
-                        │   open_pr_node     │ ← git commit + gh pr create
-                        └────────┬───────────┘
-                                 │
-                                 ▼
-                        ┌────────────────────┐
-                   ┌───▶│ review_loop_node   │ ← ReviewerAgent
-                   │    │                    │   → ReviewOutput
-                   │    └────────┬───────────┘
-                   │             │
-                   │    ┌────────┴───────────┐
-                   │    │  approved?          │
-                   │    └──┬──────────────┬──┘
-                   │       │              │
-                   │   no (max 3)     yes │
-                   └───────┘              ▼
-                                ┌──────────────────┐
-                                │   merge_node     │ ← gh pr merge --squash
-                                └────────┬─────────┘
-                                         │
-                                         ▼
-                                    ┌─────────┐
-                                    │  DONE   │
-                                    └─────────┘
+```mermaid
+flowchart TD
+    START(["START"]) --> plan_node
+
+    plan_node["plan_node\nPlannerAgent → PlanOutput"]
+    plan_node --> implement_node
+
+    implement_node["implement_node\nImplementerAgent → ImplementOutput\nwrites FileChange[] to disk"]
+    implement_node --> validate_node
+
+    validate_node["validate_node\npytest + ruff + arch_lint\n→ ValidationOutput"]
+    validate_node --> route_validate{{"next_action?"}}
+
+    route_validate -- "retry (max 5)" --> implement_node
+    route_validate -- "escalate" --> human_checkpoint["human_checkpoint\nEscalated to human"]
+    route_validate -- "proceed" --> ui_validate_node
+
+    ui_validate_node["ui_validate_node\nOptional: Playwright screenshots"]
+    ui_validate_node --> open_pr_node
+
+    open_pr_node["open_pr_node\ngit commit + gh pr create"]
+    open_pr_node --> review_loop_node
+
+    review_loop_node["review_loop_node\nReviewerAgent → ReviewOutput"]
+    review_loop_node --> route_review{{"approved?"}}
+
+    route_review -- "no (max 3)" --> implement_node
+    route_review -- "yes" --> merge_node
+
+    merge_node["merge_node\ngh pr merge --squash"]
+    merge_node --> DONE(["DONE"])
+
+    style plan_node fill:#4a9eff,color:#fff
+    style implement_node fill:#7c5cbf,color:#fff
+    style validate_node fill:#2e8b57,color:#fff
+    style ui_validate_node fill:#17a2b8,color:#fff
+    style open_pr_node fill:#d4a017,color:#fff
+    style review_loop_node fill:#e67e22,color:#fff
+    style merge_node fill:#27ae60,color:#fff
+    style human_checkpoint fill:#c0392b,color:#fff
 ```
 
 **Conditional routing** is driven entirely by typed model fields — no string matching:
@@ -353,20 +309,13 @@ class ToolCapability(BaseModel):
 
 Hard limits enforced at the entry of every LangGraph node via `pre_node_guard()`. These are **constants, not config** — intentionally not tunable at runtime:
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                     GUARD RAILS                              │
-│                                                              │
-│   MAX_IMPLEMENT_ITERATIONS  = 5     implement→validate loops │
-│   MAX_REVIEW_ITERATIONS     = 3     review→fix loops         │
-│   MAX_TOOL_CALLS_PER_NODE   = 50    tools per LangGraph node │
-│   MAX_TOTAL_TOOL_CALLS      = 200   tools across entire run  │
-│   MAX_COST_USD_PER_RUN      = $2.00 cost ceiling per workflow│
-│                                                              │
-│   Exceeded? ──▶ "escalate" (human checkpoint)                │
-│   Tool budget exhausted? ──▶ "abort" (fail cleanly)          │
-└──────────────────────────────────────────────────────────────┘
-```
+| Guard | Value | Scope | On Breach |
+|-------|-------|-------|-----------|
+| `MAX_IMPLEMENT_ITERATIONS` | **5** | implement → validate loops | escalate |
+| `MAX_REVIEW_ITERATIONS` | **3** | review → fix loops | escalate |
+| `MAX_TOOL_CALLS_PER_NODE` | **50** | tools per LangGraph node | abort |
+| `MAX_TOTAL_TOOL_CALLS` | **200** | tools across entire run | abort |
+| `MAX_COST_USD_PER_RUN` | **$2.00** | cost ceiling per workflow | escalate |
 
 ```python
 def check_guards(state: RalphState) -> GuardResult:
@@ -401,19 +350,15 @@ class RunMetrics(BaseModel):
     highest_cost_node: str                   # Where most tokens were spent
 ```
 
-```
-Example run breakdown:
-┌─────────────────┬──────────┬───────────┬──────────┐
-│ Node            │ Input Tk │ Output Tk │ Cost USD │
-├─────────────────┼──────────┼───────────┼──────────┤
-│ plan_node       │   2,100  │     800   │  $0.0017 │
-│ implement_node  │   4,500  │   2,200   │  $0.0044 │
-│ validate_node   │       0  │       0   │  $0.0000 │
-│ review_node     │   3,800  │   1,100   │  $0.0026 │
-├─────────────────┼──────────┼───────────┼──────────┤
-│ TOTAL           │  10,400  │   4,100   │  $0.0087 │
-└─────────────────┴──────────┴───────────┴──────────┘
-```
+**Example run breakdown:**
+
+| Node | Input Tokens | Output Tokens | Cost USD |
+|------|-------------|--------------|----------|
+| plan_node | 2,100 | 800 | $0.0017 |
+| implement_node | 4,500 | 2,200 | $0.0044 |
+| validate_node | 0 | 0 | $0.0000 |
+| review_node | 3,800 | 1,100 | $0.0026 |
+| **TOTAL** | **10,400** | **4,100** | **$0.0087** |
 
 Cost data flows to Logfire, building a dataset of cost-per-PR-by-task-type for regression tracking.
 
@@ -440,27 +385,17 @@ Entropy is tracked as a first-class concern through ten **Golden Principles** �
 
 The entropy GC workflow (`agents/workflows/entropy_gc.py`) runs daily via GitHub Actions:
 
-```
-┌────────────────────┐
-│  entropy_scan_node │ ← Run all linters, collect violations
-└────────┬───────────┘
-         │
-         ▼
-┌────────────────────────┐
-│ analyze_violations_node│ ← CleanerAgent clusters violations
-└────────┬───────────────┘   by principle + domain
-         │
-         ▼
-┌────────────────────────┐
-│ open_cleanup_prs_node  │ ← One atomic PR per violation cluster
-│                        │   "[gc] GP-001: remove duplicate
-│                        │    logging utilities in billing/"
-└────────┬───────────────┘
-         │
-         ▼
-┌────────────────────────┐
-│update_quality_score_node│ ← Write docs/QUALITY_SCORE.md
-└────────────────────────┘
+```mermaid
+flowchart TD
+    scan["entropy_scan_node\nRun all linters, collect violations"]
+    scan --> analyze["analyze_violations_node\nCleanerAgent clusters violations\nby principle + domain"]
+    analyze --> prs["open_cleanup_prs_node\nOne atomic PR per violation cluster"]
+    prs --> score["update_quality_score_node\nWrite docs/QUALITY_SCORE.md"]
+
+    style scan fill:#c0392b,color:#fff
+    style analyze fill:#7c5cbf,color:#fff
+    style prs fill:#d4a017,color:#fff
+    style score fill:#27ae60,color:#fff
 ```
 
 Each cleanup PR is:
@@ -512,33 +447,23 @@ The index is rebuilt automatically on every merge to `main` via CI, and agents c
 
 Agents never receive raw file dumps. The context builder (`agents/core/context_builder.py`) produces a token-budgeted context package:
 
-```
-Task: "Fix the login endpoint validation"
-                    │
-                    ▼
-            build_context(task, max_tokens=8000)
-                    │
-    ┌───────────────┼───────────────────┐
-    │               │                   │
-    ▼               ▼                   ▼
-Query repo     Load arch        Query tool
-index for      rules for        registry for
-relevant       touched          available
-files          layers           capabilities
-    │               │                   │
-    └───────────────┼───────────────────┘
-                    │
-                    ▼
-            ┌───────────────┐
-            │  TaskContext   │
-            │               │
-            │ relevant_files│ ← trimmed snippets
-            │ relevant_docs │ ← ARCHITECTURE.md sections
-            │ arch_rules    │ ← active rules for domain
-            │ active_plans  │ ← exec-plans in progress
-            │ available_tools│ ← from ToolRegistry
-            │ token_budget  │ ← remaining budget
-            └───────────────┘
+```mermaid
+flowchart TD
+    Task["Task: 'Fix the login endpoint validation'"]
+    Task --> build["build_context(task, max_tokens=8000)"]
+
+    build --> repo["Query repo index\nfor relevant files"]
+    build --> arch["Load arch rules\nfor touched layers"]
+    build --> tools["Query tool registry\nfor available capabilities"]
+
+    repo --> ctx
+    arch --> ctx
+    tools --> ctx
+
+    ctx["TaskContext\nrelevant_files, relevant_docs\narch_rules, active_plans\navailable_tools, token_budget"]
+
+    style build fill:#4a9eff,color:#fff
+    style ctx fill:#27ae60,color:#fff
 ```
 
 The context builder is the **gatekeeper for token spend**. Without it, agents read 50 files and burn context on noise. With it, they receive exactly what they need within budget.
@@ -592,26 +517,26 @@ class LintRule:
 
 Two layers of observability — one for the agent system, one for the applications agents build:
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  AGENT OBSERVABILITY (Logfire)                           │
-│                                                          │
-│  PydanticAI ──▶ Logfire (auto-instrumented)              │
-│  ├─ Model calls (tokens in/out, latency)                 │
-│  ├─ Tool calls (inputs/outputs as Pydantic models)       │
-│  ├─ LangGraph node transitions                           │
-│  └─ RunMetrics (cost per PR, per node)                   │
-└──────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph agent_obs["Agent Observability"]
+        PydanticAI --> Logfire["Logfire\n(auto-instrumented)"]
+        Logfire --> traces["Model calls · Tool calls\nNode transitions · RunMetrics"]
+    end
 
-┌──────────────────────────────────────────────────────────┐
-│  APP OBSERVABILITY (VictoriaLogs + VictoriaMetrics)      │
-│                                                          │
-│  App ──▶ Vector ──▶ VictoriaLogs (LogQL @ :9428)         │
-│                  └──▶ VictoriaMetrics (PromQL @ :8428)   │
-│                                                          │
-│  Grafana dashboard at :3000                              │
-│  Agents query via query_logs() and query_metrics() tools │
-└──────────────────────────────────────────────────────────┘
+    subgraph app_obs["App Observability"]
+        App --> Vector
+        Vector --> VLogs["VictoriaLogs\nLogQL @ :9428"]
+        Vector --> VMetrics["VictoriaMetrics\nPromQL @ :8428"]
+        VLogs --> Grafana[":3000"]
+        VMetrics --> Grafana
+    end
+
+    VLogs -. "query_logs()" .-> Agents["Agent Tools"]
+    VMetrics -. "query_metrics()" .-> Agents
+
+    style Logfire fill:#ff6b35,color:#fff
+    style Grafana fill:#f46800,color:#fff
 ```
 
 Agents can query the observability stack to diagnose issues — the same way humans do:
@@ -942,32 +867,21 @@ uv run ruff format --check .
 
 ### On Every PR (`ci.yml`)
 
-```
-Lint Job                          Test Job
-├── ruff check                    ├── Build repo index
-├── ruff format --check           ├── Run lint tests (5 + 11)
-├── Architecture lint             └── Run agent eval tests (6 + 6 + 5 + 5 + 8)
-└── Golden lint                       (with mocked GCP credentials)
-```
+```mermaid
+flowchart LR
+    subgraph ci["CI — Every PR"]
+        direction TB
+        lint["Lint Job\nruff check\nruff format --check\nArchitecture lint\nGolden lint"]
+        test["Test Job\nBuild repo index\nLint tests 16\nAgent eval tests 30\nwith mocked GCP"]
+    end
 
-### On Merge to Main (`ci.yml` — index job)
+    subgraph merge["On Merge to Main"]
+        idx["Index Job\nRebuild symbols.json\nRebuild file_map.json\nAuto-commit"]
+    end
 
-```
-Index Job
-├── Rebuild symbols.json + file_map.json
-└── Auto-commit updated index [skip ci]
-```
-
-### Daily at 6am UTC (`entropy_gc.yml`)
-
-```
-Entropy GC Job
-├── Build repo index
-├── Run entropy scan (all linters)
-├── Analyze violations (CleanerAgent)
-├── Open cleanup PRs (one per principle cluster)
-├── Update QUALITY_SCORE.md
-└── Upload results as artifact
+    subgraph gc["Daily @ 6am UTC"]
+        entropy["Entropy GC Job\nBuild repo index\nRun entropy scan\nAnalyze violations\nOpen cleanup PRs\nUpdate QUALITY_SCORE.md"]
+    end
 ```
 
 ---
