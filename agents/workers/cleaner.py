@@ -11,7 +11,7 @@ from agents.models.cost import TokenUsage
 
 SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "cleaner.txt").read_text()
 
-_agent: Agent[None, CleanupOutput] | None = None  
+_agent: Agent[None, CleanupOutput] | None = None
 
 
 def _get_agent() -> Agent[None, CleanupOutput]:

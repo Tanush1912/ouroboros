@@ -35,7 +35,7 @@ class RalphState(TypedDict):
     ]
     error_log: list[str]
     ui_screenshots: list[str]
-    node_token_usage: dict[str, dict[str, int]] 
+    node_token_usage: dict[str, dict[str, int]]
 
 
 def initial_state(task: str) -> RalphState:
