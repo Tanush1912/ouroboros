@@ -479,64 +479,69 @@
     "line": 127,
     "kind": "function"
   },
+  "_repo_nwo": {
+    "file": "agents/tools/git.py",
+    "line": 19,
+    "kind": "function"
+  },
   "GitStatus": {
     "file": "agents/tools/git.py",
-    "line": 17,
+    "line": 33,
     "kind": "class"
   },
   "CommitResult": {
     "file": "agents/tools/git.py",
-    "line": 25,
+    "line": 41,
     "kind": "class"
   },
   "PRResult": {
     "file": "agents/tools/git.py",
-    "line": 32,
+    "line": 48,
     "kind": "class"
   },
   "PRComment": {
     "file": "agents/tools/git.py",
-    "line": 39,
+    "line": 55,
     "kind": "class"
   },
   "MergeResult": {
     "file": "agents/tools/git.py",
-    "line": 48,
+    "line": 64,
     "kind": "class"
   },
   "_run": {
     "file": "agents/tools/git.py",
-    "line": 54,
+    "line": 70,
     "kind": "function"
   },
   "git_status": {
     "file": "agents/tools/git.py",
-    "line": 60,
+    "line": 76,
     "kind": "function"
   },
   "commit": {
     "file": "agents/tools/git.py",
-    "line": 89,
+    "line": 105,
     "kind": "function"
   },
   "open_pr": {
     "file": "agents/tools/git.py",
-    "line": 112,
+    "line": 128,
     "kind": "function"
   },
   "get_pr_diff": {
     "file": "agents/tools/git.py",
-    "line": 138,
+    "line": 154,
     "kind": "function"
   },
   "get_pr_comments": {
     "file": "agents/tools/git.py",
-    "line": 147,
+    "line": 163,
     "kind": "function"
   },
   "merge_pr": {
     "file": "agents/tools/git.py",
-    "line": 179,
+    "line": 195,
     "kind": "function"
   },
   "run_app_and_probe": {
