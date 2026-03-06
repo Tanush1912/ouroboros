@@ -146,13 +146,28 @@
   },
   "RalphState": {
     "file": "agents/core/state.py",
-    "line": 11,
+    "line": 13,
     "kind": "class"
   },
   "initial_state": {
     "file": "agents/core/state.py",
-    "line": 41,
+    "line": 46,
     "kind": "function"
+  },
+  "BenchmarkSampleResult": {
+    "file": "agents/models/benchmark.py",
+    "line": 8,
+    "kind": "class"
+  },
+  "BenchmarkResult": {
+    "file": "agents/models/benchmark.py",
+    "line": 17,
+    "kind": "class"
+  },
+  "PerfComparisonResult": {
+    "file": "agents/models/benchmark.py",
+    "line": 29,
+    "kind": "class"
   },
   "EntropyViolation": {
     "file": "agents/models/cleaner.py",
@@ -327,6 +342,16 @@
   "determine_next_action": {
     "file": "agents/models/validator.py",
     "line": 45,
+    "kind": "function"
+  },
+  "run_benchmark": {
+    "file": "agents/tools/benchmark.py",
+    "line": 15,
+    "kind": "function"
+  },
+  "compare_benchmarks": {
+    "file": "agents/tools/benchmark.py",
+    "line": 88,
     "kind": "function"
   },
   "ScreenshotResult": {
@@ -686,67 +711,87 @@
   },
   "_accumulate_usage": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 30,
+    "line": 32,
     "kind": "function"
   },
   "plan_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 46,
+    "line": 48,
+    "kind": "function"
+  },
+  "_BUG_FIX_KEYWORDS": {
+    "file": "agents/workflows/ralph_loop.py",
+    "line": 63,
+    "kind": "constant"
+  },
+  "route_after_plan": {
+    "file": "agents/workflows/ralph_loop.py",
+    "line": 66,
+    "kind": "function"
+  },
+  "reproduce_node": {
+    "file": "agents/workflows/ralph_loop.py",
+    "line": 80,
     "kind": "function"
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 61,
+    "line": 133,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 100,
+    "line": 173,
     "kind": "function"
   },
   "route_after_validate": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 113,
+    "line": 186,
+    "kind": "function"
+  },
+  "perf_validate_node": {
+    "file": "agents/workflows/ralph_loop.py",
+    "line": 200,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 127,
+    "line": 227,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 159,
+    "line": 268,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 198,
+    "line": 307,
     "kind": "function"
   },
   "route_after_review": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 212,
+    "line": 321,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 223,
+    "line": 332,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 233,
+    "line": 342,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 244,
+    "line": 353,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 269,
+    "line": 382,
     "kind": "function"
   },
   "ReviewerState": {
@@ -937,6 +982,46 @@
   "build_index": {
     "file": "repo_index/build_index.py",
     "line": 115,
+    "kind": "function"
+  },
+  "test_benchmark_sample_construction": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 6,
+    "kind": "function"
+  },
+  "test_benchmark_sample_defaults": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 22,
+    "kind": "function"
+  },
+  "test_benchmark_result_construction": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 30,
+    "kind": "function"
+  },
+  "test_benchmark_result_defaults": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 47,
+    "kind": "function"
+  },
+  "test_perf_comparison_pass": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 54,
+    "kind": "function"
+  },
+  "test_perf_comparison_regressed": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 78,
+    "kind": "function"
+  },
+  "test_perf_comparison_no_baseline": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 90,
+    "kind": "function"
+  },
+  "test_perf_comparison_round_trip": {
+    "file": "tests/agent_eval/test_benchmark_models.py",
+    "line": 101,
     "kind": "function"
   },
   "BUGGY_COUNTER_CODE": {
