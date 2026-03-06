@@ -214,6 +214,16 @@
     "line": 47,
     "kind": "function"
   },
+  "ProbeResult": {
+    "file": "agents/models/harness.py",
+    "line": 6,
+    "kind": "class"
+  },
+  "AppStartupResult": {
+    "file": "agents/models/harness.py",
+    "line": 17,
+    "kind": "class"
+  },
   "FileChange": {
     "file": "agents/models/implementer.py",
     "line": 8,
@@ -278,6 +288,16 @@
     "file": "agents/models/registry.py",
     "line": 44,
     "kind": "function"
+  },
+  "ErrorContext": {
+    "file": "agents/models/reproducer.py",
+    "line": 6,
+    "kind": "class"
+  },
+  "ReproductionResult": {
+    "file": "agents/models/reproducer.py",
+    "line": 15,
+    "kind": "class"
   },
   "ReviewComment": {
     "file": "agents/models/reviewer.py",
@@ -469,6 +489,26 @@
     "line": 179,
     "kind": "function"
   },
+  "run_app_and_probe": {
+    "file": "agents/tools/harness.py",
+    "line": 17,
+    "kind": "function"
+  },
+  "_poll_health": {
+    "file": "agents/tools/harness.py",
+    "line": 73,
+    "kind": "function"
+  },
+  "probe_endpoint": {
+    "file": "agents/tools/harness.py",
+    "line": 105,
+    "kind": "function"
+  },
+  "_attempt": {
+    "file": "agents/tools/harness.py",
+    "line": 81,
+    "kind": "function"
+  },
   "VICTORIA_LOGS_URL": {
     "file": "agents/tools/observability.py",
     "line": 13,
@@ -511,32 +551,47 @@
   },
   "BuildResult": {
     "file": "agents/tools/shell.py",
-    "line": 17,
+    "line": 18,
     "kind": "class"
   },
   "CommandResult": {
     "file": "agents/tools/shell.py",
-    "line": 23,
+    "line": 24,
     "kind": "class"
   },
   "run_tests": {
     "file": "agents/tools/shell.py",
-    "line": 36,
+    "line": 37,
     "kind": "function"
   },
   "run_lint": {
     "file": "agents/tools/shell.py",
-    "line": 56,
+    "line": 57,
     "kind": "function"
   },
   "run_build": {
     "file": "agents/tools/shell.py",
-    "line": 84,
+    "line": 85,
+    "kind": "function"
+  },
+  "run_single_test": {
+    "file": "agents/tools/shell.py",
+    "line": 100,
+    "kind": "function"
+  },
+  "_extract_traceback": {
+    "file": "agents/tools/shell.py",
+    "line": 119,
+    "kind": "function"
+  },
+  "capture_error_context": {
+    "file": "agents/tools/shell.py",
+    "line": 137,
     "kind": "function"
   },
   "run_command": {
     "file": "agents/tools/shell.py",
-    "line": 99,
+    "line": 167,
     "kind": "function"
   },
   "SYSTEM_PROMPT": {
@@ -556,12 +611,12 @@
   },
   "_build_prompt": {
     "file": "agents/workers/implementer.py",
-    "line": 35,
+    "line": 36,
     "kind": "function"
   },
   "run_implementer": {
     "file": "agents/workers/implementer.py",
-    "line": 70,
+    "line": 88,
     "kind": "function"
   },
   "run_planner": {
@@ -1037,6 +1092,56 @@
   "test_under_budget_allowed": {
     "file": "tests/agent_eval/test_guards.py",
     "line": 57,
+    "kind": "function"
+  },
+  "test_probe_result_healthy": {
+    "file": "tests/agent_eval/test_harness_models.py",
+    "line": 6,
+    "kind": "function"
+  },
+  "test_probe_result_unhealthy": {
+    "file": "tests/agent_eval/test_harness_models.py",
+    "line": 21,
+    "kind": "function"
+  },
+  "test_probe_result_round_trip": {
+    "file": "tests/agent_eval/test_harness_models.py",
+    "line": 33,
+    "kind": "function"
+  },
+  "test_app_startup_result_success": {
+    "file": "tests/agent_eval/test_harness_models.py",
+    "line": 47,
+    "kind": "function"
+  },
+  "test_app_startup_result_failure": {
+    "file": "tests/agent_eval/test_harness_models.py",
+    "line": 67,
+    "kind": "function"
+  },
+  "test_error_context_construction": {
+    "file": "tests/agent_eval/test_reproducer_models.py",
+    "line": 6,
+    "kind": "function"
+  },
+  "test_error_context_defaults": {
+    "file": "tests/agent_eval/test_reproducer_models.py",
+    "line": 22,
+    "kind": "function"
+  },
+  "test_reproduction_result_reproduced": {
+    "file": "tests/agent_eval/test_reproducer_models.py",
+    "line": 30,
+    "kind": "function"
+  },
+  "test_reproduction_result_not_reproduced": {
+    "file": "tests/agent_eval/test_reproducer_models.py",
+    "line": 48,
+    "kind": "function"
+  },
+  "test_reproduction_result_round_trip": {
+    "file": "tests/agent_eval/test_reproducer_models.py",
+    "line": 60,
     "kind": "function"
   },
   "test_all_pass_proceeds": {
