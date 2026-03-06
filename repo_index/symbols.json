@@ -826,27 +826,32 @@
   },
   "ReviewerState": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 17,
+    "line": 19,
     "kind": "class"
   },
   "review_node": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 26,
+    "line": 28,
+    "kind": "function"
+  },
+  "address_feedback_node": {
+    "file": "agents/workflows/reviewer_loop.py",
+    "line": 38,
     "kind": "function"
   },
   "route_review": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 36,
+    "line": 91,
     "kind": "function"
   },
   "build_reviewer_graph": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 44,
+    "line": 99,
     "kind": "function"
   },
   "run_reviewer_loop": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 56,
+    "line": 113,
     "kind": "function"
   },
   "LAYER_ORDER": {
