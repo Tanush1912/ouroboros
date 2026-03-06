@@ -178,6 +178,78 @@ def _load_active_plans() -> list[str]:
     return plans
 
 
+def _discover_doc_files() -> list[str]:
+    """Return relative paths for all markdown docs to index."""
+    root = _repo_root()
+    candidates = [
+        "ARCHITECTURE.md",
+        "AGENTS.md",
+    ]
+    docs_dir = root / "docs"
+    if docs_dir.exists():
+        for md in docs_dir.rglob("*.md"):
+            candidates.append(str(md.relative_to(root)))
+    return [p for p in candidates if (root / p).exists()]
+
+
+def _chunk_markdown(path: str) -> list[DocReference]:
+    """Split a markdown file into section-level chunks as DocReference objects."""
+    full = _repo_root() / path
+    if not full.exists():
+        return []
+    text = full.read_text(encoding="utf-8")
+    chunks: list[DocReference] = []
+    current_section: str | None = None
+    current_lines: list[str] = []
+
+    for line in text.splitlines():
+        if line.startswith("## "):
+            if current_lines:
+                body = "\n".join(current_lines).strip()
+                if body:
+                    chunks.append(DocReference(path=path, section=current_section, excerpt=body))
+            current_section = line.lstrip("# ").strip()
+            current_lines = []
+        else:
+            current_lines.append(line)
+
+    if current_lines:
+        body = "\n".join(current_lines).strip()
+        if body:
+            chunks.append(DocReference(path=path, section=current_section, excerpt=body))
+
+    return chunks
+
+
+def _score_doc_chunk(chunk: DocReference, keywords: list[str]) -> float:
+    """Score a doc chunk against task keywords using term frequency."""
+    text = f"{chunk.path} {chunk.section or ''} {chunk.excerpt}".lower()
+    score = 0.0
+    for kw in keywords:
+        count = text.count(kw)
+        if count:
+            score += count
+            if chunk.section and kw in chunk.section.lower():
+                score += 2.0
+    return score
+
+
+def _find_relevant_docs(task: str, max_docs: int = 3) -> list[DocReference]:
+    """Find doc sections relevant to the task using keyword-based TF scoring."""
+    keywords = _extract_intent_keywords(task)
+    if not keywords:
+        return []
+
+    all_chunks: list[DocReference] = []
+    for doc_path in _discover_doc_files():
+        all_chunks.extend(_chunk_markdown(doc_path))
+
+    scored = [(chunk, _score_doc_chunk(chunk, keywords)) for chunk in all_chunks]
+    scored = [(c, s) for c, s in scored if s > 0]
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return [c for c, _ in scored[:max_docs]]
+
+
 def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
     """
     Build a scoped, budget-aware context package for an agent.
@@ -205,6 +277,14 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
     arch_rules = _load_arch_rules()
     active_plans = _load_active_plans()
 
+    relevant_docs = _find_relevant_docs(task)
+    docs_to_include: list[DocReference] = []
+    for doc in relevant_docs:
+        cost = _estimate_tokens(doc.excerpt)
+        if budget - cost > 1000:
+            docs_to_include.append(doc)
+            budget -= cost
+
     all_tools = REGISTRY.all_tools()
     available_tools = [
         ToolSummary(name=t.name, description=t.description, category=t.category) for t in all_tools
@@ -215,7 +295,7 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
     return TaskContext(
         task=task,
         relevant_files=relevant_files,
-        relevant_docs=[],  # TODO: doc search via embedding similarity
+        relevant_docs=docs_to_include,
         arch_rules=arch_rules,
         active_plans=active_plans,
         available_tools=available_tools,
