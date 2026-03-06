@@ -20,14 +20,16 @@ class ReviewerState(TypedDict):
     review: ReviewOutput | None
     iteration: int
     resolved: bool
+    estimated_cost_usd: float
 
 
 async def review_node(state: ReviewerState) -> dict:
-    review, _ = await run_reviewer(state["pr_number"], state["task"])
+    review, usage = await run_reviewer(state["pr_number"], state["task"])
     return {
         "review": review,
         "iteration": state["iteration"] + 1,
         "resolved": review.approved,
+        "estimated_cost_usd": state["estimated_cost_usd"] + usage.cost_usd(),
     }
 
 
@@ -62,6 +64,7 @@ async def run_reviewer_loop(pr_number: int, task: str) -> ReviewerState:
             review=None,
             iteration=0,
             resolved=False,
+            estimated_cost_usd=0.0,
         )
         final = await app.ainvoke(state)
         logfire.info(
@@ -69,5 +72,6 @@ async def run_reviewer_loop(pr_number: int, task: str) -> ReviewerState:
             pr_number=pr_number,
             approved=final["resolved"],
             iterations=final["iteration"],
+            cost_usd=final["estimated_cost_usd"],
         )
         return final
