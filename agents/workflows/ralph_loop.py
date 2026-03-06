@@ -259,10 +259,13 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
             title=dom.title,
             screenshot_bytes=len(screenshot.image_base64),
         )
-        return {"ui_screenshots": state["ui_screenshots"] + [screenshot.image_base64]}
+        return {
+            "ui_screenshots": state["ui_screenshots"] + [screenshot.image_base64],
+            "total_tool_calls": state["total_tool_calls"] + 3,
+        }
     except Exception as e:
         logfire.warning("ui_validate_failed", error=str(e), url=app_url)
-        return {}
+        return {"total_tool_calls": state["total_tool_calls"] + 1}
 
 
 async def open_pr_node(state: RalphState) -> dict[str, Any]:
@@ -336,7 +339,7 @@ async def merge_node(state: RalphState) -> dict[str, Any]:
             "status": "failed",
             "error_log": state["error_log"] + [f"Merge failed: {result.error}"],
         }
-    return {"status": "done"}
+    return {"status": "done", "total_tool_calls": state["total_tool_calls"] + 1}
 
 
 async def human_checkpoint(state: RalphState) -> dict[str, Any]:
@@ -347,7 +350,7 @@ async def human_checkpoint(state: RalphState) -> dict[str, Any]:
         error_log=state["error_log"],
         status=state["status"],
     )
-    return {"status": "escalated"}
+    return {"status": "escalated", "total_tool_calls": state["total_tool_calls"]}
 
 
 def build_ralph_graph() -> StateGraph:
