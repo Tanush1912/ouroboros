@@ -37,7 +37,7 @@ def _collect_domains() -> list[str]:
 
 async def entropy_scan_node(state: GCState) -> dict:
     """Run all linters and collect a comprehensive scan report."""
-    lint_result = run_lint.fn(".")
+    lint_result = run_lint.fn(".")  # sync tool (subprocess.run); .fn() is correct
     violations_text = (
         "\n".join(lint_result.violations) if lint_result.violations else "No violations"
     )

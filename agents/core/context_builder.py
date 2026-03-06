@@ -209,6 +209,8 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
     available_tools = [
         ToolSummary(name=t.name, description=t.description, category=t.category) for t in all_tools
     ]
+    tools_token_cost = sum(_estimate_tokens(t.name + t.description) for t in available_tools)
+    budget -= tools_token_cost
 
     return TaskContext(
         task=task,
