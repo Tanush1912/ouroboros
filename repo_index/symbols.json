@@ -344,6 +344,31 @@
     "line": 45,
     "kind": "function"
   },
+  "_PORT": {
+    "file": "agents/server.py",
+    "line": 6,
+    "kind": "constant"
+  },
+  "_HealthHandler": {
+    "file": "agents/server.py",
+    "line": 9,
+    "kind": "class"
+  },
+  "main": {
+    "file": "agents/server.py",
+    "line": 25,
+    "kind": "function"
+  },
+  "do_GET": {
+    "file": "agents/server.py",
+    "line": 10,
+    "kind": "function"
+  },
+  "log_message": {
+    "file": "agents/server.py",
+    "line": 21,
+    "kind": "function"
+  },
   "run_benchmark": {
     "file": "agents/tools/benchmark.py",
     "line": 15,
@@ -857,11 +882,6 @@
   "run_arch_lint": {
     "file": "lint/arch_lint.py",
     "line": 113,
-    "kind": "function"
-  },
-  "main": {
-    "file": "lint/arch_lint.py",
-    "line": 128,
     "kind": "function"
   },
   "_COMMON_NON_SYMBOLS": {
