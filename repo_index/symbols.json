@@ -1,4 +1,54 @@
 {
+  "run": {
+    "file": "agents/cli.py",
+    "line": 24,
+    "kind": "function"
+  },
+  "gc": {
+    "file": "agents/cli.py",
+    "line": 65,
+    "kind": "function"
+  },
+  "main": {
+    "file": "agents/cli.py",
+    "line": 99,
+    "kind": "function"
+  },
+  "_load_dotenv": {
+    "file": "agents/core/bootstrap.py",
+    "line": 15,
+    "kind": "function"
+  },
+  "BootstrapError": {
+    "file": "agents/core/bootstrap.py",
+    "line": 31,
+    "kind": "class"
+  },
+  "_check_required_env": {
+    "file": "agents/core/bootstrap.py",
+    "line": 39,
+    "kind": "function"
+  },
+  "_check_gh_cli": {
+    "file": "agents/core/bootstrap.py",
+    "line": 49,
+    "kind": "function"
+  },
+  "bootstrap": {
+    "file": "agents/core/bootstrap.py",
+    "line": 61,
+    "kind": "function"
+  },
+  "_print_banner": {
+    "file": "agents/core/bootstrap.py",
+    "line": 111,
+    "kind": "function"
+  },
+  "__init__": {
+    "file": "agents/core/bootstrap.py",
+    "line": 34,
+    "kind": "function"
+  },
   "GCP_PROJECT": {
     "file": "agents/core/config.py",
     "line": 12,
@@ -274,11 +324,6 @@
     "line": 48,
     "kind": "constant"
   },
-  "__init__": {
-    "file": "agents/models/registry.py",
-    "line": 29,
-    "kind": "function"
-  },
   "register": {
     "file": "agents/models/registry.py",
     "line": 32,
@@ -353,11 +398,6 @@
     "file": "agents/server.py",
     "line": 9,
     "kind": "class"
-  },
-  "main": {
-    "file": "agents/server.py",
-    "line": 25,
-    "kind": "function"
   },
   "do_GET": {
     "file": "agents/server.py",
