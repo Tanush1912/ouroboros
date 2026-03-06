@@ -1,0 +1,77 @@
+name: Run Agent Task
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Natural language task description"
+        required: true
+        type: string
+      no_gh:
+        description: "Skip GitHub CLI requirement"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run-task:
+    name: Run Task
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build repo index
+        run: uv run python repo_index/build_index.py
+
+      - name: Run agent task
+        id: run
+        run: |
+          set +e
+          output=$(uv run ouroboros run "${{ inputs.task }}" ${{ inputs.no_gh && '--no-gh' || '' }} 2>&1)
+          exit_code=$?
+          echo "$output"
+          {
+            echo "output<<OUROBOROS_EOF"
+            echo "$output"
+            echo "OUROBOROS_EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          exit $exit_code
+        env:
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+          GCP_LOCATION: ${{ vars.GCP_LOCATION || 'us-central1' }}
+          OUROBOROS_MODEL: ${{ vars.OUROBOROS_MODEL || 'gemini-3.0-flash-preview' }}
+          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post workflow summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Agent Task Result
+
+          **Task:** ${{ inputs.task }}
+          **Exit code:** ${{ steps.run.outputs.exit_code }}
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+          EOF
