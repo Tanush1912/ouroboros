@@ -228,6 +228,19 @@ class PushResult(BaseModel):
     error: str = Field(default="")
 
 
+class _PRMetadataSchema(BaseModel):
+    """Raw GitHub API response schema for PR metadata (GP-004 boundary validation)."""
+
+    model_config = {"populate_by_name": True}
+
+    title: str
+    body: str = ""
+    head_ref_name: str = Field(alias="headRefName")
+    base_ref_name: str = Field(default="main", alias="baseRefName")
+    labels: list[dict[str, object]] = Field(default_factory=list)
+    author: dict[str, object] = Field(default_factory=dict)
+
+
 def get_pr_metadata(pr_number: int) -> PRMetadata:
     """Fetch PR title, body, branch, labels, and author via gh CLI."""
     rc, out, err = _run(
@@ -242,14 +255,14 @@ def get_pr_metadata(pr_number: int) -> PRMetadata:
     )
     if rc != 0:
         raise RuntimeError(f"gh pr view failed: {err}")
-    data = json.loads(out)
+    raw = _PRMetadataSchema.model_validate_json(out)
     return PRMetadata(
-        title=data["title"],
-        body=data.get("body", ""),
-        branch=data["headRefName"],
-        base=data.get("baseRefName", "main"),
-        labels=[lb["name"] for lb in data.get("labels", [])],
-        author=data.get("author", {}).get("login", ""),
+        title=raw.title,
+        body=raw.body,
+        branch=raw.head_ref_name,
+        base=raw.base_ref_name,
+        labels=[str(lb.get("name", "")) for lb in raw.labels],
+        author=str(raw.author.get("login", "")),
     )
 
 
