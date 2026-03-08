@@ -15,6 +15,10 @@
   <em>The system that manages and improves itself.</em>
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/%F0%9F%9A%A7_Under_Construction-Work_in_Progress-orange?style=for-the-badge" alt="Under Construction"/>
+</p>
+
 ---
 
 Ouroboros is an agent-first software engineering system.
@@ -149,36 +153,33 @@ Traditional software development is a loop: **plan → write → test → review
 
 Ouroboros uses a strict layered architecture enforced by AST-based linting. Each layer can only import from layers below it:
 
-```mermaid
-block-beta
-    columns 1
-    block:workflows["WORKFLOWS — LangGraph state machines"]
-        w1["ralph_loop.py"] w2["entropy_gc.py"] w3["reviewer_loop.py"]
-    end
-    space
-    block:workers["WORKERS — PydanticAI agents"]
-        a1["planner.py"] a2["implementer.py"] a3["reviewer.py"] a4["validator.py"] a5["cleaner.py"]
-    end
-    space
-    block:tools["TOOLS — @tool functions + ToolRegistry"]
-        t1["fs.py"] t2["shell.py"] t3["git.py"] t4["browser.py"] t5["observability.py"]
-    end
-    space
-    block:core["CORE — Guards, state, context builder"]
-        c1["guards.py"] c2["state.py"] c3["context_builder.py"] c4["config.py"]
-    end
-    space
-    block:models["MODELS — Pure Pydantic types (zero dependencies)"]
-        m1["PlanOutput"] m2["ImplementOutput"] m3["ReviewOutput"] m4["ValidationOutput"] m5["CostSummary"]
-    end
-
-    workflows --> workers --> tools --> core --> models
-
-    style workflows fill:#4a9eff,color:#fff
-    style workers fill:#7c5cbf,color:#fff
-    style tools fill:#2e8b57,color:#fff
-    style core fill:#d4a017,color:#fff
-    style models fill:#c0392b,color:#fff
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  WORKFLOWS — LangGraph state machines                          │
+│  ralph_loop.py · feedback_loop.py · entropy_gc.py              │
+└──────────────────────────────┬──────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  WORKERS — PydanticAI agents                                   │
+│  planner · implementer · reviewer · validator · cleaner        │
+│  post_mortem                                                   │
+└──────────────────────────────┬──────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOOLS — @tool functions + ToolRegistry                        │
+│  fs · shell · git · browser · observability · benchmark        │
+└──────────────────────────────┬──────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  CORE — Guards, state, context builder                         │
+│  guards · state · context_builder · config · paths             │
+└──────────────────────────────┬──────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  MODELS — Pure Pydantic types (zero dependencies)              │
+│  PlanOutput · ImplementOutput · ReviewOutput · ValidationOutput│
+│  CostSummary · HarnessImprovementOutput · ReproductionResult   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 **Enforced invariants:**
@@ -1127,29 +1128,14 @@ uv run ruff format --check .
 
 ### On Every PR (`ci.yml`)
 
-```mermaid
-flowchart LR
-    subgraph ci["CI — Every PR"]
-        direction TB
-        lint["Lint Job\nruff check\nruff format --check\nArchitecture lint\nGolden lint"]
-        test["Test Job\nBuild repo index\nLint tests 17\nAgent eval tests 47\nwith mocked GCP"]
-    end
-
-    subgraph merge["On Merge to Main"]
-        idx["Index Job\nRebuild symbols.json\nRebuild file_map.json\nAuto-commit"]
-    end
-
-    subgraph gc["Daily @ 6am UTC"]
-        entropy["Entropy GC Job\nBuild repo index\nRun entropy scan\nAnalyze violations\nOpen cleanup PRs\nUpdate QUALITY_SCORE.md"]
-    end
-
-    subgraph triggers["Event-Driven"]
-        direction TB
-        issue["Issue Comment\n/run-task → agent run"]
-        feedback["PR Review\nchanges_requested → feedback loop"]
-        harness["Harness Issue\nharness-improvement label\n→ auto-fix agent run"]
-    end
-```
+| Trigger | Workflow | What it does |
+|---------|----------|-------------|
+| **Every PR** | `ci.yml` | Lint (ruff + arch_lint + golden_lint) and test (17 lint + 47 agent eval) |
+| **Merge to main** | `ci.yml` | Rebuild `symbols.json` + `file_map.json`, auto-commit |
+| **Daily @ 6am UTC** | `entropy_gc.yml` | Entropy scan → analyze violations → open cleanup PRs → update QUALITY_SCORE.md |
+| **Issue comment `/run-task`** | `issue-trigger.yml` | Parse task from issue, run agent in worktree |
+| **PR review `changes_requested`** | `pr-feedback.yml` | Run feedback loop to address review comments |
+| **`harness-improvement` label** | `harness-fix.yml` | Agent picks up self-improvement issue, opens fix PR |
 
 ---
 
