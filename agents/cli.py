@@ -27,12 +27,67 @@ app = typer.Typer(
 console = Console(stderr=True)
 
 _BRANCH_PREFIX = "ouroboros/task-"
+_SANDBOX_COMPOSE = "harness/sandbox/docker-compose.yml"
+_WORKTREE_COMPOSE = "harness/sandbox/docker-compose.worktree.yml"
 
 
 def _task_branch_name(task: str) -> str:
     """Generate a unique branch name from a task string."""
     short_hash = hashlib.sha256(f"{task}{time.time()}".encode()).hexdigest()[:8]
     return f"{_BRANCH_PREFIX}{short_hash}"
+
+
+def _compute_port_offset(name: str) -> int:
+    """Deterministic port offset (100-999) from a worktree name hash."""
+    return int(hashlib.sha256(name.encode()).hexdigest()[:4], 16) % 900 + 100
+
+
+def _set_worktree_env(name: str, port_offset: int) -> dict[str, str]:
+    """Set environment variables for a per-worktree app instance. Returns the env dict."""
+    env = {
+        "WORKTREE_NAME": name,
+        "APP_PORT": str(8000 + port_offset),
+        "VECTOR_PORT": str(9001 + port_offset),
+        "VICTORIA_LOGS_PORT": str(9428 + port_offset),
+        "VICTORIA_METRICS_PORT": str(8428 + port_offset),
+        "APP_URL": f"http://localhost:{8000 + port_offset}",
+        "VICTORIA_LOGS_URL": f"http://localhost:{9428 + port_offset}",
+        "VICTORIA_METRICS_URL": f"http://localhost:{8428 + port_offset}",
+    }
+    for key, value in env.items():
+        os.environ[key] = value
+    return env
+
+
+def _start_worktree_app(worktree_path: Path, name: str) -> bool:
+    """Start the Docker Compose stack for a worktree. Returns True on success."""
+    compose_base = worktree_path / _SANDBOX_COMPOSE
+    compose_override = worktree_path / _WORKTREE_COMPOSE
+    if not compose_base.exists():
+        return False
+
+    cmd = ["docker", "compose", "-f", str(compose_base)]
+    if compose_override.exists():
+        cmd.extend(["-f", str(compose_override)])
+    cmd.extend(["up", "-d", "--wait"])
+
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=worktree_path)
+    return result.returncode == 0
+
+
+def _stop_worktree_app(worktree_path: Path, name: str) -> None:
+    """Stop and remove the Docker Compose stack for a worktree."""
+    compose_base = worktree_path / _SANDBOX_COMPOSE
+    compose_override = worktree_path / _WORKTREE_COMPOSE
+    if not compose_base.exists():
+        return
+
+    cmd = ["docker", "compose", "-f", str(compose_base)]
+    if compose_override.exists():
+        cmd.extend(["-f", str(compose_override)])
+    cmd.extend(["down", "-v"])
+
+    subprocess.run(cmd, capture_output=True, text=True, cwd=worktree_path)
 
 
 def _create_worktree(branch: str) -> Path:
@@ -81,9 +136,16 @@ def run(
     worktree: bool = typer.Option(
         False, "--worktree", "-w", help="Run in an isolated git worktree"
     ),
+    with_app: bool = typer.Option(
+        False, "--with-app", help="Boot a per-worktree app instance (requires --worktree)"
+    ),
 ) -> None:
     """Run the Ralph Loop — plan, implement, validate, review, merge."""
     from agents.core.bootstrap import BootstrapError, bootstrap
+
+    if with_app and not worktree:
+        console.print("[red]--with-app requires --worktree[/red]")
+        raise typer.Exit(1)
 
     try:
         bootstrap(require_gh=not no_gh, quiet=quiet)
@@ -95,6 +157,7 @@ def run(
     branch: str | None = None
     original_dir = os.getcwd()
     final_state: dict | None = None
+    app_started = False
 
     if worktree:
         branch = _task_branch_name(task)
@@ -106,6 +169,23 @@ def run(
         os.chdir(worktree_path)
         console.print(f"[dim]worktree:[/dim] {worktree_path}")
         console.print(f"[dim]branch:[/dim]   {branch}")
+
+        if with_app:
+            wt_name = branch.replace("/", "-")
+            port_offset = _compute_port_offset(wt_name)
+            env = _set_worktree_env(wt_name, port_offset)
+            console.print(f"[dim]app_url:[/dim]  {env['APP_URL']}")
+            console.print(
+                f"[dim]ports:[/dim]    app={env['APP_PORT']} "
+                f"vlogs={env['VICTORIA_LOGS_PORT']} "
+                f"vmetrics={env['VICTORIA_METRICS_PORT']}"
+            )
+            console.print("[dim]starting Docker stack...[/dim]")
+            app_started = _start_worktree_app(worktree_path, wt_name)
+            if not app_started:
+                console.print(
+                    "[yellow]Docker stack failed to start — continuing without app[/yellow]"
+                )
 
     try:
         from agents.workflows.ralph_loop import run_ralph_loop
@@ -137,6 +217,10 @@ def run(
     finally:
         if worktree_path:
             os.chdir(original_dir)
+            if app_started:
+                wt_name = branch.replace("/", "-")
+                console.print("[dim]stopping Docker stack...[/dim]")
+                _stop_worktree_app(worktree_path, wt_name)
             if final_state and final_state.get("status") in ("done", "merged"):
                 subprocess.run(
                     ["git", "-C", str(worktree_path), "push", "-u", "origin", branch],
