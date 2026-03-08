@@ -1,6 +1,7 @@
 """Planner worker — decomposes a task into typed execution steps.
 
 Returns PlanOutput with structured steps. No free-form text planning.
+Has interactive tool access to explore the repo before planning.
 """
 
 from pathlib import Path
@@ -12,6 +13,7 @@ from agents.core.config import get_model
 from agents.core.context_builder import TaskContext, build_context
 from agents.models.cost import TokenUsage
 from agents.models.planner import PlanOutput
+from agents.tools.fs import list_dir, read_file, search_repo, search_symbol
 
 SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "planner.txt").read_text()
 
@@ -25,6 +27,7 @@ def _get_agent() -> Agent[None, PlanOutput]:
             model=get_model(),
             result_type=PlanOutput,
             system_prompt=SYSTEM_PROMPT,
+            tools=[read_file, list_dir, search_repo, search_symbol],
             retries=3,
         )
     return _agent
@@ -32,8 +35,8 @@ def _get_agent() -> Agent[None, PlanOutput]:
 
 async def run_planner(
     task: str, context: TaskContext | None = None
-) -> tuple[PlanOutput, TokenUsage]:
-    """Run the planner agent. Returns (PlanOutput, TokenUsage) for cost tracking."""
+) -> tuple[PlanOutput, TokenUsage, int]:
+    """Run the planner agent. Returns (PlanOutput, TokenUsage, tool_call_count)."""
     if context is None:
         context = build_context(task)
 
@@ -45,6 +48,13 @@ async def run_planner(
             tokens_in=usage_data.request_tokens or 0,
             tokens_out=usage_data.response_tokens or 0,
         )
+        tool_calls = len(
+            [
+                m
+                for m in result.all_messages()
+                if hasattr(m, "parts") and any(hasattr(p, "tool_name") for p in m.parts)
+            ]
+        )
         logfire.info(
             "plan_created",
             task_summary=result.data.task_summary,
@@ -52,5 +62,6 @@ async def run_planner(
             risk_level=result.data.risk_level,
             tokens_in=token_usage.tokens_in,
             tokens_out=token_usage.tokens_out,
+            tool_calls=tool_calls,
         )
-        return result.data, token_usage
+        return result.data, token_usage, tool_calls
