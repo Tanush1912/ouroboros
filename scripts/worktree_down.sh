@@ -4,7 +4,8 @@
 # Usage: scripts/worktree_down.sh <worktree-name>
 # Example: scripts/worktree_down.sh feature-health-endpoint
 #
-# Stops Docker stack, removes volumes, removes git worktree.
+# Stops Docker stack (including per-worktree observability), removes volumes,
+# removes git worktree.
 
 set -euo pipefail
 
@@ -19,8 +20,14 @@ echo "Path: $WORKTREE_PATH"
 if [ -d "$WORKTREE_PATH" ]; then
     echo "Stopping Docker stack..."
     cd "$WORKTREE_PATH"
+
+    COMPOSE_CMD="docker compose -f harness/sandbox/docker-compose.yml"
+    if [ -f "harness/sandbox/docker-compose.worktree.yml" ]; then
+        COMPOSE_CMD="$COMPOSE_CMD -f harness/sandbox/docker-compose.worktree.yml"
+    fi
+
     WORKTREE_NAME="$WORKTREE_NAME" \
-        docker compose -f harness/sandbox/docker-compose.yml down -v 2>/dev/null || true
+        $COMPOSE_CMD down -v 2>/dev/null || true
 
     echo "Removing worktree..."
     cd "$REPO_ROOT"

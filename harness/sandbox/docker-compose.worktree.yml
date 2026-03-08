@@ -1,0 +1,41 @@
+version: "3.9"
+
+# Per-worktree observability override.
+# Adds isolated VictoriaLogs + VictoriaMetrics so each agent run
+# only sees its own logs/metrics.
+#
+# Usage (combined with base):
+#   docker compose -f docker-compose.yml -f docker-compose.worktree.yml up -d
+#
+# Requires env vars: WORKTREE_NAME, VICTORIA_LOGS_PORT, VICTORIA_METRICS_PORT
+
+services:
+  vector:
+    environment:
+      - VICTORIA_LOGS_URL=http://victoria-logs:9428
+    depends_on:
+      - victoria-logs
+
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v0.28.0-victorialogs
+    container_name: ouroboros-victoria-logs-${WORKTREE_NAME:-dev}
+    ports:
+      - "${VICTORIA_LOGS_PORT:-9428}:9428"
+    command:
+      - -storageDataPath=/victoria-logs-data
+      - -retentionPeriod=1d
+    restart: "no"
+
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.101.0
+    container_name: ouroboros-victoria-metrics-${WORKTREE_NAME:-dev}
+    ports:
+      - "${VICTORIA_METRICS_PORT:-8428}:8428"
+    command:
+      - -storageDataPath=/victoria-metrics-data
+      - -retentionPeriod=1d
+    restart: "no"
+
+networks:
+  default:
+    name: ouroboros-${WORKTREE_NAME:-dev}

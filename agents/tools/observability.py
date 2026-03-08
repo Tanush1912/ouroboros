@@ -2,6 +2,9 @@
 
 Agents can query their own observability stack. Requires the harness Docker stack running.
 VictoriaLogs at :9428 (LogQL), VictoriaMetrics at :8428 (PromQL).
+
+URLs are read at call time (not import time) so per-worktree env vars work
+when set after module import.
 """
 
 import os
@@ -10,8 +13,13 @@ import httpx
 from pydantic import BaseModel, Field
 from pydantic_ai import tool
 
-VICTORIA_LOGS_URL = os.environ.get("VICTORIA_LOGS_URL", "http://localhost:9428")
-VICTORIA_METRICS_URL = os.environ.get("VICTORIA_METRICS_URL", "http://localhost:8428")
+
+def _victoria_logs_url() -> str:
+    return os.environ.get("VICTORIA_LOGS_URL", "http://localhost:9428")
+
+
+def _victoria_metrics_url() -> str:
+    return os.environ.get("VICTORIA_METRICS_URL", "http://localhost:8428")
 
 
 class LogLine(BaseModel):
@@ -40,7 +48,7 @@ async def query_logs(logql: str, duration: str = "1h") -> list[LogLine]:
     """Query VictoriaLogs with LogQL. E.g. '{service="api"} |= "error"'"""
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{VICTORIA_LOGS_URL}/select/logsql/query",
+            f"{_victoria_logs_url()}/select/logsql/query",
             params={"query": logql, "duration": duration},
             timeout=30.0,
         )
@@ -60,7 +68,7 @@ async def query_metrics(promql: str, duration: str = "1h") -> MetricResult:
     """Query VictoriaMetrics with PromQL. E.g. 'rate(http_requests_total[5m])'"""
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{VICTORIA_METRICS_URL}/api/v1/query_range",
+            f"{_victoria_metrics_url()}/api/v1/query_range",
             params={"query": promql, "duration": duration},
             timeout=30.0,
         )
