@@ -43,6 +43,59 @@ class RalphState(TypedDict):
     perf_result: PerfComparisonResult | None
 
 
+class FeedbackState(TypedDict):
+    pr_number: int
+    pr_branch: str
+    original_task: str
+    feedback_comments: list[dict[str, object]]
+    files_changed: list[FileChange]
+    validation: ValidationOutput | None
+    iteration_count: int
+    total_tokens_in: int
+    total_tokens_out: int
+    estimated_cost_usd: float
+    cost_budget_usd: float
+    total_tool_calls: int
+    status: Literal[
+        "gathering",
+        "implementing",
+        "validating",
+        "pushing",
+        "replying",
+        "done",
+        "escalated",
+        "failed",
+    ]
+    error_log: list[str]
+    node_token_usage: dict[str, dict[str, int]]
+
+
+def initial_feedback_state(
+    pr_number: int,
+    pr_branch: str,
+    original_task: str,
+    feedback_comments: list[dict],
+) -> FeedbackState:
+    """Create a fresh initial state for a feedback loop run."""
+    return FeedbackState(
+        pr_number=pr_number,
+        pr_branch=pr_branch,
+        original_task=original_task,
+        feedback_comments=feedback_comments,
+        files_changed=[],
+        validation=None,
+        iteration_count=0,
+        total_tokens_in=0,
+        total_tokens_out=0,
+        estimated_cost_usd=0.0,
+        cost_budget_usd=2.0,
+        total_tool_calls=0,
+        status="gathering",
+        error_log=[],
+        node_token_usage={},
+    )
+
+
 def initial_state(task: str) -> RalphState:
     """Create a fresh initial state for a new Ralph Loop run."""
     return RalphState(

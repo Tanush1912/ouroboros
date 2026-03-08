@@ -181,6 +181,128 @@ def gc(
     )
 
 
+_MAX_FEEDBACK_ITERATIONS = 3
+
+
+@app.command()
+def feedback(
+    pr_number: int = typer.Argument(..., help="PR number to address feedback on"),
+    quiet: bool = typer.Option(False, "--quiet", "-q", help="Suppress startup banner"),
+) -> None:
+    """Address human review comments on an agent PR — implement fixes, push, reply."""
+    from agents.core.bootstrap import BootstrapError, bootstrap
+
+    try:
+        bootstrap(require_gh=True, quiet=quiet)
+    except BootstrapError as e:
+        console.print(f"[red]bootstrap failed:[/red] {e.message}")
+        raise typer.Exit(1) from None
+
+    from agents.tools.git import add_pr_label, get_pr_comments, get_pr_metadata
+
+    try:
+        meta = get_pr_metadata(pr_number)
+    except RuntimeError as e:
+        console.print(f"[red]Failed to fetch PR #{pr_number}:[/red] {e}")
+        raise typer.Exit(1) from None
+
+    if not meta.branch.startswith(_BRANCH_PREFIX):
+        console.print(
+            f"[red]PR #{pr_number} branch '{meta.branch}' is not an agent PR "
+            f"(expected prefix '{_BRANCH_PREFIX}').[/red]"
+        )
+        raise typer.Exit(1)
+
+    feedback_labels = [lb for lb in meta.labels if lb.startswith("feedback-iteration-")]
+    iteration_number = len(feedback_labels) + 1
+    if iteration_number > _MAX_FEEDBACK_ITERATIONS:
+        console.print(
+            f"[red]PR #{pr_number} has reached max feedback iterations "
+            f"({_MAX_FEEDBACK_ITERATIONS}). Escalate to a human.[/red]"
+        )
+        raise typer.Exit(1)
+
+    try:
+        comments = get_pr_comments.fn(pr_number)
+    except RuntimeError as e:
+        console.print(f"[red]Failed to fetch PR comments:[/red] {e}")
+        raise typer.Exit(1) from None
+
+    if not comments:
+        console.print(f"[yellow]No review comments found on PR #{pr_number}.[/yellow]")
+        raise typer.Exit(0)
+
+    comment_dicts = [c.model_dump() for c in comments]
+
+    task_section = meta.body.split("## Task\n", 1)
+    original_task = task_section[1].split("\n\n", 1)[0] if len(task_section) > 1 else meta.title
+
+    console.print(f"[dim]PR:[/dim]        #{pr_number} — {meta.title}")
+    console.print(f"[dim]branch:[/dim]    {meta.branch}")
+    console.print(f"[dim]comments:[/dim]  {len(comments)}")
+    console.print(f"[dim]iteration:[/dim] {iteration_number}/{_MAX_FEEDBACK_ITERATIONS}")
+
+    checkout_result = subprocess.run(
+        ["git", "checkout", meta.branch],
+        capture_output=True,
+        text=True,
+    )
+    if checkout_result.returncode != 0:
+        subprocess.run(
+            ["git", "fetch", "origin", meta.branch],
+            capture_output=True,
+            text=True,
+        )
+        checkout_result = subprocess.run(
+            ["git", "checkout", meta.branch],
+            capture_output=True,
+            text=True,
+        )
+        if checkout_result.returncode != 0:
+            console.print(
+                f"[red]Failed to checkout branch {meta.branch}:[/red] {checkout_result.stderr}"
+            )
+            raise typer.Exit(1)
+
+    subprocess.run(
+        ["git", "pull", "origin", meta.branch],
+        capture_output=True,
+        text=True,
+    )
+
+    from agents.workflows.feedback_loop import run_feedback_loop
+
+    start = time.monotonic()
+    final_state = asyncio.run(
+        run_feedback_loop(
+            pr_number=pr_number,
+            pr_branch=meta.branch,
+            original_task=original_task,
+            feedback_comments=comment_dicts,
+        )
+    )
+    elapsed = time.monotonic() - start
+
+    run_status = final_state["status"]
+    cost = final_state["estimated_cost_usd"]
+    tokens_in = final_state["total_tokens_in"]
+    tokens_out = final_state["total_tokens_out"]
+    iterations = final_state["iteration_count"]
+
+    console.print()
+    console.print(f"[bold]status:[/bold]     {run_status}")
+    console.print(f"[bold]cost:[/bold]       ${cost:.4f}")
+    console.print(f"[bold]tokens:[/bold]     {tokens_in:,} in / {tokens_out:,} out")
+    console.print(f"[bold]iterations:[/bold] {iterations}")
+    console.print(f"[bold]duration:[/bold]   {elapsed:.1f}s")
+
+    if run_status == "done":
+        add_pr_label(pr_number, f"feedback-iteration-{iteration_number}")
+
+    if run_status not in ("done",):
+        raise typer.Exit(1)
+
+
 @app.command()
 def status() -> None:
     """List active ouroboros worktrees and their branches."""
