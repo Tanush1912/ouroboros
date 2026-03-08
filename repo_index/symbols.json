@@ -29,14 +29,24 @@
     "line": 150,
     "kind": "function"
   },
+  "_MAX_FEEDBACK_ITERATIONS": {
+    "file": "agents/cli.py",
+    "line": 184,
+    "kind": "constant"
+  },
+  "feedback": {
+    "file": "agents/cli.py",
+    "line": 188,
+    "kind": "function"
+  },
   "status": {
     "file": "agents/cli.py",
-    "line": 185,
+    "line": 307,
     "kind": "function"
   },
   "main": {
     "file": "agents/cli.py",
-    "line": 226,
+    "line": 348,
     "kind": "function"
   },
   "_load_dotenv": {
@@ -244,9 +254,19 @@
     "line": 13,
     "kind": "class"
   },
-  "initial_state": {
+  "FeedbackState": {
     "file": "agents/core/state.py",
     "line": 46,
+    "kind": "class"
+  },
+  "initial_feedback_state": {
+    "file": "agents/core/state.py",
+    "line": 73,
+    "kind": "function"
+  },
+  "initial_state": {
+    "file": "agents/core/state.py",
+    "line": 99,
     "kind": "function"
   },
   "BenchmarkSampleResult": {
@@ -629,9 +649,44 @@
     "line": 186,
     "kind": "function"
   },
+  "PRMetadata": {
+    "file": "agents/tools/git.py",
+    "line": 217,
+    "kind": "class"
+  },
+  "PushResult": {
+    "file": "agents/tools/git.py",
+    "line": 226,
+    "kind": "class"
+  },
+  "_PRMetadataSchema": {
+    "file": "agents/tools/git.py",
+    "line": 231,
+    "kind": "class"
+  },
+  "get_pr_metadata": {
+    "file": "agents/tools/git.py",
+    "line": 244,
+    "kind": "function"
+  },
+  "reply_to_pr_comment": {
+    "file": "agents/tools/git.py",
+    "line": 269,
+    "kind": "function"
+  },
+  "add_pr_label": {
+    "file": "agents/tools/git.py",
+    "line": 285,
+    "kind": "function"
+  },
+  "push_to_remote": {
+    "file": "agents/tools/git.py",
+    "line": 291,
+    "kind": "function"
+  },
   "merge_pr": {
     "file": "agents/tools/git.py",
-    "line": 218,
+    "line": 300,
     "kind": "function"
   },
   "run_app_and_probe": {
@@ -829,9 +884,69 @@
     "line": 196,
     "kind": "function"
   },
+  "MAX_FEEDBACK_IMPLEMENT_ITERATIONS": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 29,
+    "kind": "constant"
+  },
+  "MAX_COST_USD": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 30,
+    "kind": "constant"
+  },
   "_accumulate_usage": {
-    "file": "agents/workflows/ralph_loop.py",
-    "line": 32,
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 33,
+    "kind": "function"
+  },
+  "_check_feedback_guard": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 49,
+    "kind": "function"
+  },
+  "_format_feedback_prompt": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 58,
+    "kind": "function"
+  },
+  "gather_feedback_node": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 81,
+    "kind": "function"
+  },
+  "implement_feedback_node": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 92,
+    "kind": "function"
+  },
+  "validate_feedback_node": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 136,
+    "kind": "function"
+  },
+  "route_after_validate": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 150,
+    "kind": "function"
+  },
+  "commit_push_node": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 163,
+    "kind": "function"
+  },
+  "reply_node": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 195,
+    "kind": "function"
+  },
+  "build_feedback_graph": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 216,
+    "kind": "function"
+  },
+  "run_feedback_loop": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 235,
     "kind": "function"
   },
   "plan_node": {
@@ -862,11 +977,6 @@
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
     "line": 173,
-    "kind": "function"
-  },
-  "route_after_validate": {
-    "file": "agents/workflows/ralph_loop.py",
-    "line": 186,
     "kind": "function"
   },
   "perf_validate_node": {

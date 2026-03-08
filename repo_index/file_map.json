@@ -17,22 +17,25 @@
     "domain": "agents",
     "layer": "agents",
     "imports": [
-      "hashlib",
-      "rich.console",
-      "os",
       "typer",
-      "rich.table",
-      "time",
-      "pathlib",
-      "agents.workflows.entropy_gc",
-      "agents.workflows.ralph_loop",
+      "asyncio",
+      "os",
       "agents.core.bootstrap",
       "subprocess",
-      "asyncio"
+      "agents.workflows.feedback_loop",
+      "rich.table",
+      "rich.console",
+      "agents.workflows.entropy_gc",
+      "pathlib",
+      "hashlib",
+      "agents.tools.git",
+      "time",
+      "agents.workflows.ralph_loop"
     ],
     "exports": [
       "run",
       "gc",
+      "feedback",
       "status",
       "main"
     ]
@@ -47,12 +50,12 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "sys",
-      "os",
       "shutil",
+      "os",
+      "subprocess",
       "agents.core.paths",
-      "agents.core.instrumentation",
-      "subprocess"
+      "sys",
+      "agents.core.instrumentation"
     ],
     "exports": [
       "BootstrapError",
@@ -63,9 +66,9 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "os",
+      "pydantic_ai.models.vertexai",
       "vertexai",
-      "pydantic_ai.models.vertexai"
+      "os"
     ],
     "exports": [
       "get_model"
@@ -92,10 +95,10 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "typing",
       "pydantic",
-      "logfire",
-      "agents.core.state"
+      "agents.core.state",
+      "typing",
+      "logfire"
     ],
     "exports": [
       "GuardResult",
@@ -107,8 +110,8 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "os",
-      "logfire"
+      "logfire",
+      "os"
     ],
     "exports": [
       "configure_logfire"
@@ -129,16 +132,18 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "agents.models.implementer",
-      "agents.models.reproducer",
-      "typing",
-      "agents.models.reviewer",
+      "agents.models.validator",
       "agents.models.planner",
+      "agents.models.reviewer",
+      "agents.models.reproducer",
+      "agents.models.implementer",
       "agents.models.benchmark",
-      "agents.models.validator"
+      "typing"
     ],
     "exports": [
       "RalphState",
+      "FeedbackState",
+      "initial_feedback_state",
       "initial_state"
     ]
   },
@@ -152,8 +157,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "BenchmarkSampleResult",
@@ -165,8 +170,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "EntropyViolation",
@@ -205,8 +210,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "FileChange",
@@ -217,8 +222,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "ExecutionStep",
@@ -229,8 +234,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "ToolCapability",
@@ -257,8 +262,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "ReviewComment",
@@ -269,8 +274,8 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "typing",
-      "pydantic"
+      "pydantic",
+      "typing"
     ],
     "exports": [
       "TestResult",
@@ -302,13 +307,13 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "json",
+      "agents.tools.shell",
       "pydantic_ai",
+      "json",
+      "agents.core.paths",
       "agents.models.benchmark",
       "time",
-      "agents.core.paths",
-      "datetime",
-      "agents.tools.shell"
+      "datetime"
     ],
     "exports": [
       "run_benchmark",
@@ -319,11 +324,11 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "base64",
-      "typing",
       "pydantic_ai",
+      "pydantic",
+      "base64",
       "playwright.async_api",
-      "pydantic"
+      "typing"
     ],
     "exports": [
       "ScreenshotResult",
@@ -340,13 +345,13 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "json",
-      "repo_index.build_index",
       "pydantic_ai",
-      "pathlib",
-      "agents.core.paths",
+      "pydantic",
       "subprocess",
-      "pydantic"
+      "repo_index.build_index",
+      "json",
+      "agents.core.paths",
+      "pathlib"
     ],
     "exports": [
       "WriteResult",
@@ -364,14 +369,14 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "json",
-      "contextlib",
-      "typing",
       "pydantic_ai",
-      "agents.core.paths",
       "subprocess",
       "pydantic",
-      "functools"
+      "functools",
+      "json",
+      "agents.core.paths",
+      "typing",
+      "contextlib"
     ],
     "exports": [
       "GitStatus",
@@ -384,6 +389,12 @@
       "open_pr",
       "get_pr_diff",
       "get_pr_comments",
+      "PRMetadata",
+      "PushResult",
+      "get_pr_metadata",
+      "reply_to_pr_comment",
+      "add_pr_label",
+      "push_to_remote",
       "merge_pr"
     ]
   },
@@ -391,15 +402,15 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "tenacity",
-      "os",
       "shutil",
-      "pydantic_ai",
-      "time",
-      "agents.models.harness",
-      "agents.core.paths",
       "httpx",
-      "subprocess"
+      "pydantic_ai",
+      "os",
+      "subprocess",
+      "tenacity",
+      "agents.core.paths",
+      "time",
+      "agents.models.harness"
     ],
     "exports": [
       "run_app_and_probe",
@@ -410,10 +421,10 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "os",
-      "pydantic_ai",
+      "pydantic",
       "httpx",
-      "pydantic"
+      "os",
+      "pydantic_ai"
     ],
     "exports": [
       "LogLine",
@@ -436,15 +447,15 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "shlex",
-      "agents.models.reproducer",
-      "pydantic_ai",
-      "time",
-      "pathlib",
-      "agents.core.paths",
       "agents.models.validator",
+      "pydantic_ai",
       "subprocess",
-      "pydantic"
+      "shlex",
+      "pydantic",
+      "agents.models.reproducer",
+      "agents.core.paths",
+      "pathlib",
+      "time"
     ],
     "exports": [
       "BuildResult",
@@ -468,10 +479,10 @@
     "layer": "workers",
     "imports": [
       "agents.models.cost",
-      "pydantic_ai",
       "agents.models.cleaner",
-      "logfire",
+      "pydantic_ai",
       "agents.core.config",
+      "logfire",
       "pathlib"
     ],
     "exports": [
@@ -482,16 +493,16 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "agents.models.implementer",
-      "agents.models.reproducer",
       "agents.models.cost",
+      "agents.models.validator",
+      "agents.tools.fs",
       "pydantic_ai",
-      "logfire",
       "agents.core.config",
       "agents.models.planner",
+      "logfire",
+      "agents.models.implementer",
+      "agents.models.reproducer",
       "pathlib",
-      "agents.tools.fs",
-      "agents.models.validator",
       "agents.core.context_builder"
     ],
     "exports": [
@@ -503,12 +514,12 @@
     "layer": "workers",
     "imports": [
       "agents.models.cost",
+      "agents.tools.fs",
       "pydantic_ai",
-      "logfire",
       "agents.core.config",
       "agents.models.planner",
+      "logfire",
       "pathlib",
-      "agents.tools.fs",
       "agents.core.context_builder"
     ],
     "exports": [
@@ -519,13 +530,13 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "agents.tools.git",
       "agents.models.cost",
       "pydantic_ai",
+      "agents.core.config",
       "agents.models.reviewer",
       "logfire",
-      "agents.core.config",
-      "pathlib"
+      "pathlib",
+      "agents.tools.git"
     ],
     "exports": [
       "run_reviewer"
@@ -535,8 +546,8 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "agents.models.validator",
       "agents.tools.shell",
+      "agents.models.validator",
       "logfire"
     ],
     "exports": [
@@ -553,17 +564,17 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.tools.git",
-      "typing",
-      "langgraph.graph",
-      "agents.workers.cleaner",
+      "agents.tools.shell",
       "agents.models.cleaner",
+      "asyncio",
+      "langgraph.graph",
       "logfire",
       "agents.core.paths",
-      "datetime",
       "sys",
-      "agents.tools.shell",
-      "asyncio"
+      "agents.tools.git",
+      "agents.workers.cleaner",
+      "typing",
+      "datetime"
     ],
     "exports": [
       "GCState",
@@ -576,31 +587,59 @@
       "run_entropy_gc"
     ]
   },
+  "agents/workflows/feedback_loop.py": {
+    "domain": "agents",
+    "layer": "workflows",
+    "imports": [
+      "agents.models.cost",
+      "agents.workers.planner",
+      "langgraph.graph",
+      "logfire",
+      "agents.workers.implementer",
+      "agents.core.paths",
+      "agents.core.state",
+      "agents.core.context_builder",
+      "agents.tools.git",
+      "time",
+      "agents.workers.validator",
+      "typing"
+    ],
+    "exports": [
+      "gather_feedback_node",
+      "implement_feedback_node",
+      "validate_feedback_node",
+      "route_after_validate",
+      "commit_push_node",
+      "reply_node",
+      "build_feedback_graph",
+      "run_feedback_loop"
+    ]
+  },
   "agents/workflows/ralph_loop.py": {
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.models.reproducer",
-      "agents.core.guards",
-      "os",
-      "agents.models.benchmark",
+      "agents.tools.shell",
+      "logfire",
       "agents.tools.browser",
       "agents.core.paths",
-      "agents.tools.harness",
-      "agents.tools.git",
-      "agents.workers.validator",
-      "logfire",
       "time",
-      "agents.workers.reviewer",
+      "typing",
       "agents.models.cost",
       "langgraph.graph",
-      "agents.workers.implementer",
-      "agents.tools.shell",
-      "agents.core.context_builder",
       "agents.core.state",
-      "typing",
+      "agents.tools.harness",
+      "agents.models.reproducer",
+      "agents.tools.benchmark",
+      "agents.core.context_builder",
+      "agents.core.guards",
+      "agents.workers.reviewer",
+      "os",
       "agents.workers.planner",
-      "agents.tools.benchmark"
+      "agents.workers.implementer",
+      "agents.models.benchmark",
+      "agents.tools.git",
+      "agents.workers.validator"
     ],
     "exports": [
       "plan_node",
@@ -624,15 +663,15 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.core.guards",
-      "typing",
       "langgraph.graph",
-      "agents.models.reviewer",
       "agents.models.planner",
       "logfire",
+      "agents.models.reviewer",
       "agents.workers.implementer",
+      "agents.core.paths",
+      "agents.core.guards",
       "agents.workers.reviewer",
-      "agents.core.paths"
+      "typing"
     ],
     "exports": [
       "ReviewerState",
@@ -653,11 +692,11 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "lint.rules",
-      "pathlib",
-      "agents.core.paths",
       "ast",
-      "sys"
+      "agents.core.paths",
+      "pathlib",
+      "sys",
+      "lint.rules"
     ],
     "exports": [
       "check_file",
@@ -669,10 +708,10 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "json",
-      "pathlib",
-      "agents.core.paths",
       "re",
+      "json",
+      "agents.core.paths",
+      "pathlib",
       "sys"
     ],
     "exports": [
@@ -685,16 +724,16 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "lint.doc_lint",
-      "lint.rules",
       "os",
       "subprocess",
-      "pathlib",
-      "datetime",
-      "agents.core.paths",
-      "ast",
+      "lint.doc_lint",
       "re",
-      "sys"
+      "ast",
+      "agents.core.paths",
+      "pathlib",
+      "sys",
+      "lint.rules",
+      "datetime"
     ],
     "exports": [
       "check_gp001_duplicates",
@@ -725,12 +764,12 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "lint.doc_lint",
-      "sys",
-      "lint.arch_lint",
-      "agents.core.paths",
       "lint.golden_lint",
-      "subprocess"
+      "subprocess",
+      "lint.doc_lint",
+      "agents.core.paths",
+      "lint.arch_lint",
+      "sys"
     ],
     "exports": [
       "run_all",
@@ -748,8 +787,8 @@
     "layer": "repo_index",
     "imports": [
       "json",
-      "pathlib",
       "agents.core.paths",
+      "pathlib",
       "ast"
     ],
     "exports": [
@@ -791,14 +830,14 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "agents.models.implementer",
-      "pytest",
+      "agents.models.validator",
+      "unittest.mock",
       "agents.models.planner",
+      "pytest",
+      "agents.models.implementer",
       "textwrap",
       "pathlib",
-      "agents.models.validator",
-      "sys",
-      "unittest.mock"
+      "sys"
     ],
     "exports": [
       "tmp_repo",
@@ -813,13 +852,13 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "pytest",
       "agents.models.cleaner",
+      "unittest.mock",
+      "lint.golden_lint",
+      "pytest",
       "textwrap",
       "pathlib",
-      "lint.golden_lint",
-      "sys",
-      "unittest.mock"
+      "sys"
     ],
     "exports": [
       "tmp_repo_with_gp001",
@@ -837,12 +876,12 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "agents.models.implementer",
-      "pytest",
+      "unittest.mock",
       "agents.models.reviewer",
       "agents.models.planner",
-      "sys",
-      "unittest.mock"
+      "pytest",
+      "agents.models.implementer",
+      "sys"
     ],
     "exports": [
       "test_plan_output_for_feature_task",
@@ -915,13 +954,13 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
+      "agents.models.validator",
+      "unittest.mock",
       "types",
       "agents.models.reviewer",
-      "agents.models.validator",
-      "agents.workflows.ralph_loop",
+      "agents.core.state",
       "sys",
-      "unittest.mock",
-      "agents.core.state"
+      "agents.workflows.ralph_loop"
     ],
     "exports": [
       "test_graph_compiles",
@@ -963,8 +1002,8 @@
     "layer": "lint",
     "imports": [
       "lint.arch_lint",
-      "tests.lint.helpers",
-      "pathlib"
+      "pathlib",
+      "tests.lint.helpers"
     ],
     "exports": [
       "test_worker_cross_import_detected",
@@ -978,9 +1017,9 @@
     "domain": "tests",
     "layer": "lint",
     "imports": [
-      "lint.golden_lint",
+      "pathlib",
       "tests.lint.helpers",
-      "pathlib"
+      "lint.golden_lint"
     ],
     "exports": [
       "test_gp002_file_exceeds_500_lines",
