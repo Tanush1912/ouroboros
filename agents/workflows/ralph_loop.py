@@ -27,6 +27,7 @@ from agents.workers.implementer import run_implementer
 from agents.workers.planner import run_planner
 from agents.workers.reviewer import run_reviewer
 from agents.workers.validator import run_validator
+from agents.workflows.post_mortem import post_mortem_node
 
 
 def _accumulate_usage(state: RalphState, usage: TokenUsage, node_name: str) -> dict:
@@ -366,6 +367,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_node("review_loop_node", review_loop_node)
     graph.add_node("merge_node", merge_node)
     graph.add_node("human_checkpoint", human_checkpoint)
+    graph.add_node("post_mortem_node", post_mortem_node)
 
     graph.set_entry_point("plan_node")
     graph.add_conditional_edges("plan_node", route_after_plan)
@@ -377,7 +379,8 @@ def build_ralph_graph() -> StateGraph:
     graph.add_edge("open_pr_node", "review_loop_node")
     graph.add_conditional_edges("review_loop_node", route_after_review)
     graph.add_edge("merge_node", END)
-    graph.add_edge("human_checkpoint", END)
+    graph.add_edge("human_checkpoint", "post_mortem_node")
+    graph.add_edge("post_mortem_node", END)
 
     return graph
 

@@ -5,6 +5,7 @@ from typing import Literal, TypedDict
 from agents.models.benchmark import BenchmarkResult, PerfComparisonResult
 from agents.models.implementer import FileChange
 from agents.models.planner import PlanOutput
+from agents.models.post_mortem import HarnessImprovementOutput
 from agents.models.reproducer import ReproductionResult
 from agents.models.reviewer import ReviewOutput
 from agents.models.validator import ValidationOutput
@@ -41,6 +42,8 @@ class RalphState(TypedDict):
     reproduction_evidence: ReproductionResult | None
     perf_baseline: BenchmarkResult | None
     perf_result: PerfComparisonResult | None
+    post_mortem: HarnessImprovementOutput | None
+    improvement_issue_url: str | None
 
 
 class FeedbackState(TypedDict):
@@ -120,4 +123,6 @@ def initial_state(task: str) -> RalphState:
         reproduction_evidence=None,
         perf_baseline=None,
         perf_result=None,
+        post_mortem=None,
+        improvement_issue_url=None,
     )
