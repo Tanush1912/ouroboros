@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/orchestration-LangGraph-1C3C3C" alt="LangGraph"/>
   <img src="https://img.shields.io/badge/tracing-Logfire-FF6B35" alt="Logfire"/>
   <img src="https://img.shields.io/badge/package_manager-uv-DE5FE9" alt="uv"/>
-  <img src="https://img.shields.io/badge/tests-46_passing-brightgreen" alt="Tests"/>
+  <img src="https://img.shields.io/badge/tests-64_passing-brightgreen" alt="Tests"/>
 </p>
 
 <h1 align="center">Ouroboros</h1>
@@ -21,7 +21,7 @@ Ouroboros is an agent-first software engineering system.
 
 **Input:** natural language task | **Output:** merged pull request
 
-Five specialized agents — planner, implementer, validator, reviewer, cleaner — plan, write, test, review, and merge code autonomously inside a constrained architecture.
+Six specialized agents — planner, implementer, validator, reviewer, cleaner, post-mortem — plan, write, test, review, merge, and learn from failures autonomously inside a constrained architecture.
 
 ---
 
@@ -37,6 +37,9 @@ flowchart LR
         Validate -- "retry (max 5)" --> Implement
         Review -- "approved" --> Merge
         Review -- "not approved" --> Implement
+        Review -- "human feedback" --> Feedback["Feedback Loop"]
+        Feedback --> Implement
+        Validate -- "escalate" --> PostMortem["Post-Mortem\n→ self-improvement issue"]
     end
     Merge --> Done["Merged PR #42"]
 ```
@@ -62,12 +65,18 @@ flowchart LR
 
 | Done | Upcoming |
 |------|----------|
-| Core workflow (plan → implement → validate → review → merge) | Full sandbox execution |
-| Architecture linting with AGENT_REMEDIATION | Live agent integration tests with Vertex AI |
-| 10 Golden Principles with machine-checkable lint | Larger repo benchmarks |
-| Repository index (189 symbols, 47 files) | Screenshot diff tool for UI validation |
-| Per-node token tracking and cost metrics | Prompt tuning from Logfire trace data |
-| 46 tests passing (no GCP credentials required) | End-to-end Ralph Loop on real tasks |
+| Core workflow (plan → implement → validate → review → merge) | Live agent integration tests with Vertex AI |
+| Architecture linting with AGENT_REMEDIATION | Larger repo benchmarks |
+| 10 Golden Principles with machine-checkable lint | Screenshot diff tool for UI validation |
+| Repository index (189 symbols, 47 files) | Prompt tuning from Logfire trace data |
+| Per-node token tracking and cost metrics | End-to-end Ralph Loop on real tasks |
+| 64 tests passing (no GCP credentials required) | |
+| Parallel sandbox execution via isolated git worktrees | |
+| GitHub issue comment trigger (`/run-task`) | |
+| PR feedback loop — agents address human review comments | |
+| Struggle-driven self-improvement (post-mortem → auto-fix) | |
+| Per-worktree app booting with isolated observability | |
+| CLI interface (`ouroboros run`, `feedback`, `gc`, `status`) | |
 
 ---
 
@@ -82,12 +91,16 @@ flowchart LR
 - [Tool System](#tool-system)
 - [Guard Rails](#guard-rails)
 - [Cost Awareness](#cost-awareness)
+- [PR Feedback Loop](#pr-feedback-loop)
+- [Struggle-Driven Self-Improvement](#struggle-driven-self-improvement)
 - [Entropy Management & GC](#entropy-management--garbage-collection)
 - [Repository Index](#repository-index)
 - [Context Builder](#context-builder)
 - [Lint Framework](#lint-framework)
 - [Observability](#observability)
 - [Infrastructure & Sandboxing](#infrastructure--sandboxing)
+- [Per-Worktree App Booting](#per-worktree-app-booting)
+- [CLI](#cli)
 - [Test Suite](#test-suite)
 - [Core Beliefs](#core-beliefs)
 - [Tech Stack](#tech-stack)
@@ -186,7 +199,11 @@ flowchart TD
     START(["START"]) --> plan_node
 
     plan_node["plan_node\nPlannerAgent → PlanOutput"]
-    plan_node --> implement_node
+    plan_node --> route_plan{{"bug-fix task?"}}
+
+    route_plan -- "yes" --> reproduce_node["reproduce_node\nRun pytest, capture traceback"]
+    route_plan -- "no" --> implement_node
+    reproduce_node --> implement_node
 
     implement_node["implement_node\nImplementerAgent → ImplementOutput\nwrites FileChange[] to disk"]
     implement_node --> validate_node
@@ -196,7 +213,10 @@ flowchart TD
 
     route_validate -- "retry (max 5)" --> implement_node
     route_validate -- "escalate" --> human_checkpoint["human_checkpoint\nEscalated to human"]
-    route_validate -- "proceed" --> ui_validate_node
+    route_validate -- "proceed" --> perf_validate_node
+
+    perf_validate_node["perf_validate_node\nBenchmark comparison"]
+    perf_validate_node --> ui_validate_node
 
     ui_validate_node["ui_validate_node\nOptional: Playwright screenshots"]
     ui_validate_node --> open_pr_node
@@ -213,14 +233,20 @@ flowchart TD
     merge_node["merge_node\ngh pr merge --squash"]
     merge_node --> DONE(["DONE"])
 
+    human_checkpoint --> post_mortem_node["post_mortem_node\nAnalyze failure → create\nharness-improvement issue"]
+    post_mortem_node --> DONE
+
     style plan_node fill:#4a9eff,color:#fff
+    style reproduce_node fill:#9b59b6,color:#fff
     style implement_node fill:#7c5cbf,color:#fff
     style validate_node fill:#2e8b57,color:#fff
+    style perf_validate_node fill:#1abc9c,color:#fff
     style ui_validate_node fill:#17a2b8,color:#fff
     style open_pr_node fill:#d4a017,color:#fff
     style review_loop_node fill:#e67e22,color:#fff
     style merge_node fill:#27ae60,color:#fff
     style human_checkpoint fill:#c0392b,color:#fff
+    style post_mortem_node fill:#e74c3c,color:#fff
 ```
 
 **Conditional routing** is driven entirely by typed model fields — no string matching:
@@ -239,7 +265,7 @@ result = await run_ralph_loop("Fix the off-by-one error in utils/counter.py")
 
 ## Agent Workers
 
-Five specialized workers, each returning typed Pydantic models:
+Six specialized workers, each returning typed Pydantic models:
 
 | Worker | Input | Output | Uses LLM? |
 |--------|-------|--------|-----------|
@@ -248,6 +274,7 @@ Five specialized workers, each returning typed Pydantic models:
 | **Reviewer** | PR diff + task context | `ReviewOutput` (approved, comments, blocking issues) | Yes |
 | **Validator** | (runs tools directly) | `ValidationOutput` (test/lint results, next_action) | **No** |
 | **Cleaner** | Scan report + domains | `CleanupOutput` (violations, quality scores, PR recs) | Yes |
+| **Post-Mortem** | Task + error_log + iteration count | `HarnessImprovementOutput` (failure category, root cause, suggested fix) | Yes |
 
 **The Validator is deliberately deterministic** — it runs `pytest` and lint tools, then calls a pure function (`determine_next_action()`) to decide the next step. No LLM call, no ambiguity.
 
@@ -337,6 +364,11 @@ All agent capabilities are registered in a `ToolRegistry` singleton. The planner
 | | `get_pr_diff(pr_number)` | Fetch PR diff |
 | | `get_pr_comments(pr_number)` | Fetch review comments |
 | | `merge_pr(pr_number, strategy)` | Merge PR (squash/merge) |
+| | `get_pr_metadata(pr_number)` | Fetch PR branch, title, body, labels |
+| | `reply_to_pr_comment(pr_number, comment_id, body)` | Reply to a review comment |
+| | `add_pr_label(pr_number, label)` | Add a label to a PR |
+| | `push_to_remote(branch)` | Push branch to origin |
+| | `create_issue(title, body, labels)` | Create a GitHub issue |
 | **browser** | `take_screenshot(url)` | Playwright screenshot (base64 PNG) |
 | | `snapshot_dom(url)` | Capture accessibility tree |
 | | `drive_ui_flow(url, steps)` | Execute UI action sequence |
@@ -414,6 +446,73 @@ class RunMetrics(BaseModel):
 | **TOTAL** | **10,400** | **4,100** | **$0.0087** |
 
 Cost data flows to Logfire, building a dataset of cost-per-PR-by-task-type for regression tracking.
+
+---
+
+## PR Feedback Loop
+
+When a human reviewer requests changes on an agent PR, the feedback loop workflow (`agents/workflows/feedback_loop.py`) autonomously addresses the comments:
+
+```mermaid
+flowchart TD
+    START(["PR Review: changes_requested"]) --> gather
+    gather["gather_feedback_node\nCollect review comments"]
+    gather --> implement
+    implement["implement_feedback_node\nPlanner + Implementer address comments"]
+    implement --> validate
+    validate["validate_feedback_node\npytest + ruff + arch_lint"]
+    validate --> route{{"next_action?"}}
+    route -- "retry (max 5)" --> implement
+    route -- "proceed" --> push["commit_push_node\nCommit + push to PR branch"]
+    route -- "escalate" --> END_ESC(["ESCALATED"])
+    push --> reply["reply_node\nReply to each review comment"]
+    reply --> DONE(["DONE"])
+
+    style gather fill:#4a9eff,color:#fff
+    style implement fill:#7c5cbf,color:#fff
+    style validate fill:#2e8b57,color:#fff
+    style push fill:#d4a017,color:#fff
+    style reply fill:#e67e22,color:#fff
+```
+
+**Triggers:**
+- `pull_request_review` event with `changes_requested` action
+- `/feedback` comment on an agent PR
+
+**Safety:** Max 3 feedback iterations per PR (tracked via `feedback-iteration-N` labels). After 3 rounds, the agent escalates to a human.
+
+```bash
+# CLI usage
+ouroboros feedback 42  # Address feedback on PR #42
+```
+
+---
+
+## Struggle-Driven Self-Improvement
+
+When the Ralph Loop escalates to a human (guard limits hit, repeated validation failures), the **post-mortem agent** analyzes the failure and creates a `harness-improvement` GitHub issue with a concrete fix suggestion:
+
+```mermaid
+flowchart LR
+    Failure["Agent escalates\n(hit guard limit)"] --> PostMortem["Post-Mortem Agent\nAnalyze failure"]
+    PostMortem --> Issue["GitHub Issue\nlabel: harness-improvement"]
+    Issue --> Agent["Agent picks up issue\n(harness-fix.yml)"]
+    Agent --> PR["PR to fix\nthe harness itself"]
+
+    style PostMortem fill:#e74c3c,color:#fff
+    style Issue fill:#d4a017,color:#fff
+    style Agent fill:#7c5cbf,color:#fff
+```
+
+The post-mortem agent categorizes failures into:
+- `missing_tool` — agent needed a capability that doesn't exist
+- `bad_prompt` — system prompt led to incorrect behavior
+- `insufficient_context` — context builder didn't provide enough info
+- `guard_limit` — legitimate task exceeded hard limits
+- `validation_loop` — stuck in implement/validate cycle
+- `external_dependency` — external service failure
+
+Each category maps to a priority and a suggested fix targeting specific files in the harness.
 
 ---
 
@@ -635,15 +734,78 @@ Worktrees get isolated Docker networks (`ouroboros-{name}`), unique port allocat
 
 ---
 
+## Per-Worktree App Booting
+
+Each isolated worktree can boot its own application and observability stack with automatically allocated ports. Port offsets are deterministically derived from the worktree name (`sha256(name) % 900 + 100`) to prevent collisions between parallel agent runs.
+
+```bash
+# Automatic port allocation from worktree name
+scripts/worktree_up.sh feature-login
+# App:             http://localhost:8247
+# VictoriaLogs:    http://localhost:9547
+# VictoriaMetrics: http://localhost:8647
+
+# CLI with --with-app flag for full Docker lifecycle
+ouroboros run --worktree --with-app "Fix the login form"
+```
+
+The `--with-app` flag in the CLI manages the full Docker lifecycle:
+1. Creates git worktree with unique branch
+2. Computes deterministic port offset
+3. Sets `APP_URL`, `VICTORIA_LOGS_URL`, `VICTORIA_METRICS_URL` env vars
+4. Starts Docker stack (`docker-compose.yml` + `docker-compose.worktree.yml`)
+5. Runs the Ralph Loop with full observability
+6. Tears down containers and worktree on completion
+
+The observability tools (`query_logs()`, `query_metrics()`) read endpoint URLs from environment variables at call time (not import time), so each worktree's agent queries its own isolated stack.
+
+---
+
+## CLI
+
+The `ouroboros` CLI (`agents/cli.py`) provides the primary interface for running agent workflows:
+
+```bash
+# Run the Ralph Loop on a task
+ouroboros run "Add a /health endpoint that returns 200"
+
+# Run in an isolated worktree with app booting
+ouroboros run --worktree --with-app "Fix the login form"
+
+# Address human review feedback on a PR
+ouroboros feedback 42
+
+# Run entropy GC (daily cleanup)
+ouroboros gc
+
+# Update quality scores only (no PRs)
+ouroboros gc --scores-only
+
+# List active agent worktrees
+ouroboros status
+```
+
+| Command | Description |
+|---------|-------------|
+| `ouroboros run <task>` | Run the Ralph Loop — plan, implement, validate, review, merge |
+| `ouroboros run --worktree <task>` | Run in an isolated git worktree |
+| `ouroboros run --worktree --with-app <task>` | Run with full Docker app + observability |
+| `ouroboros feedback <pr-number>` | Address review comments on an agent PR |
+| `ouroboros gc` | Run entropy GC — scan, cleanup, open PRs |
+| `ouroboros gc --scores-only` | Update quality scores without opening PRs |
+| `ouroboros status` | List active ouroboros worktrees |
+
+---
+
 ## Test Suite
 
-46 tests organized into two categories, all runnable without GCP credentials or `pydantic_ai` installed:
+64 tests organized into two categories, all runnable without GCP credentials or `pydantic_ai` installed:
 
 ### Lint Tests (`tests/lint/`)
 | Test File | Tests | Coverage |
 |-----------|-------|----------|
 | `test_arch_lint.py` | 5 | Worker cross-import, tool→worker import, clean files, remediation messages |
-| `test_golden_lint.py` | 11 | GP-001 through GP-006 (duplicates, file size, hand-rolled retry, validation, print, naming) |
+| `test_golden_lint.py` | 12 | GP-001 through GP-006 (duplicates, file size, hand-rolled retry, validation, print, naming) |
 
 ### Agent Eval Tests (`tests/agent_eval/`)
 | Test File | Tests | Coverage |
@@ -653,6 +815,9 @@ Worktrees get isolated Docker networks (`ouroboros-{name}`), unique port allocat
 | `test_bug_fix.py` | 5 | Model contracts for bug-fix workflow (PlanOutput, ImplementOutput, ValidationOutput) |
 | `test_feature_gen.py` | 5 | Model contracts for feature generation (plan, implement, review) |
 | `test_entropy_gc.py` | 8 | Entropy violation models, cleanup output, quality scoring, clustering |
+| `test_workflow_routing.py` | 8 | Reproduce node routing, feedback loop guards, post-mortem triggering |
+| `test_post_mortem.py` | 5 | Failure categorization, harness improvement output, issue creation |
+| `test_feedback_loop.py` | 4 | Feedback state transitions, comment reply logic, iteration tracking |
 
 **Design principle:** Deterministic logic (guards, validator routing, model contracts) is tested without an LLM. Probabilistic behavior (actual agent runs) uses mocks in CI and requires GCP credentials for integration testing.
 
@@ -722,7 +887,7 @@ project-ouroboros/
 ├── agents/
 │   ├── core/
 │   │   ├── config.py                # Vertex AI + Gemini model init
-│   │   ├── state.py                 # RalphState TypedDict
+│   │   ├── state.py                 # RalphState + FeedbackState TypedDicts
 │   │   ├── guards.py                # Hard iteration/cost limits
 │   │   ├── context_builder.py       # build_context() → TaskContext
 │   │   ├── paths.py                 # repo_root() utility
@@ -735,33 +900,42 @@ project-ouroboros/
 │   │   ├── validator.py             # ValidationOutput, TestResult, LintResult
 │   │   ├── cleaner.py               # CleanupOutput, EntropyViolation
 │   │   ├── cost.py                  # TokenUsage, CostSummary, RunMetrics
-│   │   └── registry.py              # ToolCapability, ToolRegistry
+│   │   ├── registry.py              # ToolCapability, ToolRegistry
+│   │   ├── post_mortem.py           # HarnessImprovementOutput, FailureCategory
+│   │   └── reproducer.py            # ReproductionResult, ErrorContext
 │   │
 │   ├── workers/                     # PydanticAI agent implementations
 │   │   ├── planner.py               # run_planner() → (PlanOutput, TokenUsage)
 │   │   ├── implementer.py           # run_implementer() → (ImplementOutput, TokenUsage)
 │   │   ├── reviewer.py              # run_reviewer() → (ReviewOutput, TokenUsage)
 │   │   ├── validator.py             # run_validator() → ValidationOutput (no LLM)
-│   │   └── cleaner.py               # run_cleaner() → (CleanupOutput, TokenUsage)
+│   │   ├── cleaner.py               # run_cleaner() → (CleanupOutput, TokenUsage)
+│   │   └── post_mortem.py           # run_post_mortem() → (HarnessImprovementOutput, TokenUsage)
 │   │
 │   ├── tools/                       # @tool functions + registry
 │   │   ├── registry.py              # REGISTRY singleton, all tools registered
 │   │   ├── fs.py                    # read_file, write_file, search_symbol
 │   │   ├── shell.py                 # run_tests, run_lint, run_build
-│   │   ├── git.py                   # git_status, commit, open_pr, merge_pr
+│   │   ├── git.py                   # git_status, commit, open_pr, merge_pr, get_pr_metadata, create_issue
 │   │   ├── browser.py               # take_screenshot, snapshot_dom
-│   │   └── observability.py         # query_logs, query_metrics
+│   │   ├── observability.py         # query_logs, query_metrics
+│   │   └── benchmark.py             # run_benchmark, compare_benchmarks
 │   │
 │   ├── workflows/                   # LangGraph state machines
 │   │   ├── ralph_loop.py            # Main PR lifecycle workflow
+│   │   ├── feedback_loop.py         # PR feedback loop workflow
+│   │   ├── post_mortem.py           # Struggle-driven self-improvement node
 │   │   ├── reviewer_loop.py         # Agent-to-agent review
 │   │   └── entropy_gc.py            # Daily entropy scan + cleanup PRs
 │   │
-│   └── prompts/                     # System prompt .txt files
-│       ├── planner.txt
-│       ├── implementer.txt
-│       ├── reviewer.txt
-│       └── cleaner.txt
+│   ├── prompts/                     # System prompt .txt files
+│   │   ├── planner.txt
+│   │   ├── implementer.txt
+│   │   ├── reviewer.txt
+│   │   ├── cleaner.txt
+│   │   └── post_mortem.txt
+│   │
+│   └── cli.py                       # ouroboros CLI (run, feedback, gc, status)
 │
 ├── lint/
 │   ├── arch_lint.py                 # AST-based layer dependency checker
@@ -784,13 +958,17 @@ project-ouroboros/
 │       ├── test_validator_logic.py
 │       ├── test_bug_fix.py
 │       ├── test_feature_gen.py
-│       └── test_entropy_gc.py
+│       ├── test_entropy_gc.py
+│       ├── test_workflow_routing.py
+│       ├── test_post_mortem.py
+│       └── test_feedback_loop.py
 │
 ├── harness/
 │   ├── observability/
 │   │   └── docker-compose.yml       # VictoriaLogs + VictoriaMetrics + Grafana
 │   └── sandbox/
-│       └── docker-compose.yml       # Per-worktree app isolation
+│       ├── docker-compose.yml       # Per-worktree app isolation
+│       └── docker-compose.worktree.yml  # Per-worktree observability override
 │
 ├── scripts/
 │   ├── worktree_up.sh               # Spin up isolated worktree env
@@ -806,7 +984,11 @@ project-ouroboros/
 │
 ├── .github/workflows/
 │   ├── ci.yml                       # Lint + tests on every PR
-│   └── entropy_gc.yml               # Daily entropy scan (6am UTC)
+│   ├── entropy_gc.yml               # Daily entropy scan (6am UTC)
+│   ├── issue-trigger.yml            # /run-task comment → agent run
+│   ├── run-task.yml                 # Reusable workflow for task execution
+│   ├── pr-feedback.yml              # PR review → feedback loop
+│   └── harness-fix.yml              # harness-improvement → auto-fix
 │
 └── pyproject.toml                   # uv + ruff + pytest config
 ```
@@ -848,7 +1030,28 @@ export GCP_PROJECT="your-gcp-project-id"
 export GCP_LOCATION="us-central1"        # optional, default
 export LOGFIRE_TOKEN="your-logfire-token" # optional, for tracing
 
-# Run a task through the Ralph Loop
+# Run a task through the Ralph Loop (CLI)
+ouroboros run "Add a /health endpoint that returns 200"
+
+# Run in an isolated worktree
+ouroboros run --worktree "Fix the login form validation"
+
+# Run with full app + observability stack
+ouroboros run --worktree --with-app "Fix the login form"
+
+# Address review feedback on a PR
+ouroboros feedback 42
+
+# Run entropy GC
+ouroboros gc
+
+# List active agent worktrees
+ouroboros status
+```
+
+Or programmatically:
+
+```bash
 uv run python -c "
 import asyncio
 from agents.workflows.ralph_loop import run_ralph_loop
@@ -904,6 +1107,10 @@ uv run ruff format --check .
 | `VICTORIA_LOGS_URL` | No | `http://localhost:9428` | VictoriaLogs endpoint |
 | `VICTORIA_METRICS_URL` | No | `http://localhost:8428` | VictoriaMetrics endpoint |
 | `APP_URL` | No | — | Application URL for browser validation |
+| `WORKTREE_NAME` | No | — | Current worktree name (set by CLI/scripts) |
+| `APP_PORT` | No | `8000` | Application port (offset for worktrees) |
+| `VICTORIA_LOGS_PORT` | No | `9428` | VictoriaLogs port (offset for worktrees) |
+| `VICTORIA_METRICS_PORT` | No | `8428` | VictoriaMetrics port (offset for worktrees) |
 
 ### Key Configuration Files
 
@@ -925,7 +1132,7 @@ flowchart LR
     subgraph ci["CI — Every PR"]
         direction TB
         lint["Lint Job\nruff check\nruff format --check\nArchitecture lint\nGolden lint"]
-        test["Test Job\nBuild repo index\nLint tests 16\nAgent eval tests 30\nwith mocked GCP"]
+        test["Test Job\nBuild repo index\nLint tests 17\nAgent eval tests 47\nwith mocked GCP"]
     end
 
     subgraph merge["On Merge to Main"]
@@ -934,6 +1141,13 @@ flowchart LR
 
     subgraph gc["Daily @ 6am UTC"]
         entropy["Entropy GC Job\nBuild repo index\nRun entropy scan\nAnalyze violations\nOpen cleanup PRs\nUpdate QUALITY_SCORE.md"]
+    end
+
+    subgraph triggers["Event-Driven"]
+        direction TB
+        issue["Issue Comment\n/run-task → agent run"]
+        feedback["PR Review\nchanges_requested → feedback loop"]
+        harness["Harness Issue\nharness-improvement label\n→ auto-fix agent run"]
     end
 ```
 
