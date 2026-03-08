@@ -251,22 +251,22 @@
   },
   "RalphState": {
     "file": "agents/core/state.py",
-    "line": 13,
+    "line": 14,
     "kind": "class"
   },
   "FeedbackState": {
     "file": "agents/core/state.py",
-    "line": 46,
+    "line": 49,
     "kind": "class"
   },
   "initial_feedback_state": {
     "file": "agents/core/state.py",
-    "line": 73,
+    "line": 76,
     "kind": "function"
   },
   "initial_state": {
     "file": "agents/core/state.py",
-    "line": 99,
+    "line": 102,
     "kind": "function"
   },
   "BenchmarkSampleResult": {
@@ -372,6 +372,11 @@
   "PlanOutput": {
     "file": "agents/models/planner.py",
     "line": 17,
+    "kind": "class"
+  },
+  "HarnessImprovementOutput": {
+    "file": "agents/models/post_mortem.py",
+    "line": 22,
     "kind": "class"
   },
   "ToolCapability": {
@@ -684,9 +689,19 @@
     "line": 291,
     "kind": "function"
   },
+  "IssueResult": {
+    "file": "agents/tools/git.py",
+    "line": 299,
+    "kind": "class"
+  },
+  "create_issue": {
+    "file": "agents/tools/git.py",
+    "line": 306,
+    "kind": "function"
+  },
   "merge_pr": {
     "file": "agents/tools/git.py",
-    "line": 300,
+    "line": 322,
     "kind": "function"
   },
   "run_app_and_probe": {
@@ -824,6 +839,16 @@
     "line": 36,
     "kind": "function"
   },
+  "_build_failure_prompt": {
+    "file": "agents/workers/post_mortem.py",
+    "line": 33,
+    "kind": "function"
+  },
+  "run_post_mortem": {
+    "file": "agents/workers/post_mortem.py",
+    "line": 71,
+    "kind": "function"
+  },
   "run_reviewer": {
     "file": "agents/workers/reviewer.py",
     "line": 33,
@@ -949,79 +974,84 @@
     "line": 235,
     "kind": "function"
   },
+  "post_mortem_node": {
+    "file": "agents/workflows/post_mortem.py",
+    "line": 33,
+    "kind": "function"
+  },
   "plan_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 48,
+    "line": 49,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 63,
+    "line": 64,
     "kind": "constant"
   },
   "route_after_plan": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 66,
+    "line": 67,
     "kind": "function"
   },
   "reproduce_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 80,
+    "line": 81,
     "kind": "function"
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 133,
+    "line": 134,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 173,
+    "line": 174,
     "kind": "function"
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 200,
+    "line": 201,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 227,
+    "line": 228,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 271,
+    "line": 272,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 310,
+    "line": 311,
     "kind": "function"
   },
   "route_after_review": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 324,
+    "line": 325,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 335,
+    "line": 336,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 345,
+    "line": 346,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 356,
+    "line": 357,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 385,
+    "line": 388,
     "kind": "function"
   },
   "ReviewerState": {
