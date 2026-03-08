@@ -51,12 +51,12 @@ async def plan_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     context = build_context(state["task"])
-    plan, usage = await run_planner(state["task"], context)
+    plan, usage, tool_calls = await run_planner(state["task"], context)
     return {
         "plan": plan,
         "status": "implementing",
         **_accumulate_usage(state, usage, "plan_node"),
-        "total_tool_calls": state["total_tool_calls"] + 1,
+        "total_tool_calls": state["total_tool_calls"] + tool_calls + 1,
     }
 
 
@@ -140,7 +140,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
 
     iteration = state["iteration_count"] + 1
     context = build_context(state["task"])
-    impl, usage = await run_implementer(
+    impl, usage, tool_calls = await run_implementer(
         task=state["task"],
         plan=state["plan"],
         context=context,
@@ -165,7 +165,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         "files_changed": impl.files_changed,
         "iteration_count": iteration,
         **_accumulate_usage(state, usage, "implement_node"),
-        "total_tool_calls": state["total_tool_calls"] + 1,
+        "total_tool_calls": state["total_tool_calls"] + tool_calls + 1,
         "status": "validating",
     }
 

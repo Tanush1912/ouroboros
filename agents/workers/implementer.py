@@ -1,6 +1,7 @@
 """Implementer worker — writes code based on the plan, returns FileChange[].
 
 Never executes tests or linting — that's the validator's job.
+Has interactive tool access to read files, search code, and explore the repo.
 """
 
 from pathlib import Path
@@ -15,6 +16,7 @@ from agents.models.implementer import ImplementOutput
 from agents.models.planner import PlanOutput
 from agents.models.reproducer import ReproductionResult
 from agents.models.validator import ValidationOutput
+from agents.tools.fs import list_dir, read_file, search_repo, search_symbol
 
 SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "implementer.txt").read_text()
 
@@ -28,6 +30,7 @@ def _get_agent() -> Agent[None, ImplementOutput]:
             model=get_model(),
             result_type=ImplementOutput,
             system_prompt=SYSTEM_PROMPT,
+            tools=[read_file, list_dir, search_repo, search_symbol],
             retries=3,
         )
     return _agent
@@ -107,11 +110,19 @@ async def run_implementer(
             tokens_in=usage_data.request_tokens or 0,
             tokens_out=usage_data.response_tokens or 0,
         )
+        tool_calls = len(
+            [
+                m
+                for m in result.all_messages()
+                if hasattr(m, "parts") and any(hasattr(p, "tool_name") for p in m.parts)
+            ]
+        )
         logfire.info(
             "implementation_complete",
             files_changed=len(result.data.files_changed),
             iteration=iteration,
             tokens_in=token_usage.tokens_in,
             tokens_out=token_usage.tokens_out,
+            tool_calls=tool_calls,
         )
-        return result.data, token_usage
+        return result.data, token_usage, tool_calls
