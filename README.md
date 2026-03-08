@@ -153,33 +153,21 @@ Traditional software development is a loop: **plan → write → test → review
 
 Ouroboros uses a strict layered architecture enforced by AST-based linting. Each layer can only import from layers below it:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  WORKFLOWS — LangGraph state machines                          │
-│  ralph_loop.py · feedback_loop.py · entropy_gc.py              │
-└──────────────────────────────┬──────────────────────────────────┘
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  WORKERS — PydanticAI agents                                   │
-│  planner · implementer · reviewer · validator · cleaner        │
-│  post_mortem                                                   │
-└──────────────────────────────┬──────────────────────────────────┘
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  TOOLS — @tool functions + ToolRegistry                        │
-│  fs · shell · git · browser · observability · benchmark        │
-└──────────────────────────────┬──────────────────────────────────┘
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  CORE — Guards, state, context builder                         │
-│  guards · state · context_builder · config · paths             │
-└──────────────────────────────┬──────────────────────────────────┘
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  MODELS — Pure Pydantic types (zero dependencies)              │
-│  PlanOutput · ImplementOutput · ReviewOutput · ValidationOutput│
-│  CostSummary · HarnessImprovementOutput · ReproductionResult   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    workflows["WORKFLOWS\nralph_loop · feedback_loop · entropy_gc"]
+    workers["WORKERS\nplanner · implementer · reviewer · validator · cleaner · post_mortem"]
+    tools["TOOLS\nfs · shell · git · browser · observability · benchmark"]
+    core["CORE\nguards · state · context_builder · config · paths"]
+    models["MODELS\nPlanOutput · ImplementOutput · ReviewOutput · ValidationOutput\nCostSummary · HarnessImprovementOutput · ReproductionResult"]
+
+    workflows --> workers --> tools --> core --> models
+
+    style workflows fill:#4a9eff,color:#fff
+    style workers fill:#7c5cbf,color:#fff
+    style tools fill:#2e8b57,color:#fff
+    style core fill:#d4a017,color:#fff
+    style models fill:#c0392b,color:#fff
 ```
 
 **Enforced invariants:**
@@ -1126,16 +1114,32 @@ uv run ruff format --check .
 
 ## CI/CD Pipelines
 
-### On Every PR (`ci.yml`)
+```mermaid
+flowchart TD
+    subgraph ci["Every PR — ci.yml"]
+        lint["Lint Job\nruff + arch_lint + golden_lint"]
+        test["Test Job\n17 lint + 47 agent eval"]
+    end
 
-| Trigger | Workflow | What it does |
-|---------|----------|-------------|
-| **Every PR** | `ci.yml` | Lint (ruff + arch_lint + golden_lint) and test (17 lint + 47 agent eval) |
-| **Merge to main** | `ci.yml` | Rebuild `symbols.json` + `file_map.json`, auto-commit |
-| **Daily @ 6am UTC** | `entropy_gc.yml` | Entropy scan → analyze violations → open cleanup PRs → update QUALITY_SCORE.md |
-| **Issue comment `/run-task`** | `issue-trigger.yml` | Parse task from issue, run agent in worktree |
-| **PR review `changes_requested`** | `pr-feedback.yml` | Run feedback loop to address review comments |
-| **`harness-improvement` label** | `harness-fix.yml` | Agent picks up self-improvement issue, opens fix PR |
+    subgraph merge["On Merge to Main"]
+        idx["Rebuild symbols.json\n+ file_map.json"]
+    end
+
+    subgraph gc["Daily @ 6am UTC — entropy_gc.yml"]
+        entropy["Entropy scan + cleanup PRs\n+ update QUALITY_SCORE.md"]
+    end
+
+    subgraph triggers["Event-Driven Triggers"]
+        issue["issue-trigger.yml\n/run-task comment"]
+        feedback["pr-feedback.yml\nchanges_requested review"]
+        harness["harness-fix.yml\nharness-improvement label"]
+    end
+
+    style ci fill:#4a9eff,color:#fff
+    style merge fill:#27ae60,color:#fff
+    style gc fill:#e67e22,color:#fff
+    style triggers fill:#7c5cbf,color:#fff
+```
 
 ---
 
