@@ -1,0 +1,180 @@
+name: PR Feedback Loop
+
+on:
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: ouroboros-feedback-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  feedback:
+    name: Address PR Feedback
+    if: |
+      (github.event_name == 'pull_request_review' &&
+       github.event.review.state == 'changes_requested' &&
+       startsWith(github.event.pull_request.head.ref, 'ouroboros/task-')) ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       startsWith(github.event.comment.body, '/feedback'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Check author permission
+        id: auth
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: "write"
+          username: ${{ github.event.review.user.login || github.event.comment.user.login }}
+
+      - name: Reject unauthorized user
+        if: steps.auth.outputs.require-result != 'true'
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number || github.event.issue.number }}"
+          ACTOR="${{ github.event.review.user.login || github.event.comment.user.login }}"
+          gh pr comment "$PR_NUMBER" \
+            --repo ${{ github.repository }} \
+            --body "**Feedback loop denied.** @${ACTOR} does not have write access."
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Acknowledge trigger
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+              --method POST --field content='eyes'
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve PR number and branch
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request_review" ]; then
+            echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "branch=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
+          else
+            PR_URL="${{ github.event.issue.pull_request.url }}"
+            PR_DATA=$(gh api "$PR_URL" --jq '{number: .number, branch: .head.ref}')
+            echo "pr_number=$(echo "$PR_DATA" | jq -r '.number')" >> "$GITHUB_OUTPUT"
+            BRANCH=$(echo "$PR_DATA" | jq -r '.branch')
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+            if [[ ! "$BRANCH" == ouroboros/task-* ]]; then
+              echo "Not an agent PR (branch: $BRANCH). Skipping."
+              exit 1
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.resolve.outputs.branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build repo index
+        run: uv run python repo_index/build_index.py
+
+      - name: Run feedback loop
+        id: run
+        run: |
+          PR_NUMBER="${{ steps.resolve.outputs.pr_number }}"
+          echo "::group::Feedback loop for PR #${PR_NUMBER}"
+
+          set +e
+          output=$(uv run ouroboros feedback "$PR_NUMBER" 2>&1)
+          exit_code=$?
+          echo "$output"
+          echo "::endgroup::"
+
+          {
+            echo "output<<OUROBOROS_EOF"
+            echo "$output"
+            echo "OUROBOROS_EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          exit $exit_code
+        env:
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+          GCP_LOCATION: ${{ vars.GCP_LOCATION || 'us-central1' }}
+          OUROBOROS_MODEL: ${{ vars.OUROBOROS_MODEL || 'gemini-3.0-flash-preview' }}
+          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post success comment
+        if: success()
+        run: |
+          PR_NUMBER="${{ steps.resolve.outputs.pr_number }}"
+          ACTOR="${{ github.event.review.user.login || github.event.comment.user.login }}"
+          gh pr comment "$PR_NUMBER" \
+            --repo ${{ github.repository }} \
+            --body "$(cat <<'EOF'
+          **Feedback addressed**
+
+          Pushed new commit(s) addressing review comments.
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+
+          Triggered by @${ACTOR}'s review.
+          EOF
+          )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post failure comment
+        if: failure() && steps.run.outcome == 'failure'
+        run: |
+          PR_NUMBER="${{ steps.resolve.outputs.pr_number }}"
+          ACTOR="${{ github.event.review.user.login || github.event.comment.user.login }}"
+          gh pr comment "$PR_NUMBER" \
+            --repo ${{ github.repository }} \
+            --body "$(cat <<'EOF'
+          **Feedback loop failed**
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+
+          cc @${ACTOR}
+          EOF
+          )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post workflow summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## PR Feedback Loop
+
+          **PR:** #${{ steps.resolve.outputs.pr_number }}
+          **Branch:** ${{ steps.resolve.outputs.branch }}
+          **Exit code:** ${{ steps.run.outputs.exit_code }}
+          **Triggered by:** ${{ github.event_name }}
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+          EOF

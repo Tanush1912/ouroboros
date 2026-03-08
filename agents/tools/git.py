@@ -214,6 +214,88 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
     ]
 
 
+class PRMetadata(BaseModel):
+    title: str
+    body: str
+    branch: str = Field(description="Head branch name")
+    base: str = Field(description="Base branch name")
+    labels: list[str] = Field(default_factory=list)
+    author: str = Field(default="")
+
+
+class PushResult(BaseModel):
+    success: bool
+    error: str = Field(default="")
+
+
+class _PRMetadataSchema(BaseModel):
+    """Raw GitHub API response schema for PR metadata (GP-004 boundary validation)."""
+
+    model_config = {"populate_by_name": True}
+
+    title: str
+    body: str = ""
+    head_ref_name: str = Field(alias="headRefName")
+    base_ref_name: str = Field(default="main", alias="baseRefName")
+    labels: list[dict[str, object]] = Field(default_factory=list)
+    author: dict[str, object] = Field(default_factory=dict)
+
+
+def get_pr_metadata(pr_number: int) -> PRMetadata:
+    """Fetch PR title, body, branch, labels, and author via gh CLI."""
+    rc, out, err = _run(
+        [
+            "gh",
+            "pr",
+            "view",
+            str(pr_number),
+            "--json",
+            "title,body,headRefName,baseRefName,labels,author",
+        ]
+    )
+    if rc != 0:
+        raise RuntimeError(f"gh pr view failed: {err}")
+    raw = _PRMetadataSchema.model_validate_json(out)
+    return PRMetadata(
+        title=raw.title,
+        body=raw.body,
+        branch=raw.head_ref_name,
+        base=raw.base_ref_name,
+        labels=[str(lb.get("name", "")) for lb in raw.labels],
+        author=str(raw.author.get("login", "")),
+    )
+
+
+def reply_to_pr_comment(comment_id: int, body: str) -> bool:
+    """Reply to a specific PR review comment. Returns True on success."""
+    rc, _, _err = _run(
+        [
+            "gh",
+            "api",
+            f"repos/{_repo_nwo()}/pulls/comments/{comment_id}/replies",
+            "--method",
+            "POST",
+            "--field",
+            f"body={body}",
+        ]
+    )
+    return rc == 0
+
+
+def add_pr_label(pr_number: int, label: str) -> bool:
+    """Add a label to a PR. Creates the label if it doesn't exist."""
+    rc, _, _err = _run(["gh", "pr", "edit", str(pr_number), "--add-label", label])
+    return rc == 0
+
+
+def push_to_remote(branch: str) -> PushResult:
+    """Push current branch to origin."""
+    rc, _, err = _run(["git", "push", "origin", branch])
+    if rc != 0:
+        return PushResult(success=False, error=err.strip())
+    return PushResult(success=True)
+
+
 @tool
 def merge_pr(pr_number: int, strategy: Literal["squash", "merge"] = "squash") -> MergeResult:
     """Merge a pull request."""
