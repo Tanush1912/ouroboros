@@ -13,6 +13,10 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: ouroboros-task-${{ github.run_id }}
+  cancel-in-progress: false
+
 jobs:
   run-task:
     name: Run Task
@@ -45,7 +49,7 @@ jobs:
         id: run
         run: |
           set +e
-          output=$(uv run ouroboros run "${{ inputs.task }}" ${{ inputs.no_gh && '--no-gh' || '' }} 2>&1)
+          output=$(uv run ouroboros run "${{ inputs.task }}" --worktree ${{ inputs.no_gh && '--no-gh' || '' }} 2>&1)
           exit_code=$?
           echo "$output"
           {

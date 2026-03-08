@@ -4,6 +4,10 @@ on:
   issue_comment:
     types: [created]
 
+concurrency:
+  group: ouroboros-issue-${{ github.event.comment.id }}
+  cancel-in-progress: false
+
 jobs:
   run-agent:
     name: Run Agent from Issue Comment
@@ -89,7 +93,7 @@ jobs:
           echo "::endgroup::"
 
           set +e
-          output=$(uv run ouroboros run "$FULL_PROMPT" 2>&1)
+          output=$(uv run ouroboros run "$FULL_PROMPT" --worktree 2>&1)
           exit_code=$?
           echo "$output"
           {
