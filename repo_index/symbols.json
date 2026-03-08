@@ -731,17 +731,17 @@
   },
   "_build_prompt": {
     "file": "agents/workers/implementer.py",
-    "line": 36,
+    "line": 39,
     "kind": "function"
   },
   "run_implementer": {
     "file": "agents/workers/implementer.py",
-    "line": 88,
+    "line": 91,
     "kind": "function"
   },
   "run_planner": {
     "file": "agents/workers/planner.py",
-    "line": 33,
+    "line": 36,
     "kind": "function"
   },
   "run_reviewer": {
