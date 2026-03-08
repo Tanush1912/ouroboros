@@ -296,6 +296,28 @@ def push_to_remote(branch: str) -> PushResult:
     return PushResult(success=True)
 
 
+class IssueResult(BaseModel):
+    success: bool
+    url: str = Field(default="")
+    number: int = Field(default=0)
+    error: str = Field(default="")
+
+
+def create_issue(title: str, body: str, labels: list[str] | None = None) -> IssueResult:
+    """Create a GitHub issue via gh CLI. Returns issue URL and number."""
+    cmd = ["gh", "issue", "create", "--title", title, "--body", body]
+    for label in labels or []:
+        cmd.extend(["--label", label])
+    rc, out, err = _run(cmd)
+    if rc != 0:
+        return IssueResult(success=False, error=err.strip())
+    url = out.strip()
+    number = 0
+    with contextlib.suppress(ValueError, IndexError):
+        number = int(url.rstrip("/").split("/")[-1])
+    return IssueResult(success=True, url=url, number=number)
+
+
 @tool
 def merge_pr(pr_number: int, strategy: Literal["squash", "merge"] = "squash") -> MergeResult:
     """Merge a pull request."""
