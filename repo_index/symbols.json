@@ -4,49 +4,79 @@
     "line": 29,
     "kind": "constant"
   },
+  "_SANDBOX_COMPOSE": {
+    "file": "agents/cli.py",
+    "line": 30,
+    "kind": "constant"
+  },
+  "_WORKTREE_COMPOSE": {
+    "file": "agents/cli.py",
+    "line": 31,
+    "kind": "constant"
+  },
   "_task_branch_name": {
     "file": "agents/cli.py",
-    "line": 32,
+    "line": 34,
+    "kind": "function"
+  },
+  "_compute_port_offset": {
+    "file": "agents/cli.py",
+    "line": 40,
+    "kind": "function"
+  },
+  "_set_worktree_env": {
+    "file": "agents/cli.py",
+    "line": 45,
+    "kind": "function"
+  },
+  "_start_worktree_app": {
+    "file": "agents/cli.py",
+    "line": 62,
+    "kind": "function"
+  },
+  "_stop_worktree_app": {
+    "file": "agents/cli.py",
+    "line": 78,
     "kind": "function"
   },
   "_create_worktree": {
     "file": "agents/cli.py",
-    "line": 38,
+    "line": 93,
     "kind": "function"
   },
   "_cleanup_worktree": {
     "file": "agents/cli.py",
-    "line": 57,
+    "line": 112,
     "kind": "function"
   },
   "run": {
     "file": "agents/cli.py",
-    "line": 77,
+    "line": 132,
     "kind": "function"
   },
   "gc": {
     "file": "agents/cli.py",
-    "line": 150,
+    "line": 234,
     "kind": "function"
   },
   "_MAX_FEEDBACK_ITERATIONS": {
     "file": "agents/cli.py",
-    "line": 184,
+    "line": 268,
     "kind": "constant"
   },
   "feedback": {
     "file": "agents/cli.py",
-    "line": 188,
+    "line": 272,
     "kind": "function"
   },
   "status": {
     "file": "agents/cli.py",
-    "line": 307,
+    "line": 391,
     "kind": "function"
   },
   "main": {
     "file": "agents/cli.py",
-    "line": 348,
+    "line": 432,
     "kind": "function"
   },
   "_load_dotenv": {
@@ -724,44 +754,44 @@
     "line": 81,
     "kind": "function"
   },
-  "VICTORIA_LOGS_URL": {
+  "_victoria_logs_url": {
     "file": "agents/tools/observability.py",
-    "line": 13,
-    "kind": "constant"
+    "line": 17,
+    "kind": "function"
   },
-  "VICTORIA_METRICS_URL": {
+  "_victoria_metrics_url": {
     "file": "agents/tools/observability.py",
-    "line": 14,
-    "kind": "constant"
+    "line": 21,
+    "kind": "function"
   },
   "LogLine": {
     "file": "agents/tools/observability.py",
-    "line": 17,
+    "line": 25,
     "kind": "class"
   },
   "MetricSample": {
     "file": "agents/tools/observability.py",
-    "line": 23,
+    "line": 31,
     "kind": "class"
   },
   "MetricSeries": {
     "file": "agents/tools/observability.py",
-    "line": 28,
+    "line": 36,
     "kind": "class"
   },
   "MetricResult": {
     "file": "agents/tools/observability.py",
-    "line": 33,
+    "line": 41,
     "kind": "class"
   },
   "query_logs": {
     "file": "agents/tools/observability.py",
-    "line": 39,
+    "line": 47,
     "kind": "function"
   },
   "query_metrics": {
     "file": "agents/tools/observability.py",
-    "line": 59,
+    "line": 67,
     "kind": "function"
   },
   "BuildResult": {
