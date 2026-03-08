@@ -1,0 +1,166 @@
+name: Issue Comment Agent Trigger
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  run-agent:
+    name: Run Agent from Issue Comment
+    if: |
+      !github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/run ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Check author permission
+        id: auth
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: "write"
+          username: ${{ github.event.comment.user.login }}
+
+      - name: Reject unauthorized user
+        if: steps.auth.outputs.require-result != 'true'
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --body "**Agent trigger denied.** @${{ github.event.comment.user.login }} does not have write access to this repository."
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Acknowledge trigger
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+            --method POST --field content='eyes'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build repo index
+        run: uv run python repo_index/build_index.py
+
+      - name: Parse task and run agent
+        id: run
+        run: |
+          # Extract task from comment (everything after /run)
+          COMMENT_BODY=$(cat <<'COMMENT_EOF'
+          ${{ github.event.comment.body }}
+          COMMENT_EOF
+          )
+          TASK=$(echo "$COMMENT_BODY" | sed 's|^/run[[:space:]]*||')
+
+          # Build combined prompt with issue context
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          ISSUE_BODY=$(cat <<'ISSUE_EOF'
+          ${{ github.event.issue.body }}
+          ISSUE_EOF
+          )
+
+          FULL_PROMPT="Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
+
+          ${ISSUE_BODY}
+
+          Task: ${TASK}"
+
+          echo "::group::Agent prompt"
+          echo "$FULL_PROMPT"
+          echo "::endgroup::"
+
+          set +e
+          output=$(uv run ouroboros run "$FULL_PROMPT" 2>&1)
+          exit_code=$?
+          echo "$output"
+          {
+            echo "output<<OUROBOROS_EOF"
+            echo "$output"
+            echo "OUROBOROS_EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          echo "task<<TASK_EOF" >> "$GITHUB_OUTPUT"
+          echo "$TASK" >> "$GITHUB_OUTPUT"
+          echo "TASK_EOF" >> "$GITHUB_OUTPUT"
+          exit $exit_code
+        env:
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+          GCP_LOCATION: ${{ vars.GCP_LOCATION || 'us-central1' }}
+          OUROBOROS_MODEL: ${{ vars.OUROBOROS_MODEL || 'gemini-3.0-flash-preview' }}
+          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post success comment
+        if: success()
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --body "$(cat <<'EOF'
+          **Agent run complete**
+
+          **Task:** ${{ steps.run.outputs.task }}
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+
+          Triggered by @${{ github.event.comment.user.login }} in [this comment](${{ github.event.comment.html_url }}).
+          EOF
+          )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post failure comment
+        if: failure() && steps.run.outcome == 'failure'
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --body "$(cat <<'EOF'
+          **Agent run failed**
+
+          **Task:** ${{ steps.run.outputs.task }}
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+
+          cc @${{ github.event.comment.user.login }}
+          EOF
+          )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post workflow summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Agent Run (Issue Comment Trigger)
+
+          **Issue:** #${{ github.event.issue.number }} — ${{ github.event.issue.title }}
+          **Task:** ${{ steps.run.outputs.task }}
+          **Exit code:** ${{ steps.run.outputs.exit_code }}
+          **Triggered by:** @${{ github.event.comment.user.login }}
+
+          ```
+          ${{ steps.run.outputs.output }}
+          ```
+          EOF
