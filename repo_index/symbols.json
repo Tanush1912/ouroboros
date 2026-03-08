@@ -1,17 +1,42 @@
 {
+  "_BRANCH_PREFIX": {
+    "file": "agents/cli.py",
+    "line": 29,
+    "kind": "constant"
+  },
+  "_task_branch_name": {
+    "file": "agents/cli.py",
+    "line": 32,
+    "kind": "function"
+  },
+  "_create_worktree": {
+    "file": "agents/cli.py",
+    "line": 38,
+    "kind": "function"
+  },
+  "_cleanup_worktree": {
+    "file": "agents/cli.py",
+    "line": 57,
+    "kind": "function"
+  },
   "run": {
     "file": "agents/cli.py",
-    "line": 24,
+    "line": 77,
     "kind": "function"
   },
   "gc": {
     "file": "agents/cli.py",
-    "line": 65,
+    "line": 150,
+    "kind": "function"
+  },
+  "status": {
+    "file": "agents/cli.py",
+    "line": 185,
     "kind": "function"
   },
   "main": {
     "file": "agents/cli.py",
-    "line": 99,
+    "line": 226,
     "kind": "function"
   },
   "_load_dotenv": {
