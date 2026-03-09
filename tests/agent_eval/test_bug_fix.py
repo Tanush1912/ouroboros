@@ -37,10 +37,10 @@ FIXED_COUNTER_CODE = textwrap.dedent("""
 @pytest.fixture
 def tmp_repo(tmp_path: Path) -> Path:
     (tmp_path / "utils").mkdir()
-    (tmp_path / "utils" / "counter.py").write_text(BUGGY_COUNTER_CODE)
+    (tmp_path / "utils" / "counter.py").write_text(BUGGY_COUNTER_CODE, encoding="utf-8")
     (tmp_path / "repo_index").mkdir()
-    (tmp_path / "repo_index" / "symbols.json").write_text("{}")
-    (tmp_path / "repo_index" / "file_map.json").write_text("{}")
+    (tmp_path / "repo_index" / "symbols.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "repo_index" / "file_map.json").write_text("{}", encoding="utf-8")
     return tmp_path
 
 

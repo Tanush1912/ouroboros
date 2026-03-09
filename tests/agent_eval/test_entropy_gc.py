@@ -26,10 +26,10 @@ def tmp_repo_with_gp001(tmp_path: Path) -> Path:
     for pkg in ["billing", "auth"]:
         pkg_dir = tmp_path / pkg
         pkg_dir.mkdir()
-        (pkg_dir / "utils.py").write_text(DUPLICATE_LOGGER)
+        (pkg_dir / "utils.py").write_text(DUPLICATE_LOGGER, encoding="utf-8")
     (tmp_path / "repo_index").mkdir()
-    (tmp_path / "repo_index" / "symbols.json").write_text("{}")
-    (tmp_path / "repo_index" / "file_map.json").write_text("{}")
+    (tmp_path / "repo_index" / "symbols.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "repo_index" / "file_map.json").write_text("{}", encoding="utf-8")
     return tmp_path
 
 
@@ -166,22 +166,23 @@ def test_violation_cluster_by_principle() -> None:
     assert len(clusters["GP-001"]) == 2
     assert len(clusters["GP-005"]) == 1
 
-    @pytest.mark.asyncio
-    async def test_cleaner_called_with_mock() -> None:
-        """Verify cleaner worker can be mocked for testing."""
-        mock_cleanup = CleanupOutput(
-            violations=[],
-            quality_scores={"agents": 10.0},
-            recommended_prs=[],
-            human_review_needed=[],
-        )
 
-        mock_run_cleaner = AsyncMock(return_value=mock_cleanup)
-        with patch.dict(
-            "sys.modules", {"agents.workers.cleaner": MagicMock(run_cleaner=mock_run_cleaner)}
-        ):
-            import sys
+@pytest.mark.asyncio
+async def test_cleaner_called_with_mock() -> None:
+    """Verify cleaner worker can be mocked for testing."""
+    mock_cleanup = CleanupOutput(
+        violations=[],
+        quality_scores={"agents": 10.0},
+        recommended_prs=[],
+        human_review_needed=[],
+    )
 
-            worker_module = sys.modules["agents.workers.cleaner"]
-            result = await worker_module.run_cleaner(scan_report="No violations")
-            assert result.overall_score() == pytest.approx(10.0)
+    mock_run_cleaner = AsyncMock(return_value=mock_cleanup)
+    with patch.dict(
+        "sys.modules", {"agents.workers.cleaner": MagicMock(run_cleaner=mock_run_cleaner)}
+    ):
+        import sys
+
+        worker_module = sys.modules["agents.workers.cleaner"]
+        result = await worker_module.run_cleaner(scan_report="No violations")
+        assert result.overall_score() == pytest.approx(10.0)

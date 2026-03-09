@@ -7,13 +7,20 @@ Schedule: daily via .github/workflows/entropy_gc.yml
 """
 
 from datetime import UTC, datetime
-from typing import TypedDict
+from typing import Any, TypedDict
 
 import logfire
 from langgraph.graph import END, StateGraph
 
+from agents.core.guards import pre_node_guard
 from agents.core.paths import repo_root as _repo_root
+from agents.core.workflow_helpers import (
+    accumulate_usage,
+    apply_file_changes,
+    update_node_tool_calls,
+)
 from agents.models.cleaner import CleanupOutput, EntropyViolation
+from agents.models.implementer import FileChange
 from agents.tools.git import commit, open_pr
 from agents.tools.shell import run_lint
 from agents.workers.cleaner import run_cleaner
@@ -24,6 +31,11 @@ class GCState(TypedDict):
     cleanup: CleanupOutput | None
     prs_opened: list[str]
     quality_score_updated: bool
+    status: str
+    error_log: list[str]
+    total_tool_calls: int
+    node_tool_calls: dict[str, int]
+    estimated_cost_usd: float
 
 
 def _collect_domains() -> list[str]:
@@ -35,21 +47,39 @@ def _collect_domains() -> list[str]:
     ]
 
 
-async def entropy_scan_node(state: GCState) -> dict:
+async def entropy_scan_node(state: GCState) -> dict[str, Any]:
     """Run all linters and collect a comprehensive scan report."""
+    guard = pre_node_guard(state, "entropy_scan_node")
+    if not guard.allowed:
+        return {"status": "failed", "error_log": state["error_log"] + [guard.reason]}
+
     lint_result = run_lint.fn(".")  # sync tool (subprocess.run); .fn() is correct
     violations_text = (
         "\n".join(lint_result.violations) if lint_result.violations else "No violations"
     )
     scan_report = f"Lint violations:\n{violations_text}\n\nAuto-fixed: {lint_result.auto_fixed}"
-    return {"scan_report": scan_report}
+    node_calls = 1  
+    return {
+        "scan_report": scan_report,
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
+        "node_tool_calls": update_node_tool_calls(state, "entropy_scan_node", node_calls),
+    }
 
 
-async def analyze_violations_node(state: GCState) -> dict:
+async def analyze_violations_node(state: GCState) -> dict[str, Any]:
     """Run the cleaner agent to analyze violations."""
+    guard = pre_node_guard(state, "analyze_violations_node")
+    if not guard.allowed:
+        return {"status": "failed", "error_log": state["error_log"] + [guard.reason]}
+
     domains = _collect_domains()
-    cleanup, _ = await run_cleaner(state["scan_report"], domains)
-    return {"cleanup": cleanup}
+    cleanup, usage = await run_cleaner(state["scan_report"], domains)
+    node_calls = 1  # run_cleaner
+    return {
+        "cleanup": cleanup,
+        **accumulate_usage(state, usage, "analyze_violations_node", node_calls),
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
+    }
 
 
 def _cluster_violations(violations: list[EntropyViolation]) -> dict[str, list[EntropyViolation]]:
@@ -62,18 +92,27 @@ def _cluster_violations(violations: list[EntropyViolation]) -> dict[str, list[En
     return clusters
 
 
-async def open_cleanup_prs_node(state: GCState) -> dict:
+async def open_cleanup_prs_node(state: GCState) -> dict[str, Any]:
     """Open one tracking PR per auto-fixable violation cluster.
 
     NOTE: This node opens PRs that describe the violations to fix, but does not
     implement the fixes itself. The actual fix implementation is handled by
     running Ralph Loop on each PR's description as a task.
     """
+    guard = pre_node_guard(state, "open_cleanup_prs_node")
+    if not guard.allowed:
+        return {"status": "failed", "error_log": state["error_log"] + [guard.reason]}
+
     if not state["cleanup"]:
-        return {"prs_opened": []}
+        return {
+            "prs_opened": [],
+            "total_tool_calls": state["total_tool_calls"],
+            "node_tool_calls": state["node_tool_calls"],
+        }
 
     clusters = _cluster_violations(state["cleanup"].violations)
     prs_opened = []
+    pr_calls = 0
 
     for principle, violations in clusters.items():
         affected_files = sorted({v.file for v in violations})
@@ -88,17 +127,30 @@ async def open_cleanup_prs_node(state: GCState) -> dict:
         title = f"[gc] {principle}: {violations[0].description[:60]}"
 
         pr_result = await open_pr.fn(title=title, body=body)
+        pr_calls += 1
         if pr_result.success:
             prs_opened.append(pr_result.url)
             logfire.info("gc_pr_opened", principle=principle, url=pr_result.url)
 
-    return {"prs_opened": prs_opened}
+    return {
+        "prs_opened": prs_opened,
+        "total_tool_calls": state["total_tool_calls"] + pr_calls,
+        "node_tool_calls": update_node_tool_calls(state, "open_cleanup_prs_node", pr_calls),
+    }
 
 
-async def update_quality_score_node(state: GCState) -> dict:
+async def update_quality_score_node(state: GCState) -> dict[str, Any]:
     """Write updated QUALITY_SCORE.md based on cleanup analysis."""
+    guard = pre_node_guard(state, "update_quality_score_node")
+    if not guard.allowed:
+        return {"status": "failed", "error_log": state["error_log"] + [guard.reason]}
+
     if not state["cleanup"]:
-        return {"quality_score_updated": False}
+        return {
+            "quality_score_updated": False,
+            "total_tool_calls": state["total_tool_calls"],
+            "node_tool_calls": state["node_tool_calls"],
+        }
 
     cleanup = state["cleanup"]
     root = _repo_root()
@@ -152,15 +204,52 @@ async def update_quality_score_node(state: GCState) -> dict:
     for pr_url in state["prs_opened"]:
         lines.append(f"- {pr_url}")
 
-    score_path = root / "docs" / "QUALITY_SCORE.md"
-    score_path.write_text("\n".join(lines) + "\n")
+    apply_file_changes(
+        [
+            FileChange(
+                path="docs/QUALITY_SCORE.md",
+                content="\n".join(lines) + "\n",
+                operation="modify",
+                diff_summary="Update quality scores and PR list",
+            ),
+        ],
+        root=root,
+    )
 
     commit_result = await commit.fn(
         message=f"chore(gc): update quality scores [{now}]",
         files=["docs/QUALITY_SCORE.md"],
     )
 
-    return {"quality_score_updated": commit_result.success}
+    node_calls = 1  
+    return {
+        "quality_score_updated": commit_result.success,
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
+        "node_tool_calls": update_node_tool_calls(state, "update_quality_score_node", node_calls),
+    }
+
+
+def _gc_status_gate(state: GCState, next_node: str) -> str:
+    """Route to END on failure, otherwise continue."""
+    if state.get("status") == "failed":
+        return END
+    return next_node
+
+
+def _route_after_scan(state: GCState) -> str:
+    return _gc_status_gate(state, "analyze_violations_node")
+
+
+def _route_after_analyze(state: GCState) -> str:
+    return _gc_status_gate(state, "open_cleanup_prs_node")
+
+
+def _route_after_analyze_scores_only(state: GCState) -> str:
+    return _gc_status_gate(state, "update_quality_score_node")
+
+
+def _route_after_open_prs(state: GCState) -> str:
+    return _gc_status_gate(state, "update_quality_score_node")
 
 
 def build_gc_graph() -> StateGraph:
@@ -172,9 +261,9 @@ def build_gc_graph() -> StateGraph:
     graph.add_node("update_quality_score_node", update_quality_score_node)
 
     graph.set_entry_point("entropy_scan_node")
-    graph.add_edge("entropy_scan_node", "analyze_violations_node")
-    graph.add_edge("analyze_violations_node", "open_cleanup_prs_node")
-    graph.add_edge("open_cleanup_prs_node", "update_quality_score_node")
+    graph.add_conditional_edges("entropy_scan_node", _route_after_scan)
+    graph.add_conditional_edges("analyze_violations_node", _route_after_analyze)
+    graph.add_conditional_edges("open_cleanup_prs_node", _route_after_open_prs)
     graph.add_edge("update_quality_score_node", END)
 
     return graph
@@ -187,8 +276,8 @@ def build_scores_only_graph() -> StateGraph:
     graph.add_node("analyze_violations_node", analyze_violations_node)
     graph.add_node("update_quality_score_node", update_quality_score_node)
     graph.set_entry_point("entropy_scan_node")
-    graph.add_edge("entropy_scan_node", "analyze_violations_node")
-    graph.add_edge("analyze_violations_node", "update_quality_score_node")
+    graph.add_conditional_edges("entropy_scan_node", _route_after_scan)
+    graph.add_conditional_edges("analyze_violations_node", _route_after_analyze_scores_only)
     graph.add_edge("update_quality_score_node", END)
     return graph
 
@@ -204,6 +293,11 @@ async def run_entropy_gc(update_scores_only: bool = False) -> GCState:
             cleanup=None,
             prs_opened=[],
             quality_score_updated=False,
+            status="running",
+            error_log=[],
+            total_tool_calls=0,
+            node_tool_calls={},
+            estimated_cost_usd=0.0,
         )
         final = await app.ainvoke(state)
 

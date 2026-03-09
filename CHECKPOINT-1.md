@@ -87,7 +87,7 @@ and correct — it is not yet *connected* to live infrastructure.
 | 63 | Worker: `agents/workers/cleaner.py` | DONE | 1 | `agents/workers/cleaner.py` |
 | 64 | Reference docs (`docs/references/`) | DONE | 1 | `docs/references/*.txt` |
 | 65 | `docs/PLANS.md`, `docs/DESIGN.md` | DONE | 1 | `docs/PLANS.md`, `docs/DESIGN.md` |
-| 66 | `exec-plans/active/` + `exec-plans/completed/` | DONE | 1 | `docs/exec-plans/` |
+| 66 | `docs/exec-plans/active/` + `docs/exec-plans/completed/` | DONE | 1 | `docs/exec-plans/` |
 | 67 | `.gitignore` | DONE | 1 | `.gitignore` |
 | 68 | `gh repo create` (push to remote) | PENDING | 1 | — |
 | 69 | `uv sync` — install all dependencies | PENDING | 1 | `pyproject.toml` |

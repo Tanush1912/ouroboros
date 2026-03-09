@@ -2,6 +2,11 @@
 
 Extracted from ralph_loop to stay under GP-002 (500 lines). Wired into the
 ralph_loop graph after human_checkpoint.
+
+Guard checks are intentionally skipped (listed in _EXEMPT_NODES):
+post_mortem_node is only reached after a guard-triggered failure or
+human_checkpoint, so re-checking the same limits would suppress the
+main diagnostic path for those failures.
 """
 
 from typing import Any
@@ -9,29 +14,14 @@ from typing import Any
 import logfire
 
 from agents.core.state import RalphState
-from agents.models.cost import TokenUsage
+from agents.core.workflow_helpers import accumulate_usage
 from agents.tools.git import create_issue
 from agents.workers.post_mortem import run_post_mortem
 
 
-def _accumulate_usage(state: RalphState, usage: TokenUsage, node_name: str) -> dict:
-    """Return state updates for token/cost accumulation."""
-    prev = state["node_token_usage"].get(node_name, {"tokens_in": 0, "tokens_out": 0})
-    updated = dict(state["node_token_usage"])
-    updated[node_name] = {
-        "tokens_in": prev["tokens_in"] + usage.tokens_in,
-        "tokens_out": prev["tokens_out"] + usage.tokens_out,
-    }
-    return {
-        "total_tokens_in": state["total_tokens_in"] + usage.tokens_in,
-        "total_tokens_out": state["total_tokens_out"] + usage.tokens_out,
-        "estimated_cost_usd": state["estimated_cost_usd"] + usage.cost_usd(),
-        "node_token_usage": updated,
-    }
-
-
 async def post_mortem_node(state: RalphState) -> dict[str, Any]:
     """Analyze failure and create a harness-improvement issue."""
+
     validation_summary = None
     if state["validation"]:
         v = state["validation"]
@@ -60,7 +50,9 @@ async def post_mortem_node(state: RalphState) -> dict[str, Any]:
         )
     except Exception as e:
         logfire.warning("post_mortem_failed", error=str(e))
-        return {}
+        return {
+            "error_log": state["error_log"] + [f"Post-mortem analysis failed: {e}"],
+        }
 
     issue_body = (
         f"## Failure Analysis\n\n"
@@ -93,9 +85,10 @@ async def post_mortem_node(state: RalphState) -> dict[str, Any]:
     else:
         logfire.warning("post_mortem_issue_failed", error=issue_result.error)
 
+    node_calls = 2  
     return {
         "post_mortem": analysis,
         "improvement_issue_url": issue_url,
-        **_accumulate_usage(state, usage, "post_mortem_node"),
-        "total_tool_calls": state["total_tool_calls"] + 2,
+        **accumulate_usage(state, usage, "post_mortem_node", tool_calls=node_calls),
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
     }

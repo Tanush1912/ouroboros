@@ -35,10 +35,6 @@ The system is self-referential: agents can improve the agent infrastructure itse
 - `docs/design-docs/core-beliefs.md` — Agent-first operating principles
 - `docs/PLANS.md` — How to read and write execution plans
 
-### Execution Plans
-- `docs/exec-plans/active/` — In-progress plans (versioned, updated every 7 days)
-- `docs/exec-plans/completed/` — Archived plans (never deleted)
-
 ### Agent Code
 - `agents/core/config.py` — Vertex AI + model configuration
 - `agents/core/state.py` — LangGraph typed state schema
@@ -89,6 +85,10 @@ The system is self-referential: agents can improve the agent infrastructure itse
 - `tests/agent_eval/test_bug_fix.py` — Agent fixes buggy code
 - `tests/agent_eval/test_feature_gen.py` — Agent generates feature
 - `tests/agent_eval/test_entropy_gc.py` — GC detects and cleans violations
+- `tests/agent_eval/test_guards.py` — Guard enforcement across state types
+- `tests/agent_eval/test_guard_coverage.py` — Guard coverage across all workflows
+- `tests/agent_eval/test_workflow_routing.py` — Routing logic for all conditional edges
+- `tests/agent_eval/test_registry_contract.py` — Tool registry contract tests
 
 ### Harness
 - `harness/observability/docker-compose.yml` — VictoriaLogs + VictoriaMetrics + Grafana
@@ -103,8 +103,7 @@ The system is self-referential: agents can improve the agent infrastructure itse
 2. Read `ARCHITECTURE.md` for layer rules
 3. Call `build_context(task)` to get your scoped context package
 4. Check `REGISTRY.all_tools()` for available tools
-5. Check `docs/exec-plans/active/` for any active plan for this domain
-6. Start the appropriate workflow in `agents/workflows/`
+5. Start the appropriate workflow in `agents/workflows/`
 
 ## Guard Rails — NEVER Bypass
 

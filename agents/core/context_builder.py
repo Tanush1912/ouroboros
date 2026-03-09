@@ -9,8 +9,16 @@ from pydantic import BaseModel, Field, RootModel
 
 from agents.core.paths import repo_root as _repo_root
 from agents.models.registry import REGISTRY
+from agents.models.tool_catalog import ALL_TOOL_CAPABILITIES
 
 _JsonDict = RootModel[dict]
+
+_AGENT_CALLABLE_NAMES: list[str] = [t.name for t in ALL_TOOL_CAPABILITIES if t.agent_callable]
+
+WORKER_TOOL_ACCESS: dict[str, list[str] | None] = {
+    "planner": None,  
+    "implementer": _AGENT_CALLABLE_NAMES,
+}
 
 
 class FileSnippet(BaseModel):
@@ -31,6 +39,7 @@ class ToolSummary(BaseModel):
     name: str
     description: str
     category: str
+    agent_callable: bool = False
 
 
 class TaskContext(BaseModel):
@@ -69,9 +78,19 @@ class TaskContext(BaseModel):
             for plan in self.active_plans:
                 parts.append(f"- {plan}")
 
-        if self.available_tools:
-            parts.append("## Available Tools")
-            for t in self.available_tools:
+        agent_tools = [t for t in self.available_tools if t.agent_callable]
+        system_tools = [t for t in self.available_tools if not t.agent_callable]
+
+        if agent_tools:
+            parts.append("## Your Tools (you can call these directly)")
+            for t in agent_tools:
+                parts.append(f"- `{t.name}` [{t.category}]: {t.description}")
+
+        if system_tools:
+            parts.append(
+                "## System Capabilities (used by workflow orchestration, not callable by you)"
+            )
+            for t in system_tools:
                 parts.append(f"- `{t.name}` [{t.category}]: {t.description}")
 
         parts.append(f"\n_Token budget remaining: {self.token_budget_remaining}_")
@@ -86,14 +105,14 @@ def _estimate_tokens(text: str) -> int:
 def _load_symbols() -> dict:
     symbols_path = _repo_root() / "repo_index" / "symbols.json"
     if symbols_path.exists():
-        return _JsonDict.model_validate_json(symbols_path.read_text()).root
+        return _JsonDict.model_validate_json(symbols_path.read_text(encoding="utf-8")).root
     return {}
 
 
 def _load_file_map() -> dict:
     file_map_path = _repo_root() / "repo_index" / "file_map.json"
     if file_map_path.exists():
-        return _JsonDict.model_validate_json(file_map_path.read_text()).root
+        return _JsonDict.model_validate_json(file_map_path.read_text(encoding="utf-8")).root
     return {}
 
 
@@ -250,7 +269,7 @@ def _find_relevant_docs(task: str, max_docs: int = 3) -> list[DocReference]:
     return [c for c, _ in scored[:max_docs]]
 
 
-def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
+def build_context(task: str, max_tokens: int = 8000, worker_role: str | None = None) -> TaskContext:
     """
     Build a scoped, budget-aware context package for an agent.
 
@@ -286,8 +305,21 @@ def build_context(task: str, max_tokens: int = 8000) -> TaskContext:
             budget -= cost
 
     all_tools = REGISTRY.all_tools()
+    if worker_role is not None:
+        if worker_role not in WORKER_TOOL_ACCESS:
+            available = ", ".join(sorted(WORKER_TOOL_ACCESS.keys()))
+            raise KeyError(f"Unknown worker_role '{worker_role}'. Available: {available}")
+        allowed_names = WORKER_TOOL_ACCESS[worker_role]
+        if allowed_names is not None:  
+            all_tools = [t for t in all_tools if t.name in set(allowed_names)]
     available_tools = [
-        ToolSummary(name=t.name, description=t.description, category=t.category) for t in all_tools
+        ToolSummary(
+            name=t.name,
+            description=t.description,
+            category=t.category,
+            agent_callable=t.agent_callable,
+        )
+        for t in all_tools
     ]
     tools_token_cost = sum(_estimate_tokens(t.name + t.description) for t in available_tools)
     budget -= tools_token_cost

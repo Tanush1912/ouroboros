@@ -13,7 +13,9 @@ from agents.core.config import get_model
 from agents.models.cost import TokenUsage
 from agents.models.post_mortem import HarnessImprovementOutput
 
-SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "post_mortem.txt").read_text()
+SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "post_mortem.txt").read_text(
+    encoding="utf-8"
+)
 
 _agent: Agent[None, HarnessImprovementOutput] | None = None
 

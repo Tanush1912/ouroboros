@@ -8,7 +8,7 @@ from pydantic_ai import tool
 
 from agents.core.paths import repo_root as _repo_root
 from agents.models.benchmark import BenchmarkResult, BenchmarkSampleResult, PerfComparisonResult
-from agents.tools.shell import _run
+from agents.tools.shell import run_subprocess
 
 
 @tool
@@ -21,7 +21,7 @@ def run_benchmark(
     bench_output = "/tmp/bench.json"
 
     start = time.monotonic()
-    returncode, _stdout, _stderr = _run(
+    returncode, _stdout, _stderr = run_subprocess(
         [
             "python",
             "-m",
@@ -41,7 +41,7 @@ def run_benchmark(
 
     if returncode == 0:
         try:
-            with open(bench_output) as f:
+            with open(bench_output, encoding="utf-8") as f:
                 data = json.load(f)
             for bench in data.get("benchmarks", []):
                 stats = bench.get("stats", {})

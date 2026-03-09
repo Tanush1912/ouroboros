@@ -13,7 +13,9 @@ from agents.models.cost import TokenUsage
 from agents.models.reviewer import ReviewOutput
 from agents.tools.git import get_pr_diff
 
-SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "reviewer.txt").read_text()
+SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "reviewer.txt").read_text(
+    encoding="utf-8"
+)
 
 _agent: Agent[None, ReviewOutput] | None = None
 

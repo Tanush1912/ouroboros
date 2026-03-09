@@ -17,7 +17,7 @@ def _load_dotenv() -> None:
     env_file = repo_root() / ".env"
     if not env_file.exists():
         return
-    for line in env_file.read_text().splitlines():
+    for line in env_file.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -78,14 +78,12 @@ def bootstrap(*, require_gh: bool = True, quiet: bool = False) -> dict[str, str]
     model_name = os.environ.get("OUROBOROS_MODEL", "gemini-3.0-flash-preview")
     logfire_token = os.environ.get("LOGFIRE_TOKEN", "")
 
-    # gh CLI check
     gh_ok = _check_gh_cli()
     if require_gh and not gh_ok:
         raise BootstrapError(
             "GitHub CLI (gh) is not installed or not authenticated.\nRun: gh auth login"
         )
 
-    # Initialise Logfire
     from agents.core.instrumentation import configure_logfire
 
     if logfire_token:

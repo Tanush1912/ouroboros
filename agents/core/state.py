@@ -39,6 +39,7 @@ class RalphState(TypedDict):
     error_log: list[str]
     ui_screenshots: list[str]
     node_token_usage: dict[str, dict[str, int]]
+    node_tool_calls: dict[str, int]
     reproduction_evidence: ReproductionResult | None
     perf_baseline: BenchmarkResult | None
     perf_result: PerfComparisonResult | None
@@ -71,13 +72,14 @@ class FeedbackState(TypedDict):
     ]
     error_log: list[str]
     node_token_usage: dict[str, dict[str, int]]
+    node_tool_calls: dict[str, int]
 
 
 def initial_feedback_state(
     pr_number: int,
     pr_branch: str,
     original_task: str,
-    feedback_comments: list[dict],
+    feedback_comments: list[dict[str, object]],
 ) -> FeedbackState:
     """Create a fresh initial state for a feedback loop run."""
     return FeedbackState(
@@ -96,6 +98,7 @@ def initial_feedback_state(
         status="gathering",
         error_log=[],
         node_token_usage={},
+        node_tool_calls={},
     )
 
 
@@ -120,6 +123,7 @@ def initial_state(task: str) -> RalphState:
         error_log=[],
         ui_screenshots=[],
         node_token_usage={},
+        node_tool_calls={},
         reproduction_evidence=None,
         perf_baseline=None,
         perf_result=None,

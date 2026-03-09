@@ -155,9 +155,11 @@ def reindex(paths: list[str], root: Path | None = None) -> tuple[dict, dict]:
     symbols_path = index_dir / "symbols.json"
     file_map_path = index_dir / "file_map.json"
 
-    symbols: dict[str, dict] = json.loads(symbols_path.read_text()) if symbols_path.exists() else {}
+    symbols: dict[str, dict] = (
+        json.loads(symbols_path.read_text(encoding="utf-8")) if symbols_path.exists() else {}
+    )
     file_map: dict[str, dict] = (
-        json.loads(file_map_path.read_text()) if file_map_path.exists() else {}
+        json.loads(file_map_path.read_text(encoding="utf-8")) if file_map_path.exists() else {}
     )
 
     stale_files = set(paths)

@@ -177,5 +177,193 @@ GOLDEN_RULES: list[LintRule] = [
     ),
 ]
 
-ALL_RULES: list[LintRule] = ARCH_RULES + GOLDEN_RULES
+WORKFLOW_RULES: list[LintRule] = [
+    LintRule(
+        id="WF-001",
+        name="node-must-guard",
+        description="Every workflow node must call pre_node_guard() at entry.",
+        severity="error",
+        agent_remediation=(
+            "Add `guard = pre_node_guard(state, 'node_name')` as the first line "
+            "of the node function, followed by "
+            "`if not guard.allowed: return {'status': 'escalated', "
+            "'error_log': state['error_log'] + [guard.reason]}`."
+        ),
+        docs_link="agents/core/guards.py",
+    ),
+    LintRule(
+        id="WF-002",
+        name="node-return-tracking",
+        description=(
+            "Every non-guard-failure return from a workflow node must include "
+            "total_tool_calls and node_tool_calls tracking keys."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Add 'total_tool_calls': state['total_tool_calls'] + N and "
+            "'node_tool_calls': update_node_tool_calls(state, 'node_name', N) "
+            "to the return dict. Use accumulate_usage() for LLM nodes."
+        ),
+        docs_link="agents/core/workflow_helpers.py",
+    ),
+    LintRule(
+        id="WF-003",
+        name="context-role-mismatch",
+        description=(
+            "build_context(worker_role=X) result must be passed to run_X(), "
+            "not to a different worker's runner."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Build separate contexts for each worker: "
+            "planner_ctx = build_context(task, worker_role='planner') and "
+            "impl_ctx = build_context(task, worker_role='implementer'). "
+            "Pass each to the matching run_*() function."
+        ),
+        docs_link="agents/core/context_builder.py",
+    ),
+    LintRule(
+        id="WF-004",
+        name="guard-exemption-requires-listing",
+        description=(
+            "Guard-exempt nodes must be listed in _EXEMPT_NODES with a reason. "
+            "A node without pre_node_guard() that is NOT in _EXEMPT_NODES is a violation."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Either add the guard call, or add the node name to _EXEMPT_NODES in "
+            "lint/workflow_lint.py with a comment explaining why it is exempt."
+        ),
+        docs_link="lint/workflow_lint.py",
+    ),
+    LintRule(
+        id="WF-005",
+        name="status-aware-edges",
+        description=(
+            "Nodes that can return status='failed' or status='escalated' must use "
+            "add_conditional_edges, not add_edge. A fixed edge silently continues "
+            "after a guard/error path."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Replace graph.add_edge(node, next) with "
+            "graph.add_conditional_edges(node, route_fn) where route_fn checks "
+            "state['status'] and routes to END or human_checkpoint on failure."
+        ),
+        docs_link="agents/workflows/ralph_routing.py",
+    ),
+    LintRule(
+        id="WF-006",
+        name="loop-tool-call-accounting",
+        description=(
+            "Tool calls inside for/while loops must use an attempt counter that "
+            "feeds into both total_tool_calls and node_tool_calls. Counting only "
+            "successes understates the budget."
+        ),
+        severity="warning",
+        agent_remediation=(
+            "Add an `attempts` counter incremented on every loop iteration, "
+            "regardless of success/failure. Use `attempts` (not `succeeded`) "
+            "for total_tool_calls and node_tool_calls updates."
+        ),
+    ),
+    LintRule(
+        id="WF-007",
+        name="budget-off-by-one",
+        description=(
+            "Post-call >= MAX_TOOL_CALLS_PER_NODE patterns turn the last allowed "
+            "call into a failure. Use > for post-call checks, or >= for pre-call."
+        ),
+        severity="warning",
+        agent_remediation=(
+            "Change the post-call check from `>= MAX_TOOL_CALLS_PER_NODE` to "
+            "`> MAX_TOOL_CALLS_PER_NODE`, or move the check before the call."
+        ),
+    ),
+    LintRule(
+        id="WF-009",
+        name="llm-node-must-accumulate-usage",
+        description=(
+            "Nodes calling run_planner, run_implementer, run_reviewer, or "
+            "run_post_mortem must use accumulate_usage() in the return path."
+        ),
+        severity="warning",
+        agent_remediation=(
+            "Add **accumulate_usage(state, usage, 'node_name', tool_calls=N) "
+            "to the return dict, and ensure the usage variable from the "
+            "run_*() call is passed through."
+        ),
+        docs_link="agents/core/workflow_helpers.py",
+    ),
+    LintRule(
+        id="WF-010",
+        name="no-direct-file-mutation-in-workflows",
+        description=(
+            "Workflow nodes must not call Path.write_text, unlink, mkdir, etc. "
+            "directly. Use apply_file_changes() or a registered tool."
+        ),
+        severity="warning",
+        agent_remediation=(
+            "Replace direct Path mutations with apply_file_changes() for "
+            "file writes, or use a tool from agents/tools/. "
+            "This prevents duplicated mutation logic across workflows."
+        ),
+    ),
+]
+
+GOLDEN_RULES_EXTENDED: list[LintRule] = [
+    LintRule(
+        id="GP-011",
+        name="no-cross-module-private-imports",
+        description="Do not import _-prefixed names from other modules.",
+        severity="warning",
+        agent_remediation=(
+            "Rename the private function/variable to a public name (remove _ prefix) "
+            "if it is intended to be part of the module's API. "
+            "If it must stay private, extract a public wrapper."
+        ),
+    ),
+    LintRule(
+        id="GP-012",
+        name="file-encoding",
+        description=("All file I/O (.read_text, .write_text, open) must specify encoding='utf-8'."),
+        severity="warning",
+        agent_remediation=(
+            "Add encoding='utf-8' as a keyword argument to the file I/O call. "
+            "For open(), add encoding='utf-8'. "
+            "For .read_text()/.write_text(), add encoding='utf-8'."
+        ),
+        auto_fixable=True,
+    ),
+    LintRule(
+        id="GP-013",
+        name="no-silent-exception-swallow",
+        description=(
+            "except Exception handlers must not silently swallow errors "
+            "(return {} or pass without error propagation)."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Add error propagation to the except handler: either re-raise, "
+            "append to error_log, or return a dict with 'error_log' or 'status' key. "
+            "Logging alone is not enough — the caller must know the operation failed."
+        ),
+    ),
+    LintRule(
+        id="GP-014",
+        name="no-hardcoded-guard-limits",
+        description=(
+            "Guard limits in workflow code must use constants from agents.core.guards, "
+            "not magic numbers."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Import the appropriate constant from agents.core.guards "
+            "(MAX_IMPLEMENT_ITERATIONS, MAX_REVIEW_ITERATIONS, MAX_TOOL_CALLS_PER_NODE, "
+            "MAX_TOTAL_TOOL_CALLS) and use it instead of the hardcoded number."
+        ),
+    ),
+]
+
+ALL_RULES: list[LintRule] = ARCH_RULES + GOLDEN_RULES + WORKFLOW_RULES + GOLDEN_RULES_EXTENDED
 RULES_BY_ID: dict[str, LintRule] = {r.id: r for r in ALL_RULES}

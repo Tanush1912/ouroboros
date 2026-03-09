@@ -20,14 +20,14 @@ class WriteResult(BaseModel):
     created: bool = Field(description="True if file was newly created, False if overwritten")
 
 
-class SearchMatch(BaseModel):
+class SearchMatchResult(BaseModel):
     file: str
     line: int
     column: int
     text: str = Field(description="The matching line content")
 
 
-class SymbolLocation(BaseModel):
+class SymbolLocationResult(BaseModel):
     name: str
     file: str
     line: int
@@ -70,7 +70,7 @@ def list_dir(path: str) -> list[str]:
 
 
 @tool
-def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatch]:
+def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatchResult]:
     """Search repository contents using ripgrep. Returns file + line matches."""
     root = _repo_root()
     cmd = [
@@ -89,7 +89,7 @@ def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatch]:
             if obj.get("type") == "match":
                 data = obj["data"]
                 matches.append(
-                    SearchMatch.model_validate(
+                    SearchMatchResult.model_validate(
                         {
                             "file": str(Path(data["path"]["text"]).relative_to(root)),
                             "line": data["line_number"],
@@ -104,15 +104,15 @@ def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatch]:
 
 
 @tool
-def search_symbol(name: str) -> SymbolLocation | None:
+def search_symbol(name: str) -> SymbolLocationResult | None:
     """Look up a symbol by name. Returns file + line. Never reads the whole repo."""
     symbols_path = _repo_root() / "repo_index" / "symbols.json"
     if not symbols_path.exists():
         return None
-    symbols = json.loads(symbols_path.read_text())
+    symbols = json.loads(symbols_path.read_text(encoding="utf-8"))
     if name in symbols:
         entry = symbols[name]
-        return SymbolLocation.model_validate(
+        return SymbolLocationResult.model_validate(
             {
                 "name": name,
                 "file": entry["file"],

@@ -9,7 +9,9 @@ from agents.core.config import get_model
 from agents.models.cleaner import CleanupOutput
 from agents.models.cost import TokenUsage
 
-SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "cleaner.txt").read_text()
+SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "cleaner.txt").read_text(
+    encoding="utf-8"
+)
 
 _agent: Agent[None, CleanupOutput] | None = None
 

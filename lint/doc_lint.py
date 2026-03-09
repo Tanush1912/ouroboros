@@ -16,14 +16,14 @@ def _load_symbols(root: Path) -> set[str]:
     symbols_path = root / "repo_index" / "symbols.json"
     if not symbols_path.exists():
         return set()
-    return set(json.loads(symbols_path.read_text()).keys())
+    return set(json.loads(symbols_path.read_text(encoding="utf-8")).keys())
 
 
 def _load_file_map(root: Path) -> set[str]:
     file_map_path = root / "repo_index" / "file_map.json"
     if not file_map_path.exists():
         return set()
-    return set(json.loads(file_map_path.read_text()).keys())
+    return set(json.loads(file_map_path.read_text(encoding="utf-8")).keys())
 
 
 _COMMON_NON_SYMBOLS = {
@@ -91,6 +91,15 @@ def check_doc_references(
             continue
 
         if ref.endswith("/"):
+            normalized = ref.rstrip("/")
+            while normalized.startswith("./"):
+                normalized = normalized[2:]
+            if normalized and "/" in normalized and not (root / normalized).exists():
+                violations.append(
+                    f"GP-008: {rel_doc} references directory `{ref}` which does not exist.\n"
+                    f"REMEDIATION: Update the reference to the current directory location, "
+                    f"or remove the reference if the directory was deleted."
+                )
             continue
         if "/" in ref:
             normalized = ref
