@@ -16,7 +16,7 @@ _JsonDict = RootModel[dict]
 _AGENT_CALLABLE_NAMES: list[str] = [t.name for t in ALL_TOOL_CAPABILITIES if t.agent_callable]
 
 WORKER_TOOL_ACCESS: dict[str, list[str] | None] = {
-    "planner": None,  
+    "planner": None,
     "implementer": _AGENT_CALLABLE_NAMES,
 }
 
@@ -310,7 +310,7 @@ def build_context(task: str, max_tokens: int = 8000, worker_role: str | None = N
             available = ", ".join(sorted(WORKER_TOOL_ACCESS.keys()))
             raise KeyError(f"Unknown worker_role '{worker_role}'. Available: {available}")
         allowed_names = WORKER_TOOL_ACCESS[worker_role]
-        if allowed_names is not None:  
+        if allowed_names is not None:
             all_tools = [t for t in all_tools if t.name in set(allowed_names)]
     available_tools = [
         ToolSummary(

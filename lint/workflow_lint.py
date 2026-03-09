@@ -99,10 +99,7 @@ def _is_guard_failure_return(node: ast.Dict) -> bool:
     if not keys or not keys.issubset(_GUARD_FAILURE_KEYS):
         return False
     # Verify that the dict values actually reference guard.reason
-    for value in node.values:
-        if value is not None and _references_guard_reason(value):
-            return True
-    return False
+    return any(value is not None and _references_guard_reason(value) for value in node.values)
 
 
 def _is_empty_return(node: ast.Dict) -> bool:
@@ -324,7 +321,7 @@ def check_wf007_budget_off_by_one(
                         f"off-by-one that escalates the last allowed call.\n"
                         f"REMEDIATION: {remediation}"
                     )
-                    return violations  
+                    return violations
     return violations
 
 

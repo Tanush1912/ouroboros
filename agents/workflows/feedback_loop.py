@@ -175,7 +175,7 @@ async def commit_push_node(state: FeedbackState) -> dict[str, Any]:
             "node_tool_calls": update_node_tool_calls(state, "commit_push_node", 2),
         }
 
-    node_calls = 2 
+    node_calls = 2
     return {
         "status": "replying",
         "total_tool_calls": state["total_tool_calls"] + node_calls,

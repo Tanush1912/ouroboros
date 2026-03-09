@@ -85,7 +85,7 @@ async def post_mortem_node(state: RalphState) -> dict[str, Any]:
     else:
         logfire.warning("post_mortem_issue_failed", error=issue_result.error)
 
-    node_calls = 2  
+    node_calls = 2
     return {
         "post_mortem": analysis,
         "improvement_issue_url": issue_url,

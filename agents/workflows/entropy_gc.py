@@ -58,7 +58,7 @@ async def entropy_scan_node(state: GCState) -> dict[str, Any]:
         "\n".join(lint_result.violations) if lint_result.violations else "No violations"
     )
     scan_report = f"Lint violations:\n{violations_text}\n\nAuto-fixed: {lint_result.auto_fixed}"
-    node_calls = 1  
+    node_calls = 1
     return {
         "scan_report": scan_report,
         "total_tool_calls": state["total_tool_calls"] + node_calls,
@@ -221,7 +221,7 @@ async def update_quality_score_node(state: GCState) -> dict[str, Any]:
         files=["docs/QUALITY_SCORE.md"],
     )
 
-    node_calls = 1  
+    node_calls = 1
     return {
         "quality_score_updated": commit_result.success,
         "total_tool_calls": state["total_tool_calls"] + node_calls,

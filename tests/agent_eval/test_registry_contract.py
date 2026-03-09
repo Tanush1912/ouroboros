@@ -111,7 +111,7 @@ def test_worker_tool_access_names_exist_in_registry():
     registry_names = set(REGISTRY.tool_names())
     for role, names in WORKER_TOOL_ACCESS.items():
         if names is None:
-            continue  
+            continue
         for name in names:
             assert name in registry_names, (
                 f"WORKER_TOOL_ACCESS['{role}'] references '{name}' which is not in REGISTRY"
