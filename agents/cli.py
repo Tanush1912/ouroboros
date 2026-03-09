@@ -124,8 +124,8 @@ def _cleanup_worktree(worktree_path: Path, branch: str) -> None:
             capture_output=True,
             text=True,
         )
-    except Exception:
-        pass
+    except Exception as e:
+        console.print(f"[yellow]worktree cleanup failed:[/yellow] {e}")
 
 
 @app.command()

@@ -28,6 +28,7 @@ Thumbs.db
 # Project-specific
 repo_index/symbols.json
 repo_index/file_map.json
+*.docx
 
 # Docker
 *.log

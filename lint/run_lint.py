@@ -1,21 +1,26 @@
 """CLI lint runner — used by CI and agents.
 
 Usage:
-  python lint/run_lint.py [path]           # Run all linters
-  python lint/run_lint.py --arch-only .   # Architecture lint only
-  python lint/run_lint.py --golden-only . # Golden lint only
-  python lint/run_lint.py --doc-only .    # Doc lint only
+  python lint/run_lint.py [path]              # Run all linters
+  python lint/run_lint.py --arch-only .      # Architecture lint only
+  python lint/run_lint.py --golden-only .    # Golden lint only (includes doc + workflow)
+  python lint/run_lint.py --doc-only .       # Doc lint only
+  python lint/run_lint.py --workflow-only .  # Workflow contract lint only
 """
 
 import subprocess
 import sys
+from pathlib import Path
+
+# Ensure repo root is on sys.path so `agents` package is importable
+# when running as `python lint/run_lint.py`.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from agents.core.paths import repo_root as _repo_root
 
 
 def run_all(path: str) -> int:
     from lint.arch_lint import run_arch_lint
-    from lint.doc_lint import run_doc_lint
     from lint.golden_lint import run_golden_lint
 
     root = _repo_root()
@@ -37,7 +42,7 @@ def run_all(path: str) -> int:
     if arch_violations:
         exit_code = 1
 
-    print("Running golden lint...")
+    print("Running golden lint (includes doc lint)...")
     golden_violations = run_golden_lint(path, root)
     for v in golden_violations:
         print(v)
@@ -45,15 +50,7 @@ def run_all(path: str) -> int:
     if golden_violations:
         exit_code = 1
 
-    print("Running doc lint...")
-    doc_violations = run_doc_lint(path, root)
-    for v in doc_violations:
-        print(v)
-        print()
-    if doc_violations:
-        exit_code = 1
-
-    total = len(arch_violations) + len(golden_violations) + len(doc_violations)
+    total = len(arch_violations) + len(golden_violations)
     if exit_code == 0:
         print("\n✓ All lint checks passed.")
     else:
@@ -88,6 +85,15 @@ def main() -> int:
 
         path = args[-1] if len(args) > 1 else "."
         violations = run_doc_lint(path)
+        for v in violations:
+            print(v)
+        return 1 if violations else 0
+
+    if "--workflow-only" in args:
+        from lint.workflow_lint import run_workflow_lint
+
+        path = args[-1] if len(args) > 1 else "."
+        violations = run_workflow_lint(path)
         for v in violations:
             print(v)
         return 1 if violations else 0

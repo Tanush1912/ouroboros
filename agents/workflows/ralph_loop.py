@@ -19,6 +19,11 @@ from langgraph.graph import END, StateGraph
 from agents.core.context_builder import build_context
 from agents.core.guards import pre_node_guard
 from agents.core.state import RalphState, initial_state
+from agents.core.workflow_helpers import (
+    accumulate_usage,
+    apply_file_changes,
+    update_node_tool_calls,
+)
 from agents.models.benchmark import PerfComparisonResult
 from agents.models.cost import CostSummary, RunMetrics, TokenUsage
 from agents.models.reproducer import ErrorContext, ReproductionResult
@@ -28,22 +33,17 @@ from agents.workers.planner import run_planner
 from agents.workers.reviewer import run_reviewer
 from agents.workers.validator import run_validator
 from agents.workflows.post_mortem import post_mortem_node
-
-
-def _accumulate_usage(state: RalphState, usage: TokenUsage, node_name: str) -> dict:
-    """Return state updates for token/cost accumulation, including per-node tracking."""
-    prev = state["node_token_usage"].get(node_name, {"tokens_in": 0, "tokens_out": 0})
-    updated_node_usage = dict(state["node_token_usage"])
-    updated_node_usage[node_name] = {
-        "tokens_in": prev["tokens_in"] + usage.tokens_in,
-        "tokens_out": prev["tokens_out"] + usage.tokens_out,
-    }
-    return {
-        "total_tokens_in": state["total_tokens_in"] + usage.tokens_in,
-        "total_tokens_out": state["total_tokens_out"] + usage.tokens_out,
-        "estimated_cost_usd": state["estimated_cost_usd"] + usage.cost_usd(),
-        "node_token_usage": updated_node_usage,
-    }
+from agents.workflows.ralph_routing import (
+    route_after_implement,
+    route_after_merge,
+    route_after_open_pr,
+    route_after_perf_validate,
+    route_after_plan,
+    route_after_reproduce,
+    route_after_review,
+    route_after_ui_validate,
+    route_after_validate,
+)
 
 
 async def plan_node(state: RalphState) -> dict[str, Any]:
@@ -51,52 +51,40 @@ async def plan_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    context = build_context(state["task"])
+    context = build_context(state["task"], worker_role="planner")
     plan, usage, tool_calls = await run_planner(state["task"], context)
+    node_calls = tool_calls + 1
     return {
         "plan": plan,
         "status": "implementing",
-        **_accumulate_usage(state, usage, "plan_node"),
-        "total_tool_calls": state["total_tool_calls"] + tool_calls + 1,
+        **accumulate_usage(state, usage, "plan_node", node_calls),
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
     }
-
-
-_BUG_FIX_KEYWORDS = {"fix", "bug", "error", "broken", "failing", "crash"}
-
-
-def route_after_plan(state: RalphState) -> str:
-    """Route to reproduce_node for bug-fix tasks, otherwise straight to implement."""
-    if state["status"] == "escalated":
-        return "implement_node"
-
-    has_prior_failure = state["validation"] is not None and not state["validation"].overall_pass
-    task_lower = state["task"].lower()
-    has_bug_keywords = any(kw in task_lower for kw in _BUG_FIX_KEYWORDS)
-
-    if has_prior_failure or has_bug_keywords:
-        return "reproduce_node"
-    return "implement_node"
 
 
 async def reproduce_node(state: RalphState) -> dict[str, Any]:
     """Attempt to reproduce a bug by running tests and capturing error context."""
-    from agents.tools.shell import _extract_traceback, _run
+    guard = pre_node_guard(state, "reproduce_node")
+    if not guard.allowed:
+        return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
+
+    from agents.tools.shell import extract_traceback, run_subprocess
 
     root_path = None
     try:
         from agents.core.paths import repo_root as _repo_root
 
         root_path = _repo_root()
-    except Exception:
-        pass
+    except Exception as e:
+        logfire.warning("reproduce_node_repo_root_failed", error=str(e))
 
     steps = ["pytest --tb=long -x"]
-    returncode, stdout, stderr = _run(
+    returncode, stdout, stderr = run_subprocess(
         ["python", "-m", "pytest", "--tb=long", "-x", "-q"],
         cwd=root_path,
     )
     combined = stdout + stderr
-    traceback_text = _extract_traceback(combined)
+    traceback_text = extract_traceback(combined)
     reproduced = returncode != 0
 
     error_context = None
@@ -128,7 +116,11 @@ async def reproduce_node(state: RalphState) -> dict[str, Any]:
         traceback_length=len(traceback_text),
     )
 
-    return {"reproduction_evidence": result, "total_tool_calls": state["total_tool_calls"] + 1}
+    return {
+        "reproduction_evidence": result,
+        "total_tool_calls": state["total_tool_calls"] + 1,
+        "node_tool_calls": update_node_tool_calls(state, "reproduce_node", 1),
+    }
 
 
 async def implement_node(state: RalphState) -> dict[str, Any]:
@@ -140,7 +132,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         }
 
     iteration = state["iteration_count"] + 1
-    context = build_context(state["task"])
+    context = build_context(state["task"], worker_role="implementer")
     impl, usage, tool_calls = await run_implementer(
         task=state["task"],
         plan=state["plan"],
@@ -150,23 +142,14 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
         reproduction_evidence=state.get("reproduction_evidence"),
     )
 
-    from agents.core.paths import repo_root as _repo_root
+    apply_file_changes(impl.files_changed)
 
-    root = _repo_root()
-
-    for change in impl.files_changed:
-        target = root / change.path
-        if change.operation == "delete":
-            target.unlink(missing_ok=True)
-        elif change.content is not None:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(change.content, encoding="utf-8")
-
+    node_calls = tool_calls + 1
     return {
         "files_changed": impl.files_changed,
         "iteration_count": iteration,
-        **_accumulate_usage(state, usage, "implement_node"),
-        "total_tool_calls": state["total_tool_calls"] + tool_calls + 1,
+        **accumulate_usage(state, usage, "implement_node", node_calls),
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
         "status": "validating",
     }
 
@@ -177,29 +160,20 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     validation = await run_validator(iteration=state["iteration_count"])
+    node_calls = 2  # run_tests + run_lint
     return {
         "validation": validation,
-        "total_tool_calls": state["total_tool_calls"] + 2,  # run_tests + run_lint
-        "status": "validating",
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
+        "node_tool_calls": update_node_tool_calls(state, "validate_node", node_calls),
     }
-
-
-def route_after_validate(state: RalphState) -> str:
-    if state["status"] == "escalated":
-        return "human_checkpoint"
-    validation = state["validation"]
-    if validation is None:
-        return "human_checkpoint"
-    route_map = {
-        "proceed": "perf_validate_node",
-        "retry": "implement_node",
-        "escalate": "human_checkpoint",
-    }
-    return route_map[validation.next_action]
 
 
 async def perf_validate_node(state: RalphState) -> dict[str, Any]:
     """Run benchmarks and compare against baseline. Informational only in v1."""
+    guard = pre_node_guard(state, "perf_validate_node")
+    if not guard.allowed:
+        return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
+
     plan = state["plan"]
     if plan and plan.risk_level == "low":
         logfire.info("perf_validate_skipped", reason="low risk change")
@@ -219,10 +193,18 @@ async def perf_validate_node(state: RalphState) -> dict[str, Any]:
                 "perf_regression_detected",
                 regressions=comparison.regressions,
             )
-        return {"perf_result": comparison, "total_tool_calls": state["total_tool_calls"] + 1}
+        return {
+            "perf_result": comparison,
+            "total_tool_calls": state["total_tool_calls"] + 1,
+            "node_tool_calls": update_node_tool_calls(state, "perf_validate_node", 1),
+        }
     except Exception as e:
         logfire.warning("perf_validate_failed", error=str(e))
-        return {}
+        return {
+            "error_log": state["error_log"] + [f"perf_validate_node failed: {e}"],
+            "total_tool_calls": state["total_tool_calls"] + 1,
+            "node_tool_calls": update_node_tool_calls(state, "perf_validate_node", 1),
+        }
 
 
 async def ui_validate_node(state: RalphState) -> dict[str, Any]:
@@ -231,6 +213,10 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
     Requires APP_URL env var (set by worktree_up.sh). Skips gracefully if not set
     or if plan.requires_browser_validation is False.
     """
+    guard = pre_node_guard(state, "ui_validate_node")
+    if not guard.allowed:
+        return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
+
     plan = state["plan"]
     if not plan or not plan.requires_browser_validation:
         return {}
@@ -263,13 +249,22 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
         return {
             "ui_screenshots": state["ui_screenshots"] + [screenshot.image_base64],
             "total_tool_calls": state["total_tool_calls"] + 3,
+            "node_tool_calls": update_node_tool_calls(state, "ui_validate_node", 3),
         }
     except Exception as e:
         logfire.warning("ui_validate_failed", error=str(e), url=app_url)
-        return {"total_tool_calls": state["total_tool_calls"] + 1}
+        return {
+            "error_log": state["error_log"] + [f"ui_validate_node failed: {e}"],
+            "total_tool_calls": state["total_tool_calls"] + 1,
+            "node_tool_calls": update_node_tool_calls(state, "ui_validate_node", 1),
+        }
 
 
 async def open_pr_node(state: RalphState) -> dict[str, Any]:
+    guard = pre_node_guard(state, "open_pr_node")
+    if not guard.allowed:
+        return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
+
     changed_paths = [f.path for f in state["files_changed"]]
     commit_result = await commit.fn(
         message=f"feat: {state['task'][:72]}",
@@ -279,6 +274,8 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
         return {
             "status": "failed",
             "error_log": state["error_log"] + [f"Commit failed: {commit_result.error}"],
+            "total_tool_calls": state["total_tool_calls"] + 1,
+            "node_tool_calls": update_node_tool_calls(state, "open_pr_node", 1),
         }
 
     screenshot_note = ""
@@ -298,12 +295,16 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
         return {
             "status": "failed",
             "error_log": state["error_log"] + [f"PR creation failed: {pr_result.error}"],
+            "total_tool_calls": state["total_tool_calls"] + 2,
+            "node_tool_calls": update_node_tool_calls(state, "open_pr_node", 2),
         }
 
+    node_calls = 2  # commit + open_pr
     return {
         "pr_url": pr_result.url,
         "pr_number": pr_result.number,
-        "total_tool_calls": state["total_tool_calls"] + 2,  # commit + open_pr
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
+        "node_tool_calls": update_node_tool_calls(state, "open_pr_node", node_calls),
         "status": "reviewing",
     }
 
@@ -314,36 +315,36 @@ async def review_loop_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     review, usage = await run_reviewer(state["pr_number"], state["task"])
+    node_calls = 1  # get_pr_diff in reviewer
     return {
         "review": review,
         "review_iteration_count": state["review_iteration_count"] + 1,
-        **_accumulate_usage(state, usage, "review_loop_node"),
-        "total_tool_calls": state["total_tool_calls"] + 1,  # get_pr_diff in reviewer
+        **accumulate_usage(state, usage, "review_loop_node", node_calls),
+        "total_tool_calls": state["total_tool_calls"] + node_calls,
     }
 
 
-def route_after_review(state: RalphState) -> str:
-    if state["status"] == "escalated":
-        return "human_checkpoint"
-    review = state["review"]
-    if review is None or not review.approved:
-        if state["review_iteration_count"] >= 3:
-            return "human_checkpoint"
-        return "implement_node"
-    return "merge_node"
-
-
 async def merge_node(state: RalphState) -> dict[str, Any]:
+    guard = pre_node_guard(state, "merge_node")
+    if not guard.allowed:
+        return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
+
     result = await merge_pr.fn(pr_number=state["pr_number"])
     if not result.success:
         return {
             "status": "failed",
             "error_log": state["error_log"] + [f"Merge failed: {result.error}"],
+            "total_tool_calls": state["total_tool_calls"] + 1,
+            "node_tool_calls": update_node_tool_calls(state, "merge_node", 1),
         }
-    return {"status": "done", "total_tool_calls": state["total_tool_calls"] + 1}
+    return {
+        "status": "done",
+        "total_tool_calls": state["total_tool_calls"] + 1,
+        "node_tool_calls": update_node_tool_calls(state, "merge_node", 1),
+    }
 
 
-async def human_checkpoint(state: RalphState) -> dict[str, Any]:
+def human_checkpoint(state: RalphState) -> dict[str, Any]:
     logfire.warning(
         "human_escalation_required",
         task=state["task"],
@@ -371,14 +372,14 @@ def build_ralph_graph() -> StateGraph:
 
     graph.set_entry_point("plan_node")
     graph.add_conditional_edges("plan_node", route_after_plan)
-    graph.add_edge("reproduce_node", "implement_node")
-    graph.add_edge("implement_node", "validate_node")
+    graph.add_conditional_edges("reproduce_node", route_after_reproduce)
+    graph.add_conditional_edges("implement_node", route_after_implement)
     graph.add_conditional_edges("validate_node", route_after_validate)
-    graph.add_edge("perf_validate_node", "ui_validate_node")
-    graph.add_edge("ui_validate_node", "open_pr_node")
-    graph.add_edge("open_pr_node", "review_loop_node")
+    graph.add_conditional_edges("perf_validate_node", route_after_perf_validate)
+    graph.add_conditional_edges("ui_validate_node", route_after_ui_validate)
+    graph.add_conditional_edges("open_pr_node", route_after_open_pr)
     graph.add_conditional_edges("review_loop_node", route_after_review)
-    graph.add_edge("merge_node", END)
+    graph.add_conditional_edges("merge_node", route_after_merge)
     graph.add_edge("human_checkpoint", "post_mortem_node")
     graph.add_edge("post_mortem_node", END)
 

@@ -28,7 +28,7 @@ class CommandResult(BaseModel):
     success: bool
 
 
-def _run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
+def run_subprocess(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd or _repo_root())
     return result.returncode, result.stdout, result.stderr
 
@@ -39,7 +39,7 @@ def run_tests(path: str = ".") -> TestResult:
     import time
 
     start = time.monotonic()
-    returncode, stdout, stderr = _run(
+    returncode, stdout, stderr = run_subprocess(
         ["python", "-m", "pytest", path, "--tb=short", "-q"],
         cwd=_repo_root(),
     )
@@ -60,19 +60,19 @@ def run_lint(path: str = ".") -> LintResult:
     violations = []
     auto_fixed = 0
 
-    returncode, stdout, _stderr = _run(["python", "-m", "ruff", "check", path], cwd=root)
+    returncode, stdout, _stderr = run_subprocess(["python", "-m", "ruff", "check", path], cwd=root)
     if returncode != 0:
         for line in stdout.splitlines():
             if line.strip():
                 violations.append(f"RUFF: {line.strip()}")
 
-    returncode, stdout, _stderr = _run(
+    returncode, stdout, _stderr = run_subprocess(
         ["python", "lint/run_lint.py", "--arch-only", path], cwd=root
     )
     if returncode != 0:
         violations.extend(stdout.splitlines())
 
-    returncode, stdout, _stderr = _run(
+    returncode, stdout, _stderr = run_subprocess(
         ["python", "lint/run_lint.py", "--golden-only", path], cwd=root
     )
     if returncode != 0:
@@ -87,7 +87,7 @@ def run_build() -> BuildResult:
     import time
 
     start = time.monotonic()
-    returncode, stdout, stderr = _run(["python", "-m", "build"])
+    returncode, stdout, stderr = run_subprocess(["python", "-m", "build"])
     duration = time.monotonic() - start
     return BuildResult(
         success=returncode == 0,
@@ -102,7 +102,7 @@ def run_single_test(test_path: str) -> TestResult:
     import time
 
     start = time.monotonic()
-    returncode, stdout, stderr = _run(
+    returncode, stdout, stderr = run_subprocess(
         ["python", "-m", "pytest", test_path, "--tb=long", "-v"],
         cwd=_repo_root(),
     )
@@ -116,7 +116,7 @@ def run_single_test(test_path: str) -> TestResult:
     return TestResult(passed=passed, failures=failures, duration_seconds=duration)
 
 
-def _extract_traceback(text: str) -> str:
+def extract_traceback(text: str) -> str:
     """Extract Python traceback from command output."""
     lines = text.splitlines()
     tb_start = None
@@ -145,7 +145,7 @@ def capture_error_context(command: str, cwd: str = ".") -> ErrorContext:
 
     result = subprocess.run(shlex.split(command), capture_output=True, text=True, cwd=work_dir)
     combined = result.stdout + result.stderr
-    traceback_text = _extract_traceback(combined)
+    traceback_text = extract_traceback(combined)
 
     relevant_logs = [
         line.strip()

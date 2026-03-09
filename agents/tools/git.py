@@ -214,7 +214,7 @@ def get_pr_comments(pr_number: int) -> list[PRComment]:
     ]
 
 
-class PRMetadata(BaseModel):
+class PRMetadataSchema(BaseModel):
     title: str
     body: str
     branch: str = Field(description="Head branch name")
@@ -228,7 +228,7 @@ class PushResult(BaseModel):
     error: str = Field(default="")
 
 
-class _PRMetadataSchema(BaseModel):
+class _PRMetadataRawSchema(BaseModel):
     """Raw GitHub API response schema for PR metadata (GP-004 boundary validation)."""
 
     model_config = {"populate_by_name": True}
@@ -241,7 +241,7 @@ class _PRMetadataSchema(BaseModel):
     author: dict[str, object] = Field(default_factory=dict)
 
 
-def get_pr_metadata(pr_number: int) -> PRMetadata:
+def get_pr_metadata(pr_number: int) -> PRMetadataSchema:
     """Fetch PR title, body, branch, labels, and author via gh CLI."""
     rc, out, err = _run(
         [
@@ -255,8 +255,8 @@ def get_pr_metadata(pr_number: int) -> PRMetadata:
     )
     if rc != 0:
         raise RuntimeError(f"gh pr view failed: {err}")
-    raw = _PRMetadataSchema.model_validate_json(out)
-    return PRMetadata(
+    raw = _PRMetadataRawSchema.model_validate_json(out)
+    return PRMetadataSchema(
         title=raw.title,
         body=raw.body,
         branch=raw.head_ref_name,

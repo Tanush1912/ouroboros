@@ -8,6 +8,7 @@ when set after module import.
 """
 
 import os
+from typing import Any
 
 import httpx
 from pydantic import BaseModel, Field
@@ -22,29 +23,51 @@ def _victoria_metrics_url() -> str:
     return os.environ.get("VICTORIA_METRICS_URL", "http://localhost:8428")
 
 
-class LogLine(BaseModel):
+class LogLineSchema(BaseModel):
     timestamp: str
     stream: dict[str, str] = Field(description="Log stream labels")
     message: str
 
 
-class MetricSample(BaseModel):
+class MetricSampleSchema(BaseModel):
     timestamp: float
     value: float
 
 
-class MetricSeries(BaseModel):
+class MetricSeriesSchema(BaseModel):
     labels: dict[str, str]
-    samples: list[MetricSample]
+    samples: list[MetricSampleSchema]
 
 
 class MetricResult(BaseModel):
     query: str
-    series: list[MetricSeries]
+    series: list[MetricSeriesSchema]
+
+
+class _LogStreamSchema(BaseModel):
+    stream: dict[str, str] = Field(default_factory=dict)
+    values: list[list[str]] = Field(default_factory=list)
+
+
+class _VictoriaLogsSchema(BaseModel):
+    streams: list[_LogStreamSchema] = Field(default_factory=list)
+
+
+class _MetricSeriesRawSchema(BaseModel):
+    metric: dict[str, str] = Field(default_factory=dict)
+    values: list[list[Any]] = Field(default_factory=list)
+
+
+class _MetricDataSchema(BaseModel):
+    result: list[_MetricSeriesRawSchema] = Field(default_factory=list)
+
+
+class _VictoriaMetricsSchema(BaseModel):
+    data: _MetricDataSchema = Field(default_factory=_MetricDataSchema)
 
 
 @tool
-async def query_logs(logql: str, duration: str = "1h") -> list[LogLine]:
+async def query_logs(logql: str, duration: str = "1h") -> list[LogLineSchema]:
     """Query VictoriaLogs with LogQL. E.g. '{service="api"} |= "error"'"""
     async with httpx.AsyncClient() as client:
         response = await client.get(
@@ -53,13 +76,13 @@ async def query_logs(logql: str, duration: str = "1h") -> list[LogLine]:
             timeout=30.0,
         )
         response.raise_for_status()
-        data = response.json()
+        parsed = _VictoriaLogsSchema.model_validate(response.json())
 
     lines = []
-    for entry in data.get("streams", []):
-        stream = entry.get("stream", {})
-        for ts, msg in entry.get("values", []):
-            lines.append(LogLine(timestamp=ts, stream=stream, message=msg))
+    for entry in parsed.streams:
+        for val in entry.values:
+            if len(val) >= 2:
+                lines.append(LogLineSchema(timestamp=val[0], stream=entry.stream, message=val[1]))
     return lines
 
 
@@ -73,13 +96,14 @@ async def query_metrics(promql: str, duration: str = "1h") -> MetricResult:
             timeout=30.0,
         )
         response.raise_for_status()
-        data = response.json()
+        parsed = _VictoriaMetricsSchema.model_validate(response.json())
 
     series = []
-    for result in data.get("data", {}).get("result", []):
-        labels = result.get("metric", {})
+    for result in parsed.data.result:
         samples = [
-            MetricSample(timestamp=ts, value=float(val)) for ts, val in result.get("values", [])
+            MetricSampleSchema(timestamp=v[0], value=float(v[1]))
+            for v in result.values
+            if len(v) >= 2
         ]
-        series.append(MetricSeries(labels=labels, samples=samples))
+        series.append(MetricSeriesSchema(labels=result.metric, samples=samples))
     return MetricResult(query=promql, series=series)

@@ -16,9 +16,11 @@ from agents.models.implementer import ImplementOutput
 from agents.models.planner import PlanOutput
 from agents.models.reproducer import ReproductionResult
 from agents.models.validator import ValidationOutput
-from agents.tools.fs import list_dir, read_file, search_repo, search_symbol
+from agents.tools.tool_wiring import resolve_worker_tools
 
-SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "implementer.txt").read_text()
+SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "implementer.txt").read_text(
+    encoding="utf-8"
+)
 
 _agent: Agent[None, ImplementOutput] | None = None
 
@@ -30,7 +32,7 @@ def _get_agent() -> Agent[None, ImplementOutput]:
             model=get_model(),
             result_type=ImplementOutput,
             system_prompt=SYSTEM_PROMPT,
-            tools=[read_file, list_dir, search_repo, search_symbol],
+            tools=resolve_worker_tools("implementer"),
             retries=3,
         )
     return _agent
@@ -95,10 +97,10 @@ async def run_implementer(
     previous_validation: ValidationOutput | None = None,
     iteration: int = 1,
     reproduction_evidence: ReproductionResult | None = None,
-) -> tuple[ImplementOutput, TokenUsage]:
-    """Run the implementer agent. Returns (ImplementOutput, TokenUsage) for cost tracking."""
+) -> tuple[ImplementOutput, TokenUsage, int]:
+    """Run the implementer agent. Returns (ImplementOutput, TokenUsage, tool_call_count)."""
     if context is None:
-        context = build_context(task)
+        context = build_context(task, worker_role="implementer")
 
     prompt = _build_prompt(task, plan, context, previous_validation, reproduction_evidence)
 

@@ -1,6 +1,7 @@
-"""Golden Principles linter — GP-001 through GP-010.
+"""Golden Principles linter — GP-001 through GP-010 (core) + GP-011..GP-014 (ext).
 
 Enforces the machine-checkable rules in docs/GOLDEN_PRINCIPLES.md.
+GP-011 through GP-014 live in lint/golden_lint_ext.py (GP-002 compliance).
 """
 
 import ast
@@ -53,7 +54,12 @@ def _all_python_files(root: Path, exclude_scripts: bool = False) -> list[Path]:
 
 
 def check_gp001_duplicates(root: Path) -> list[str]:
-    """GP-001: No duplicate utility functions across packages."""
+    """GP-001: No duplicate utility functions across packages.
+
+    Checks all public functions for duplicates. For test files (tests/),
+    also checks _-prefixed functions since duplicate test helpers across
+    test files should be extracted to conftest.py.
+    """
     violations = []
     func_bodies: dict[str, list[str]] = {}
 
@@ -64,9 +70,11 @@ def check_gp001_duplicates(root: Path) -> list[str]:
         except SyntaxError:
             continue
 
+        is_test_file = "tests" in py_file.relative_to(root).parts
+
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if node.name.startswith("_"):
+                if node.name.startswith("_") and not is_test_file:
                     continue
                 body_source = ast.unparse(node)
                 func_bodies.setdefault(body_source, []).append(
@@ -75,6 +83,9 @@ def check_gp001_duplicates(root: Path) -> list[str]:
 
     for _body, locations in func_bodies.items():
         if len(locations) > 1:
+            files = {loc.rsplit(":", 1)[0] for loc in locations}
+            if len(files) < 2:
+                continue
             rule = RULES_BY_ID["GP-001"]
             violations.append(
                 f"GP-001: Duplicate function detected in {len(locations)} locations:\n"
@@ -214,13 +225,21 @@ def check_gp005_no_print(root: Path) -> list[str]:
 
 
 def check_gp006_model_naming(root: Path) -> list[str]:
-    """GP-006: Pydantic BaseModel subclasses in agents/models/ must use approved suffixes."""
+    """GP-006: Pydantic BaseModel subclasses must use approved suffixes.
+
+    Checks all Python files under agents/ (not just agents/models/).
+    Strips leading underscores before checking the suffix so _FooSchema passes
+    but _FooEntry does not.
+    """
     violations = []
-    models_dir = root / "agents" / "models"
-    if not models_dir.exists():
+    agents_dir = root / "agents"
+    if not agents_dir.exists():
         return []
 
-    for py_file in models_dir.glob("*.py"):
+    for py_file in agents_dir.rglob("*.py"):
+        parts = set(py_file.parts)
+        if parts.intersection({".venv", "venv", "__pycache__"}):
+            continue
         try:
             source = py_file.read_text(encoding="utf-8")
             tree = ast.parse(source)
@@ -236,7 +255,8 @@ def check_gp006_model_naming(root: Path) -> list[str]:
             ]
             if "BaseModel" not in base_names:
                 continue
-            if not any(node.name.endswith(s) for s in _GP006_ALLOWED_SUFFIXES):
+            check_name = node.name.lstrip("_")
+            if not any(check_name.endswith(s) for s in _GP006_ALLOWED_SUFFIXES):
                 rule = RULES_BY_ID["GP-006"]
                 violations.append(
                     f"GP-006: {py_file.relative_to(root)}:{node.lineno} "
@@ -330,6 +350,13 @@ def run_golden_lint(path: str, repo_root: Path | None = None) -> list[str]:
         repo_root = _repo_root()
 
     from lint.doc_lint import run_doc_lint
+    from lint.golden_lint_ext import (
+        check_gp011_cross_module_private_imports,
+        check_gp012_file_encoding,
+        check_gp013_silent_exception,
+        check_gp014_hardcoded_guard_limits,
+    )
+    from lint.workflow_lint import run_workflow_lint
 
     violations = []
     violations.extend(check_gp001_duplicates(repo_root))
@@ -339,9 +366,14 @@ def run_golden_lint(path: str, repo_root: Path | None = None) -> list[str]:
     violations.extend(check_gp005_no_print(repo_root))
     violations.extend(check_gp006_model_naming(repo_root))
     violations.extend(check_gp007_dead_imports(repo_root))
-    violations.extend(run_doc_lint(path, repo_root=repo_root))  # GP-008
+    violations.extend(run_doc_lint(path, repo_root=repo_root))
     violations.extend(check_gp009_active_plans(repo_root))
     violations.extend(check_gp010_quality_score(repo_root))
+    violations.extend(check_gp011_cross_module_private_imports(repo_root))
+    violations.extend(check_gp012_file_encoding(repo_root))
+    violations.extend(check_gp013_silent_exception(repo_root))
+    violations.extend(check_gp014_hardcoded_guard_limits(repo_root))
+    violations.extend(run_workflow_lint(path, repo_root=repo_root))
     return violations
 
 
