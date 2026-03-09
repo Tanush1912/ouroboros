@@ -106,7 +106,7 @@
   },
   "_print_banner": {
     "file": "agents/core/bootstrap.py",
-    "line": 111,
+    "line": 109,
     "kind": "function"
   },
   "__init__": {
@@ -141,132 +141,142 @@
   },
   "FileSnippet": {
     "file": "agents/core/context_builder.py",
-    "line": 16,
+    "line": 24,
     "kind": "class"
   },
   "DocReference": {
     "file": "agents/core/context_builder.py",
-    "line": 24,
+    "line": 32,
     "kind": "class"
   },
   "ToolSummary": {
     "file": "agents/core/context_builder.py",
-    "line": 30,
+    "line": 38,
     "kind": "class"
   },
   "TaskContext": {
     "file": "agents/core/context_builder.py",
-    "line": 36,
+    "line": 45,
     "kind": "class"
   },
   "_estimate_tokens": {
     "file": "agents/core/context_builder.py",
-    "line": 81,
+    "line": 100,
     "kind": "function"
   },
   "_load_symbols": {
     "file": "agents/core/context_builder.py",
-    "line": 86,
+    "line": 105,
     "kind": "function"
   },
   "_load_file_map": {
     "file": "agents/core/context_builder.py",
-    "line": 93,
+    "line": 112,
     "kind": "function"
   },
   "_extract_intent_keywords": {
     "file": "agents/core/context_builder.py",
-    "line": 100,
+    "line": 119,
     "kind": "function"
   },
   "_find_relevant_files": {
     "file": "agents/core/context_builder.py",
-    "line": 107,
+    "line": 126,
     "kind": "function"
   },
   "_read_snippet": {
     "file": "agents/core/context_builder.py",
-    "line": 136,
+    "line": 155,
     "kind": "function"
   },
   "_load_arch_rules": {
     "file": "agents/core/context_builder.py",
-    "line": 151,
+    "line": 170,
     "kind": "function"
   },
   "_load_active_plans": {
     "file": "agents/core/context_builder.py",
-    "line": 169,
+    "line": 188,
     "kind": "function"
   },
   "_discover_doc_files": {
     "file": "agents/core/context_builder.py",
-    "line": 181,
+    "line": 200,
     "kind": "function"
   },
   "_chunk_markdown": {
     "file": "agents/core/context_builder.py",
-    "line": 195,
+    "line": 214,
     "kind": "function"
   },
   "_score_doc_chunk": {
     "file": "agents/core/context_builder.py",
-    "line": 224,
+    "line": 243,
     "kind": "function"
   },
   "_find_relevant_docs": {
     "file": "agents/core/context_builder.py",
-    "line": 237,
+    "line": 256,
     "kind": "function"
   },
   "build_context": {
     "file": "agents/core/context_builder.py",
-    "line": 253,
+    "line": 272,
     "kind": "function"
   },
   "to_prompt_text": {
     "file": "agents/core/context_builder.py",
-    "line": 45,
+    "line": 54,
     "kind": "function"
   },
   "MAX_IMPLEMENT_ITERATIONS": {
     "file": "agents/core/guards.py",
-    "line": 15,
+    "line": 20,
     "kind": "constant"
   },
   "MAX_REVIEW_ITERATIONS": {
     "file": "agents/core/guards.py",
-    "line": 16,
+    "line": 21,
     "kind": "constant"
   },
   "MAX_TOOL_CALLS_PER_NODE": {
     "file": "agents/core/guards.py",
-    "line": 17,
+    "line": 22,
     "kind": "constant"
   },
   "MAX_TOTAL_TOOL_CALLS": {
     "file": "agents/core/guards.py",
-    "line": 18,
+    "line": 23,
     "kind": "constant"
   },
   "MAX_COST_USD_PER_RUN": {
     "file": "agents/core/guards.py",
-    "line": 19,
+    "line": 24,
+    "kind": "constant"
+  },
+  "_IMPLEMENT_NODES": {
+    "file": "agents/core/guards.py",
+    "line": 26,
+    "kind": "constant"
+  },
+  "_REVIEW_NODES": {
+    "file": "agents/core/guards.py",
+    "line": 27,
     "kind": "constant"
   },
   "GuardResult": {
     "file": "agents/core/guards.py",
-    "line": 22,
+    "line": 30,
     "kind": "class"
   },
   "check_guards": {
     "file": "agents/core/guards.py",
-    "line": 28,
+    "line": 36,
     "kind": "function"
   },
   "pre_node_guard": {
     "file": "agents/core/guards.py",
-    "line": 72,
+    "line": 101,
     "kind": "function"
   },
   "configure_logfire": {
@@ -286,17 +296,32 @@
   },
   "FeedbackState": {
     "file": "agents/core/state.py",
-    "line": 49,
+    "line": 50,
     "kind": "class"
   },
   "initial_feedback_state": {
     "file": "agents/core/state.py",
-    "line": 76,
+    "line": 78,
     "kind": "function"
   },
   "initial_state": {
     "file": "agents/core/state.py",
-    "line": 102,
+    "line": 105,
+    "kind": "function"
+  },
+  "apply_file_changes": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 16,
+    "kind": "function"
+  },
+  "accumulate_usage": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 32,
+    "kind": "function"
+  },
+  "update_node_tool_calls": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 56,
     "kind": "function"
   },
   "BenchmarkSampleResult": {
@@ -409,45 +434,10 @@
     "line": 22,
     "kind": "class"
   },
-  "ToolCapability": {
-    "file": "agents/models/registry.py",
-    "line": 12,
-    "kind": "class"
-  },
-  "ToolRegistry": {
-    "file": "agents/models/registry.py",
-    "line": 26,
-    "kind": "class"
-  },
   "REGISTRY": {
     "file": "agents/models/registry.py",
-    "line": 48,
+    "line": 16,
     "kind": "constant"
-  },
-  "register": {
-    "file": "agents/models/registry.py",
-    "line": 32,
-    "kind": "function"
-  },
-  "all_tools": {
-    "file": "agents/models/registry.py",
-    "line": 35,
-    "kind": "function"
-  },
-  "tools_for_category": {
-    "file": "agents/models/registry.py",
-    "line": 38,
-    "kind": "function"
-  },
-  "get_tool": {
-    "file": "agents/models/registry.py",
-    "line": 41,
-    "kind": "function"
-  },
-  "tool_names": {
-    "file": "agents/models/registry.py",
-    "line": 44,
-    "kind": "function"
   },
   "ErrorContext": {
     "file": "agents/models/reproducer.py",
@@ -468,6 +458,51 @@
     "file": "agents/models/reviewer.py",
     "line": 20,
     "kind": "class"
+  },
+  "ToolCapability": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 13,
+    "kind": "class"
+  },
+  "ToolRegistry": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 35,
+    "kind": "class"
+  },
+  "register_all_tools": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 344,
+    "kind": "function"
+  },
+  "register": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 41,
+    "kind": "function"
+  },
+  "all_tools": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 44,
+    "kind": "function"
+  },
+  "tools_for_category": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 47,
+    "kind": "function"
+  },
+  "get_tool": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 50,
+    "kind": "function"
+  },
+  "tool_names": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 53,
+    "kind": "function"
+  },
+  "agent_callable_tools": {
+    "file": "agents/models/tool_catalog.py",
+    "line": 56,
+    "kind": "function"
   },
   "TestResult": {
     "file": "agents/models/validator.py",
@@ -574,12 +609,12 @@
     "line": 17,
     "kind": "class"
   },
-  "SearchMatch": {
+  "SearchMatchResult": {
     "file": "agents/tools/fs.py",
     "line": 23,
     "kind": "class"
   },
-  "SymbolLocation": {
+  "SymbolLocationResult": {
     "file": "agents/tools/fs.py",
     "line": 30,
     "kind": "class"
@@ -684,7 +719,7 @@
     "line": 186,
     "kind": "function"
   },
-  "PRMetadata": {
+  "PRMetadataSchema": {
     "file": "agents/tools/git.py",
     "line": 217,
     "kind": "class"
@@ -694,7 +729,7 @@
     "line": 226,
     "kind": "class"
   },
-  "_PRMetadataSchema": {
+  "_PRMetadataRawSchema": {
     "file": "agents/tools/git.py",
     "line": 231,
     "kind": "class"
@@ -756,42 +791,67 @@
   },
   "_victoria_logs_url": {
     "file": "agents/tools/observability.py",
-    "line": 17,
+    "line": 18,
     "kind": "function"
   },
   "_victoria_metrics_url": {
     "file": "agents/tools/observability.py",
-    "line": 21,
+    "line": 22,
     "kind": "function"
   },
-  "LogLine": {
+  "LogLineSchema": {
     "file": "agents/tools/observability.py",
-    "line": 25,
+    "line": 26,
     "kind": "class"
   },
-  "MetricSample": {
+  "MetricSampleSchema": {
     "file": "agents/tools/observability.py",
-    "line": 31,
+    "line": 32,
     "kind": "class"
   },
-  "MetricSeries": {
+  "MetricSeriesSchema": {
     "file": "agents/tools/observability.py",
-    "line": 36,
+    "line": 37,
     "kind": "class"
   },
   "MetricResult": {
     "file": "agents/tools/observability.py",
-    "line": 41,
+    "line": 42,
+    "kind": "class"
+  },
+  "_LogStreamSchema": {
+    "file": "agents/tools/observability.py",
+    "line": 47,
+    "kind": "class"
+  },
+  "_VictoriaLogsSchema": {
+    "file": "agents/tools/observability.py",
+    "line": 52,
+    "kind": "class"
+  },
+  "_MetricSeriesRawSchema": {
+    "file": "agents/tools/observability.py",
+    "line": 56,
+    "kind": "class"
+  },
+  "_MetricDataSchema": {
+    "file": "agents/tools/observability.py",
+    "line": 61,
+    "kind": "class"
+  },
+  "_VictoriaMetricsSchema": {
+    "file": "agents/tools/observability.py",
+    "line": 65,
     "kind": "class"
   },
   "query_logs": {
     "file": "agents/tools/observability.py",
-    "line": 47,
+    "line": 70,
     "kind": "function"
   },
   "query_metrics": {
     "file": "agents/tools/observability.py",
-    "line": 67,
+    "line": 90,
     "kind": "function"
   },
   "BuildResult": {
@@ -803,6 +863,11 @@
     "file": "agents/tools/shell.py",
     "line": 24,
     "kind": "class"
+  },
+  "run_subprocess": {
+    "file": "agents/tools/shell.py",
+    "line": 31,
+    "kind": "function"
   },
   "run_tests": {
     "file": "agents/tools/shell.py",
@@ -824,7 +889,7 @@
     "line": 100,
     "kind": "function"
   },
-  "_extract_traceback": {
+  "extract_traceback": {
     "file": "agents/tools/shell.py",
     "line": 119,
     "kind": "function"
@@ -839,6 +904,11 @@
     "line": 167,
     "kind": "function"
   },
+  "resolve_worker_tools": {
+    "file": "agents/tools/tool_wiring.py",
+    "line": 22,
+    "kind": "function"
+  },
   "SYSTEM_PROMPT": {
     "file": "agents/workers/cleaner.py",
     "line": 12,
@@ -846,42 +916,42 @@
   },
   "_get_agent": {
     "file": "agents/workers/cleaner.py",
-    "line": 17,
+    "line": 19,
     "kind": "function"
   },
   "run_cleaner": {
     "file": "agents/workers/cleaner.py",
-    "line": 29,
+    "line": 31,
     "kind": "function"
   },
   "_build_prompt": {
     "file": "agents/workers/implementer.py",
-    "line": 39,
+    "line": 41,
     "kind": "function"
   },
   "run_implementer": {
     "file": "agents/workers/implementer.py",
-    "line": 91,
+    "line": 93,
     "kind": "function"
   },
   "run_planner": {
     "file": "agents/workers/planner.py",
-    "line": 36,
+    "line": 38,
     "kind": "function"
   },
   "_build_failure_prompt": {
     "file": "agents/workers/post_mortem.py",
-    "line": 33,
+    "line": 35,
     "kind": "function"
   },
   "run_post_mortem": {
     "file": "agents/workers/post_mortem.py",
-    "line": 71,
+    "line": 73,
     "kind": "function"
   },
   "run_reviewer": {
     "file": "agents/workers/reviewer.py",
-    "line": 33,
+    "line": 35,
     "kind": "function"
   },
   "run_validator": {
@@ -891,122 +961,147 @@
   },
   "GCState": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 22,
+    "line": 29,
     "kind": "class"
   },
   "_collect_domains": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 29,
+    "line": 41,
     "kind": "function"
   },
   "entropy_scan_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 38,
+    "line": 50,
     "kind": "function"
   },
   "analyze_violations_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 48,
+    "line": 69,
     "kind": "function"
   },
   "_cluster_violations": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 55,
+    "line": 85,
     "kind": "function"
   },
   "open_cleanup_prs_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 65,
+    "line": 95,
     "kind": "function"
   },
   "update_quality_score_node": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 98,
+    "line": 142,
+    "kind": "function"
+  },
+  "_gc_status_gate": {
+    "file": "agents/workflows/entropy_gc.py",
+    "line": 232,
+    "kind": "function"
+  },
+  "_route_after_scan": {
+    "file": "agents/workflows/entropy_gc.py",
+    "line": 239,
+    "kind": "function"
+  },
+  "_route_after_analyze": {
+    "file": "agents/workflows/entropy_gc.py",
+    "line": 243,
+    "kind": "function"
+  },
+  "_route_after_analyze_scores_only": {
+    "file": "agents/workflows/entropy_gc.py",
+    "line": 247,
+    "kind": "function"
+  },
+  "_route_after_open_prs": {
+    "file": "agents/workflows/entropy_gc.py",
+    "line": 251,
     "kind": "function"
   },
   "build_gc_graph": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 166,
+    "line": 255,
     "kind": "function"
   },
   "build_scores_only_graph": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 183,
+    "line": 272,
     "kind": "function"
   },
   "run_entropy_gc": {
     "file": "agents/workflows/entropy_gc.py",
-    "line": 196,
-    "kind": "function"
-  },
-  "MAX_FEEDBACK_IMPLEMENT_ITERATIONS": {
-    "file": "agents/workflows/feedback_loop.py",
-    "line": 29,
-    "kind": "constant"
-  },
-  "MAX_COST_USD": {
-    "file": "agents/workflows/feedback_loop.py",
-    "line": 30,
-    "kind": "constant"
-  },
-  "_accumulate_usage": {
-    "file": "agents/workflows/feedback_loop.py",
-    "line": 33,
-    "kind": "function"
-  },
-  "_check_feedback_guard": {
-    "file": "agents/workflows/feedback_loop.py",
-    "line": 49,
+    "line": 285,
     "kind": "function"
   },
   "_format_feedback_prompt": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 58,
+    "line": 36,
     "kind": "function"
   },
   "gather_feedback_node": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 81,
+    "line": 59,
     "kind": "function"
   },
   "implement_feedback_node": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 92,
+    "line": 75,
     "kind": "function"
   },
   "validate_feedback_node": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 136,
+    "line": 113,
     "kind": "function"
   },
   "route_after_validate": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 150,
+    "line": 129,
     "kind": "function"
   },
   "commit_push_node": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 163,
+    "line": 142,
     "kind": "function"
   },
   "reply_node": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 195,
+    "line": 186,
+    "kind": "function"
+  },
+  "_feedback_status_gate": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 256,
+    "kind": "function"
+  },
+  "route_after_gather": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 263,
+    "kind": "function"
+  },
+  "route_after_implement_feedback": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 267,
+    "kind": "function"
+  },
+  "route_after_commit_push": {
+    "file": "agents/workflows/feedback_loop.py",
+    "line": 271,
     "kind": "function"
   },
   "build_feedback_graph": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 216,
+    "line": 275,
     "kind": "function"
   },
   "run_feedback_loop": {
     "file": "agents/workflows/feedback_loop.py",
-    "line": 235,
+    "line": 294,
     "kind": "function"
   },
   "post_mortem_node": {
     "file": "agents/workflows/post_mortem.py",
-    "line": 33,
+    "line": 22,
     "kind": "function"
   },
   "plan_node": {
@@ -1014,104 +1109,149 @@
     "line": 49,
     "kind": "function"
   },
-  "_BUG_FIX_KEYWORDS": {
-    "file": "agents/workflows/ralph_loop.py",
-    "line": 64,
-    "kind": "constant"
-  },
-  "route_after_plan": {
-    "file": "agents/workflows/ralph_loop.py",
-    "line": 67,
-    "kind": "function"
-  },
   "reproduce_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 81,
+    "line": 65,
     "kind": "function"
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 134,
+    "line": 126,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 174,
+    "line": 157,
     "kind": "function"
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 201,
+    "line": 171,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 228,
+    "line": 210,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 272,
+    "line": 263,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 311,
-    "kind": "function"
-  },
-  "route_after_review": {
-    "file": "agents/workflows/ralph_loop.py",
-    "line": 325,
+    "line": 312,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 336,
+    "line": 327,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 346,
+    "line": 347,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 357,
+    "line": 358,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 388,
+    "line": 389,
+    "kind": "function"
+  },
+  "_BUG_FIX_KEYWORDS": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 13,
+    "kind": "constant"
+  },
+  "route_after_plan": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 16,
+    "kind": "function"
+  },
+  "route_after_review": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 44,
+    "kind": "function"
+  },
+  "_ralph_status_gate": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 55,
+    "kind": "function"
+  },
+  "route_after_implement": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 62,
+    "kind": "function"
+  },
+  "route_after_reproduce": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 66,
+    "kind": "function"
+  },
+  "route_after_perf_validate": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 70,
+    "kind": "function"
+  },
+  "route_after_ui_validate": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 74,
+    "kind": "function"
+  },
+  "route_after_open_pr": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 78,
+    "kind": "function"
+  },
+  "route_after_merge": {
+    "file": "agents/workflows/ralph_routing.py",
+    "line": 82,
     "kind": "function"
   },
   "ReviewerState": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 19,
+    "line": 20,
     "kind": "class"
   },
   "review_node": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 28,
+    "line": 37,
     "kind": "function"
   },
   "address_feedback_node": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 38,
+    "line": 53,
     "kind": "function"
   },
   "route_review": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 91,
+    "line": 103,
+    "kind": "function"
+  },
+  "_reviewer_status_gate": {
+    "file": "agents/workflows/reviewer_loop.py",
+    "line": 113,
+    "kind": "function"
+  },
+  "route_after_address": {
+    "file": "agents/workflows/reviewer_loop.py",
+    "line": 120,
     "kind": "function"
   },
   "build_reviewer_graph": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 99,
+    "line": 124,
     "kind": "function"
   },
   "run_reviewer_loop": {
     "file": "agents/workflows/reviewer_loop.py",
-    "line": 113,
+    "line": 142,
     "kind": "function"
   },
   "LAYER_ORDER": {
@@ -1166,72 +1306,92 @@
   },
   "run_doc_lint": {
     "file": "lint/doc_lint.py",
-    "line": 124,
+    "line": 133,
     "kind": "function"
   },
   "_GP006_ALLOWED_SUFFIXES": {
     "file": "lint/golden_lint.py",
-    "line": 16,
+    "line": 17,
     "kind": "constant"
   },
   "_all_python_files": {
     "file": "lint/golden_lint.py",
-    "line": 42,
+    "line": 43,
     "kind": "function"
   },
   "check_gp001_duplicates": {
     "file": "lint/golden_lint.py",
-    "line": 55,
+    "line": 56,
     "kind": "function"
   },
   "check_gp002_file_size": {
     "file": "lint/golden_lint.py",
-    "line": 87,
+    "line": 98,
     "kind": "function"
   },
   "check_gp003_hand_rolled": {
     "file": "lint/golden_lint.py",
-    "line": 101,
+    "line": 112,
     "kind": "function"
   },
   "check_gp004_unvalidated_external": {
     "file": "lint/golden_lint.py",
-    "line": 136,
+    "line": 147,
     "kind": "function"
   },
   "_GP005_CLI_DIRS": {
     "file": "lint/golden_lint.py",
-    "line": 187,
+    "line": 198,
     "kind": "constant"
   },
   "check_gp005_no_print": {
     "file": "lint/golden_lint.py",
-    "line": 190,
+    "line": 201,
     "kind": "function"
   },
   "check_gp006_model_naming": {
     "file": "lint/golden_lint.py",
-    "line": 216,
+    "line": 227,
     "kind": "function"
   },
   "check_gp007_dead_imports": {
     "file": "lint/golden_lint.py",
-    "line": 250,
+    "line": 270,
     "kind": "function"
   },
   "check_gp009_active_plans": {
     "file": "lint/golden_lint.py",
-    "line": 270,
+    "line": 290,
     "kind": "function"
   },
   "check_gp010_quality_score": {
     "file": "lint/golden_lint.py",
-    "line": 305,
+    "line": 325,
     "kind": "function"
   },
   "run_golden_lint": {
     "file": "lint/golden_lint.py",
-    "line": 327,
+    "line": 347,
+    "kind": "function"
+  },
+  "check_gp011_cross_module_private_imports": {
+    "file": "lint/golden_lint_ext.py",
+    "line": 25,
+    "kind": "function"
+  },
+  "check_gp012_file_encoding": {
+    "file": "lint/golden_lint_ext.py",
+    "line": 68,
+    "kind": "function"
+  },
+  "check_gp013_silent_exception": {
+    "file": "lint/golden_lint_ext.py",
+    "line": 128,
+    "kind": "function"
+  },
+  "check_gp014_hardcoded_guard_limits": {
+    "file": "lint/golden_lint_ext.py",
+    "line": 194,
     "kind": "function"
   },
   "LintRule": {
@@ -1241,7 +1401,107 @@
   },
   "run_all": {
     "file": "lint/run_lint.py",
-    "line": 16,
+    "line": 22,
+    "kind": "function"
+  },
+  "_TRACKING_KEYS": {
+    "file": "lint/workflow_lint.py",
+    "line": 21,
+    "kind": "constant"
+  },
+  "_GUARD_FAILURE_KEYS": {
+    "file": "lint/workflow_lint.py",
+    "line": 23,
+    "kind": "constant"
+  },
+  "_EXEMPT_NODES": {
+    "file": "lint/workflow_lint.py",
+    "line": 25,
+    "kind": "constant"
+  },
+  "_WORKER_ROLE_TO_RUNNER": {
+    "file": "lint/workflow_lint.py",
+    "line": 27,
+    "kind": "constant"
+  },
+  "_LLM_RUNNERS": {
+    "file": "lint/workflow_lint.py",
+    "line": 34,
+    "kind": "constant"
+  },
+  "_FILE_MUTATION_METHODS": {
+    "file": "lint/workflow_lint.py",
+    "line": 44,
+    "kind": "constant"
+  },
+  "_is_workflow_node": {
+    "file": "lint/workflow_lint.py",
+    "line": 58,
+    "kind": "function"
+  },
+  "_dict_keys_from_return": {
+    "file": "lint/workflow_lint.py",
+    "line": 69,
+    "kind": "function"
+  },
+  "_references_guard_reason": {
+    "file": "lint/workflow_lint.py",
+    "line": 78,
+    "kind": "function"
+  },
+  "_is_guard_failure_return": {
+    "file": "lint/workflow_lint.py",
+    "line": 91,
+    "kind": "function"
+  },
+  "_is_empty_return": {
+    "file": "lint/workflow_lint.py",
+    "line": 105,
+    "kind": "function"
+  },
+  "_has_double_star": {
+    "file": "lint/workflow_lint.py",
+    "line": 110,
+    "kind": "function"
+  },
+  "check_wf001_guard_contract": {
+    "file": "lint/workflow_lint.py",
+    "line": 115,
+    "kind": "function"
+  },
+  "check_wf002_return_tracking": {
+    "file": "lint/workflow_lint.py",
+    "line": 142,
+    "kind": "function"
+  },
+  "check_wf003_context_role_mismatch": {
+    "file": "lint/workflow_lint.py",
+    "line": 179,
+    "kind": "function"
+  },
+  "check_wf005_status_aware_edges": {
+    "file": "lint/workflow_lint.py",
+    "line": 242,
+    "kind": "function"
+  },
+  "check_wf007_budget_off_by_one": {
+    "file": "lint/workflow_lint.py",
+    "line": 296,
+    "kind": "function"
+  },
+  "check_wf009_llm_accumulate_usage": {
+    "file": "lint/workflow_lint.py",
+    "line": 328,
+    "kind": "function"
+  },
+  "check_wf010_no_direct_file_mutation": {
+    "file": "lint/workflow_lint.py",
+    "line": 361,
+    "kind": "function"
+  },
+  "run_workflow_lint": {
+    "file": "lint/workflow_lint.py",
+    "line": 386,
     "kind": "function"
   },
   "_discover_python_files": {
@@ -1272,6 +1532,21 @@
   "build_index": {
     "file": "repo_index/build_index.py",
     "line": 115,
+    "kind": "function"
+  },
+  "_state_with": {
+    "file": "tests/agent_eval/conftest.py",
+    "line": 6,
+    "kind": "function"
+  },
+  "make_reviewer_state": {
+    "file": "tests/agent_eval/conftest.py",
+    "line": 13,
+    "kind": "function"
+  },
+  "make_feedback_state": {
+    "file": "tests/agent_eval/conftest.py",
+    "line": 35,
     "kind": "function"
   },
   "test_benchmark_sample_construction": {
@@ -1401,7 +1676,7 @@
   },
   "test_cleaner_called_with_mock": {
     "file": "tests/agent_eval/test_entropy_gc.py",
-    "line": 170,
+    "line": 171,
     "kind": "function"
   },
   "FEATURE_TASK": {
@@ -1434,39 +1709,254 @@
     "line": 123,
     "kind": "function"
   },
-  "_state_with": {
-    "file": "tests/agent_eval/test_guards.py",
-    "line": 13,
+  "test_5th_implement_blocks_reentry": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 22,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_validate": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 30,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_perf_validate": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 37,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_ui_validate": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 43,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_open_pr": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 49,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_review": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 55,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_merge": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 61,
+    "kind": "function"
+  },
+  "test_5th_implement_allows_commit_push": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 67,
+    "kind": "function"
+  },
+  "test_5th_implement_blocks_feedback_reentry": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 74,
+    "kind": "function"
+  },
+  "test_3rd_review_blocks_reentry": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 84,
+    "kind": "function"
+  },
+  "test_3rd_review_allows_merge": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 92,
+    "kind": "function"
+  },
+  "test_3rd_review_blocks_address_feedback": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 99,
+    "kind": "function"
+  },
+  "test_3rd_review_allows_open_pr": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 106,
+    "kind": "function"
+  },
+  "test_exactly_at_node_limit_blocks_entry": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 116,
+    "kind": "function"
+  },
+  "test_under_node_limit_allows_entry": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 126,
+    "kind": "function"
+  },
+  "test_mid_loop_exactly_at_limit_should_not_escalate": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 135,
+    "kind": "function"
+  },
+  "test_mid_loop_over_limit_should_escalate": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 146,
+    "kind": "function"
+  },
+  "test_mid_loop_partial_budget_at_limit": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 157,
+    "kind": "function"
+  },
+  "test_mid_loop_partial_budget_over_limit": {
+    "file": "tests/agent_eval/test_guard_boundary.py",
+    "line": 167,
+    "kind": "function"
+  },
+  "test_reviewer_fresh_state_allowed": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 26,
+    "kind": "function"
+  },
+  "test_reviewer_cost_budget_escalates": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 32,
+    "kind": "function"
+  },
+  "test_reviewer_custom_cost_budget": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 40,
+    "kind": "function"
+  },
+  "test_reviewer_review_iterations_escalates": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 48,
+    "kind": "function"
+  },
+  "test_reviewer_review_iterations_allows_non_review_node": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 55,
+    "kind": "function"
+  },
+  "test_reviewer_total_tool_calls_aborts": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 62,
+    "kind": "function"
+  },
+  "test_reviewer_per_node_limit": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 69,
+    "kind": "function"
+  },
+  "test_reviewer_per_node_different_node_allowed": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 78,
+    "kind": "function"
+  },
+  "test_feedback_fresh_state_allowed": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 90,
+    "kind": "function"
+  },
+  "test_feedback_iteration_limit_escalates": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 95,
+    "kind": "function"
+  },
+  "test_feedback_iteration_limit_allows_downstream": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 102,
+    "kind": "function"
+  },
+  "test_feedback_cost_budget_escalates": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 109,
+    "kind": "function"
+  },
+  "test_feedback_per_node_limit": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 115,
+    "kind": "function"
+  },
+  "test_pre_node_guard_returns_guard_result": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 126,
+    "kind": "function"
+  },
+  "test_pre_node_guard_blocked_returns_reason": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 133,
+    "kind": "function"
+  },
+  "test_per_node_checked_before_global_limits": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 144,
+    "kind": "function"
+  },
+  "test_iteration_checked_before_cost": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 155,
+    "kind": "function"
+  },
+  "test_minimal_dict_state_allowed": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 169,
+    "kind": "function"
+  },
+  "test_minimal_dict_with_cost_over_budget": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 175,
+    "kind": "function"
+  },
+  "test_reply_node_mid_loop_guard_breaks_at_limit": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 184,
+    "kind": "function"
+  },
+  "test_reply_node_fresh_state_allows_up_to_limit": {
+    "file": "tests/agent_eval/test_guard_coverage.py",
+    "line": 201,
     "kind": "function"
   },
   "test_fresh_state_allowed": {
     "file": "tests/agent_eval/test_guards.py",
-    "line": 19,
+    "line": 15,
     "kind": "function"
   },
   "test_max_implement_iterations_escalates": {
     "file": "tests/agent_eval/test_guards.py",
-    "line": 25,
+    "line": 21,
+    "kind": "function"
+  },
+  "test_max_implement_iterations_allows_downstream": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 29,
     "kind": "function"
   },
   "test_max_review_iterations_escalates": {
     "file": "tests/agent_eval/test_guards.py",
-    "line": 33,
+    "line": 36,
+    "kind": "function"
+  },
+  "test_max_review_iterations_allows_merge": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 44,
     "kind": "function"
   },
   "test_tool_call_budget_aborts": {
     "file": "tests/agent_eval/test_guards.py",
-    "line": 41,
+    "line": 51,
     "kind": "function"
   },
   "test_cost_budget_escalates": {
     "file": "tests/agent_eval/test_guards.py",
-    "line": 49,
+    "line": 59,
     "kind": "function"
   },
   "test_under_budget_allowed": {
     "file": "tests/agent_eval/test_guards.py",
-    "line": 57,
+    "line": 67,
+    "kind": "function"
+  },
+  "test_per_node_tool_calls_escalates": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 77,
+    "kind": "function"
+  },
+  "test_per_node_tool_calls_under_limit_allowed": {
+    "file": "tests/agent_eval/test_guards.py",
+    "line": 87,
     "kind": "function"
   },
   "test_probe_result_healthy": {
@@ -1492,6 +1982,81 @@
   "test_app_startup_result_failure": {
     "file": "tests/agent_eval/test_harness_models.py",
     "line": 67,
+    "kind": "function"
+  },
+  "test_registry_populated_at_import": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 14,
+    "kind": "function"
+  },
+  "test_registry_has_core_tools": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 20,
+    "kind": "function"
+  },
+  "test_registry_tools_have_required_fields": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 27,
+    "kind": "function"
+  },
+  "test_build_context_returns_tools": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 35,
+    "kind": "function"
+  },
+  "test_agent_callable_tools_match_worker_tools": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 46,
+    "kind": "function"
+  },
+  "test_context_distinguishes_callable_vs_system_tools": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 56,
+    "kind": "function"
+  },
+  "test_build_context_worker_role_filters_tools": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 70,
+    "kind": "function"
+  },
+  "test_build_context_no_role_returns_all_tools": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 82,
+    "kind": "function"
+  },
+  "test_build_context_invalid_role_raises": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 90,
+    "kind": "function"
+  },
+  "test_worker_tool_access_derived_from_agent_callable": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 100,
+    "kind": "function"
+  },
+  "test_worker_tool_access_names_exist_in_registry": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 109,
+    "kind": "function"
+  },
+  "test_resolve_module_covers_all_worker_tool_names": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 121,
+    "kind": "function"
+  },
+  "test_planner_agent_tools_match_catalog": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 161,
+    "kind": "function"
+  },
+  "test_implementer_agent_tools_match_catalog": {
+    "file": "tests/agent_eval/test_registry_contract.py",
+    "line": 186,
+    "kind": "function"
+  },
+  "test_planner_context_sees_all_tools": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 340,
     "kind": "function"
   },
   "test_error_context_construction": {
@@ -1551,102 +2116,247 @@
   },
   "_PASS_TESTS": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 36,
+    "line": 64,
     "kind": "constant"
   },
   "_PASS_LINT": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 37,
+    "line": 65,
     "kind": "constant"
   },
   "_FAIL_TESTS": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 38,
+    "line": 66,
     "kind": "constant"
   },
   "_FAIL_LINT": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 39,
+    "line": 67,
     "kind": "constant"
   },
   "_state": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 42,
+    "line": 70,
     "kind": "function"
   },
   "test_graph_compiles": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 52,
+    "line": 77,
     "kind": "function"
   },
   "test_route_after_plan_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 61,
+    "line": 83,
     "kind": "function"
   },
   "test_route_after_plan_bug_keyword": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 66,
+    "line": 88,
     "kind": "function"
   },
   "test_route_after_plan_prior_failure": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 71,
+    "line": 93,
     "kind": "function"
   },
   "test_route_after_plan_normal_task": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 83,
+    "line": 105,
     "kind": "function"
   },
   "test_route_after_validate_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 91,
+    "line": 110,
     "kind": "function"
   },
   "test_route_after_validate_no_validation": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 96,
+    "line": 115,
     "kind": "function"
   },
   "test_route_after_validate_proceed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 101,
+    "line": 120,
     "kind": "function"
   },
   "test_route_after_validate_retry": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 113,
+    "line": 132,
     "kind": "function"
   },
   "test_route_after_validate_escalate": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 125,
+    "line": 144,
     "kind": "function"
   },
   "test_route_after_review_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 140,
+    "line": 156,
     "kind": "function"
   },
   "test_route_after_review_approved": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 145,
+    "line": 161,
     "kind": "function"
   },
   "test_route_after_review_not_approved_retries": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 156,
+    "line": 172,
     "kind": "function"
   },
   "test_route_after_review_max_iterations_escalates": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 167,
+    "line": 183,
     "kind": "function"
   },
   "test_route_after_review_no_review": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 178,
+    "line": 194,
+    "kind": "function"
+  },
+  "test_route_after_plan_all_bug_keywords": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 199,
+    "kind": "function"
+  },
+  "test_reviewer_route_approved": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 208,
+    "kind": "function"
+  },
+  "test_reviewer_route_escalate_on_max_iterations": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 213,
+    "kind": "function"
+  },
+  "test_reviewer_route_address_feedback": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 218,
+    "kind": "function"
+  },
+  "test_reviewer_route_failed_status_escalates": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 223,
+    "kind": "function"
+  },
+  "test_route_after_implement_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 229,
+    "kind": "function"
+  },
+  "test_route_after_implement_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 235,
+    "kind": "function"
+  },
+  "test_route_after_implement_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 240,
+    "kind": "function"
+  },
+  "test_route_after_reproduce_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 245,
+    "kind": "function"
+  },
+  "test_route_after_reproduce_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 250,
+    "kind": "function"
+  },
+  "test_route_after_perf_validate_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 255,
+    "kind": "function"
+  },
+  "test_route_after_perf_validate_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 260,
+    "kind": "function"
+  },
+  "test_route_after_ui_validate_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 265,
+    "kind": "function"
+  },
+  "test_route_after_ui_validate_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 270,
+    "kind": "function"
+  },
+  "test_route_after_open_pr_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 275,
+    "kind": "function"
+  },
+  "test_route_after_open_pr_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 281,
+    "kind": "function"
+  },
+  "test_route_after_merge_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 286,
+    "kind": "function"
+  },
+  "test_route_after_merge_done": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 291,
+    "kind": "function"
+  },
+  "test_feedback_route_after_gather_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 296,
+    "kind": "function"
+  },
+  "test_feedback_route_after_gather_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 301,
+    "kind": "function"
+  },
+  "test_feedback_route_after_implement_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 306,
+    "kind": "function"
+  },
+  "test_feedback_route_after_implement_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 311,
+    "kind": "function"
+  },
+  "test_feedback_route_after_commit_push_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 316,
+    "kind": "function"
+  },
+  "test_feedback_route_after_commit_push_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 322,
+    "kind": "function"
+  },
+  "test_reviewer_route_after_address_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 327,
+    "kind": "function"
+  },
+  "test_reviewer_route_after_address_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 332,
+    "kind": "function"
+  },
+  "test_implementer_context_is_filtered": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 349,
+    "kind": "function"
+  },
+  "test_planner_and_implementer_contexts_differ": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 360,
+    "kind": "function"
+  },
+  "test_feedback_route_escalated_status_ends": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 379,
     "kind": "function"
   },
   "write_py": {
@@ -1737,6 +2447,141 @@
   "test_gp006_approved_suffix_passes": {
     "file": "tests/lint/test_golden_lint.py",
     "line": 170,
+    "kind": "function"
+  },
+  "_parse_func": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 17,
+    "kind": "function"
+  },
+  "test_wf001_passes_with_guard": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 28,
+    "kind": "function"
+  },
+  "test_wf001_fails_without_guard": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 39,
+    "kind": "function"
+  },
+  "test_wf002_passes_with_tracking": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 53,
+    "kind": "function"
+  },
+  "test_wf002_fails_missing_tracking": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 61,
+    "kind": "function"
+  },
+  "test_wf002_exempts_guard_failure_return": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 72,
+    "kind": "function"
+  },
+  "test_wf002_flags_non_guard_failure_missing_tracking": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 80,
+    "kind": "function"
+  },
+  "test_wf002_exempts_empty_return": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 91,
+    "kind": "function"
+  },
+  "test_wf002_exempts_double_star_spread": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 99,
+    "kind": "function"
+  },
+  "test_wf003_passes_matching_roles": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 110,
+    "kind": "function"
+  },
+  "test_wf003_fails_mismatched_roles": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 119,
+    "kind": "function"
+  },
+  "test_wf003_passes_separate_contexts": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 132,
+    "kind": "function"
+  },
+  "_parse_module": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 146,
+    "kind": "function"
+  },
+  "_collect_node_funcs": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 150,
+    "kind": "function"
+  },
+  "test_wf005_passes_with_conditional_edges": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 160,
+    "kind": "function"
+  },
+  "test_wf005_fails_with_unconditional_edge": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 172,
+    "kind": "function"
+  },
+  "test_wf005_passes_terminal_edge_to_end": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 187,
+    "kind": "function"
+  },
+  "test_wf005_passes_no_failure_status": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 200,
+    "kind": "function"
+  },
+  "test_wf007_flags_gte_in_loop": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 215,
+    "kind": "function"
+  },
+  "test_wf007_passes_gt_in_loop": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 229,
+    "kind": "function"
+  },
+  "test_wf007_passes_no_loop": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 240,
+    "kind": "function"
+  },
+  "test_wf009_passes_with_accumulate": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 252,
+    "kind": "function"
+  },
+  "test_wf009_fails_without_accumulate": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 261,
+    "kind": "function"
+  },
+  "test_wf009_passes_no_llm_call": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 273,
+    "kind": "function"
+  },
+  "test_wf010_flags_write_text": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 285,
+    "kind": "function"
+  },
+  "test_wf010_flags_unlink": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 297,
+    "kind": "function"
+  },
+  "test_wf010_passes_apply_file_changes": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 308,
     "kind": "function"
   }
 }
