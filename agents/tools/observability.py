@@ -36,8 +36,6 @@ class MetricResult(BaseModel):
     series: list[MetricSeriesSchema]
 
 
-
-
 class _LogStreamSchema(BaseModel):
     stream: dict[str, str] = Field(default_factory=dict)
     values: list[list[str]] = Field(default_factory=list)
