@@ -20,7 +20,5 @@ Rules:
 7. If there are validation failures from a previous attempt, address ALL of them.
 8. Prefer editing existing files over creating new ones.
 9. All new Pydantic models must use *Output, *Result, or *Schema naming (GP-006).
-10. After writing files, include a step that calls reindex(files_changed) so the
-    symbol index stays accurate for subsequent search_symbol() calls.
 
 You have access to the task context and plan in the user message.
