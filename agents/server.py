@@ -52,12 +52,15 @@ class _Handler(BaseHTTPRequestHandler):
             self._json_response(200, {"status": "ok"})
         elif self.path == "/status":
             uptime = time.monotonic() - _START_TIME
-            self._json_response(200, {
-                "status": "ok",
-                "uptime_seconds": round(uptime, 2),
-                "version": _VERSION,
-                "request_count": _REQUEST_COUNT,
-            })
+            self._json_response(
+                200,
+                {
+                    "status": "ok",
+                    "uptime_seconds": round(uptime, 2),
+                    "version": _VERSION,
+                    "request_count": _REQUEST_COUNT,
+                },
+            )
         else:
             self.send_error(404)
 

@@ -15,9 +15,9 @@ class ToolCapability(BaseModel):
     description: str = Field(description="What the tool does — written for the planner to read")
     input_schema: dict = Field(description="JSON schema of tool inputs")
     output_type: str = Field(description="Python type name of the return value")
-    category: Literal["fs", "shell", "git", "browser", "observability", "index", "harness", "benchmark"] = Field(
-        description="Functional category"
-    )
+    category: Literal[
+        "fs", "shell", "git", "browser", "observability", "index", "harness", "benchmark"
+    ] = Field(description="Functional category")
     requires_sandbox: bool = Field(
         default=False,
         description="True if this tool requires the Docker sandbox to be running",

@@ -8,9 +8,9 @@ from pydantic import BaseModel, Field
 class ExecutionStep(BaseModel):
     description: str = Field(description="What this step does")
     files_affected: list[str] = Field(description="Files this step reads or modifies")
-    tool: Literal["fs", "shell", "git", "browser", "observability", "index", "harness", "benchmark"] = Field(
-        description="Tool category this step uses"
-    )
+    tool: Literal[
+        "fs", "shell", "git", "browser", "observability", "index", "harness", "benchmark"
+    ] = Field(description="Tool category this step uses")
     expected_output: str = Field(description="What a successful execution of this step produces")
 
 
