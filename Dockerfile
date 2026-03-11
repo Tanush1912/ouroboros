@@ -9,6 +9,9 @@ WORKDIR /opt/ouroboros
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
+# Install Playwright browser for UI validation
+RUN /opt/ouroboros/.venv/bin/python -m playwright install chromium --with-deps
+
 # Copy application code
 COPY agents/ agents/
 
