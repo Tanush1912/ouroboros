@@ -141,92 +141,92 @@
   },
   "FileSnippet": {
     "file": "agents/core/context_builder.py",
-    "line": 24,
+    "line": 31,
     "kind": "class"
   },
   "DocReference": {
     "file": "agents/core/context_builder.py",
-    "line": 32,
+    "line": 39,
     "kind": "class"
   },
   "ToolSummary": {
     "file": "agents/core/context_builder.py",
-    "line": 38,
+    "line": 45,
     "kind": "class"
   },
   "TaskContext": {
     "file": "agents/core/context_builder.py",
-    "line": 45,
+    "line": 52,
     "kind": "class"
   },
   "_estimate_tokens": {
     "file": "agents/core/context_builder.py",
-    "line": 100,
+    "line": 107,
     "kind": "function"
   },
   "_load_symbols": {
     "file": "agents/core/context_builder.py",
-    "line": 105,
+    "line": 112,
     "kind": "function"
   },
   "_load_file_map": {
     "file": "agents/core/context_builder.py",
-    "line": 112,
+    "line": 119,
     "kind": "function"
   },
   "_extract_intent_keywords": {
     "file": "agents/core/context_builder.py",
-    "line": 119,
+    "line": 126,
     "kind": "function"
   },
   "_find_relevant_files": {
     "file": "agents/core/context_builder.py",
-    "line": 126,
+    "line": 133,
     "kind": "function"
   },
   "_read_snippet": {
     "file": "agents/core/context_builder.py",
-    "line": 155,
+    "line": 162,
     "kind": "function"
   },
   "_load_arch_rules": {
     "file": "agents/core/context_builder.py",
-    "line": 170,
+    "line": 177,
     "kind": "function"
   },
   "_load_active_plans": {
     "file": "agents/core/context_builder.py",
-    "line": 188,
+    "line": 195,
     "kind": "function"
   },
   "_discover_doc_files": {
     "file": "agents/core/context_builder.py",
-    "line": 200,
+    "line": 207,
     "kind": "function"
   },
   "_chunk_markdown": {
     "file": "agents/core/context_builder.py",
-    "line": 214,
+    "line": 221,
     "kind": "function"
   },
   "_score_doc_chunk": {
     "file": "agents/core/context_builder.py",
-    "line": 243,
+    "line": 250,
     "kind": "function"
   },
   "_find_relevant_docs": {
     "file": "agents/core/context_builder.py",
-    "line": 256,
+    "line": 263,
     "kind": "function"
   },
   "build_context": {
     "file": "agents/core/context_builder.py",
-    "line": 272,
+    "line": 279,
     "kind": "function"
   },
   "to_prompt_text": {
     "file": "agents/core/context_builder.py",
-    "line": 54,
+    "line": 61,
     "kind": "function"
   },
   "MAX_IMPLEMENT_ITERATIONS": {
@@ -526,32 +526,67 @@
   },
   "_PORT": {
     "file": "agents/server.py",
-    "line": 6,
+    "line": 16,
     "kind": "constant"
   },
-  "_HealthHandler": {
+  "_VERSION": {
     "file": "agents/server.py",
-    "line": 9,
+    "line": 17,
+    "kind": "constant"
+  },
+  "_START_TIME": {
+    "file": "agents/server.py",
+    "line": 18,
+    "kind": "constant"
+  },
+  "_REQUEST_COUNT": {
+    "file": "agents/server.py",
+    "line": 19,
+    "kind": "constant"
+  },
+  "_REQUEST_COUNT_LOCK": {
+    "file": "agents/server.py",
+    "line": 20,
+    "kind": "constant"
+  },
+  "_LOG_ENDPOINT": {
+    "file": "agents/server.py",
+    "line": 21,
+    "kind": "constant"
+  },
+  "_structured_log": {
+    "file": "agents/server.py",
+    "line": 24,
+    "kind": "function"
+  },
+  "_Handler": {
+    "file": "agents/server.py",
+    "line": 48,
     "kind": "class"
   },
   "do_GET": {
     "file": "agents/server.py",
-    "line": 10,
+    "line": 49,
+    "kind": "function"
+  },
+  "_json_response": {
+    "file": "agents/server.py",
+    "line": 71,
     "kind": "function"
   },
   "log_message": {
     "file": "agents/server.py",
-    "line": 21,
+    "line": 79,
     "kind": "function"
   },
   "run_benchmark": {
     "file": "agents/tools/benchmark.py",
-    "line": 15,
+    "line": 17,
     "kind": "function"
   },
   "compare_benchmarks": {
     "file": "agents/tools/benchmark.py",
-    "line": 88,
+    "line": 95,
     "kind": "function"
   },
   "ScreenshotResult": {
@@ -1121,47 +1156,47 @@
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 157,
+    "line": 162,
     "kind": "function"
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 171,
+    "line": 176,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 210,
+    "line": 215,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 263,
+    "line": 268,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 312,
+    "line": 317,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 327,
+    "line": 332,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 347,
+    "line": 352,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 358,
+    "line": 363,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 389,
+    "line": 394,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
@@ -1252,6 +1287,11 @@
   "run_reviewer_loop": {
     "file": "agents/workflows/reviewer_loop.py",
     "line": 142,
+    "kind": "function"
+  },
+  "test_build_context_performance": {
+    "file": "benchmarks/test_context_perf.py",
+    "line": 7,
     "kind": "function"
   },
   "LAYER_ORDER": {
@@ -2082,6 +2122,21 @@
   "test_reproduction_result_round_trip": {
     "file": "tests/agent_eval/test_reproducer_models.py",
     "line": 60,
+    "kind": "function"
+  },
+  "_run_server": {
+    "file": "tests/agent_eval/test_server.py",
+    "line": 11,
+    "kind": "function"
+  },
+  "test_health_endpoint": {
+    "file": "tests/agent_eval/test_server.py",
+    "line": 20,
+    "kind": "function"
+  },
+  "test_status_endpoint": {
+    "file": "tests/agent_eval/test_server.py",
+    "line": 31,
     "kind": "function"
   },
   "test_all_pass_proceeds": {
