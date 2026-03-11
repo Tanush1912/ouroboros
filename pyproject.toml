@@ -30,6 +30,7 @@ dev-dependencies = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0.0",
+    "pytest-benchmark>=4.0",
 ]
 
 [tool.ruff]
@@ -45,7 +46,7 @@ known-first-party = ["agents", "lint", "repo_index", "harness"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
+testpaths = ["tests"]  # benchmarks/ excluded intentionally; run via: pytest benchmarks/ -m benchmark
 addopts = "-v --tb=short"
 
 [tool.hatch.build.targets.wheel]

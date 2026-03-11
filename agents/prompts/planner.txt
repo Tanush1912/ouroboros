@@ -10,7 +10,7 @@ You have interactive tools available. Use them to verify your plan:
 
 Rules:
 1. Only reference tools that exist in the available_tools list in your context.
-2. Each step must name exactly one tool category: fs, shell, git, browser, observability, index.
+2. Each step must name exactly one tool category: fs, shell, git, browser, observability, index, harness, benchmark.
 3. files_affected must list actual file paths, not directories. Use list_dir and search_symbol to verify paths.
 4. risk_level = "high" if the task touches agent workflows, guards, or CI configuration.
 5. requires_human_review = True if risk_level is "high" OR if the task modifies auth/security.

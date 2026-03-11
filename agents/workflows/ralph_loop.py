@@ -144,6 +144,11 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
 
     apply_file_changes(impl.files_changed)
 
+    # Keep symbol index fresh for subsequent implement iterations
+    from agents.tools.fs import reindex as _reindex_tool
+
+    _reindex_tool.fn([fc.path for fc in impl.files_changed])
+
     node_calls = tool_calls + 1
     return {
         "files_changed": impl.files_changed,

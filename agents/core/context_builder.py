@@ -16,8 +16,15 @@ _JsonDict = RootModel[dict]
 _AGENT_CALLABLE_NAMES: list[str] = [t.name for t in ALL_TOOL_CAPABILITIES if t.agent_callable]
 
 WORKER_TOOL_ACCESS: dict[str, list[str] | None] = {
+    # None = show ALL tools in context (agent-callable + system). The planner
+    # needs full visibility for planning, but can only *call* the 4 tools in
+    # _NAME_TO_CALLABLE (read_file, list_dir, search_repo, search_symbol).
+    # to_prompt_text() separates "Your Tools" from "System Capabilities".
     "planner": None,
     "implementer": _AGENT_CALLABLE_NAMES,
+    "reviewer": [],
+    "cleaner": [],
+    "post_mortem": [],
 }
 
 
