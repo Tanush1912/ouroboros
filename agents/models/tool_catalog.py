@@ -15,7 +15,7 @@ class ToolCapability(BaseModel):
     description: str = Field(description="What the tool does — written for the planner to read")
     input_schema: dict = Field(description="JSON schema of tool inputs")
     output_type: str = Field(description="Python type name of the return value")
-    category: Literal["fs", "shell", "git", "browser", "observability", "index"] = Field(
+    category: Literal["fs", "shell", "git", "browser", "observability", "index", "harness", "benchmark"] = Field(
         description="Functional category"
     )
     requires_sandbox: bool = Field(
@@ -191,7 +191,7 @@ ALL_TOOL_CAPABILITIES: list[ToolCapability] = [
             "timeout_seconds": {"type": "integer", "default": 30},
         },
         output_type="AppStartupResult",
-        category="shell",
+        category="harness",
         requires_sandbox=True,
     ),
     ToolCapability(
@@ -204,7 +204,7 @@ ALL_TOOL_CAPABILITIES: list[ToolCapability] = [
             "body": {"type": "string"},
         },
         output_type="ProbeResult",
-        category="shell",
+        category="harness",
         requires_sandbox=True,
     ),
     ToolCapability(
@@ -215,7 +215,7 @@ ALL_TOOL_CAPABILITIES: list[ToolCapability] = [
             "marker": {"type": "string", "default": "benchmark"},
         },
         output_type="BenchmarkResult",
-        category="shell",
+        category="benchmark",
     ),
     ToolCapability(
         name="compare_benchmarks",
@@ -226,7 +226,7 @@ ALL_TOOL_CAPABILITIES: list[ToolCapability] = [
             "threshold_pct": {"type": "number", "default": 10.0},
         },
         output_type="PerfComparison",
-        category="shell",
+        category="benchmark",
     ),
     # -- Git tools --
     ToolCapability(
