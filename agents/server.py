@@ -8,6 +8,7 @@ Optionally forwards request logs to LOG_ENDPOINT (e.g. Vector HTTP source).
 import json
 import os
 import sys
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.request import Request, urlopen
@@ -16,6 +17,7 @@ _PORT = 8000
 _VERSION = "0.1.0"
 _START_TIME = time.monotonic()
 _REQUEST_COUNT = 0
+_REQUEST_COUNT_LOCK = threading.Lock()
 _LOG_ENDPOINT = os.environ.get("LOG_ENDPOINT", "")
 
 
@@ -46,7 +48,9 @@ def _structured_log(level: str, event: str, **kwargs: object) -> None:
 class _Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         global _REQUEST_COUNT
-        _REQUEST_COUNT += 1
+        with _REQUEST_COUNT_LOCK:
+            _REQUEST_COUNT += 1
+            count = _REQUEST_COUNT
 
         if self.path == "/health":
             self._json_response(200, {"status": "ok"})
@@ -58,7 +62,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "status": "ok",
                     "uptime_seconds": round(uptime, 2),
                     "version": _VERSION,
-                    "request_count": _REQUEST_COUNT,
+                    "request_count": count,
                 },
             )
         else:
@@ -73,13 +77,16 @@ class _Handler(BaseHTTPRequestHandler):
         self.wfile.write(payload)
 
     def log_message(self, format: str, *args: object) -> None:
-        _structured_log(
-            "info",
-            "http_request",
-            method=self.command,
-            path=self.path,
-            client=self.client_address[0],
-        )
+        try:
+            _structured_log(
+                "info",
+                "http_request",
+                method=self.command,
+                path=self.path,
+                client=self.client_address[0],
+            )
+        except Exception as exc:
+            sys.stderr.write(f"log_message_failed: {exc}\n")
 
 
 def main() -> None:

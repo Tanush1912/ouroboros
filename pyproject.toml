@@ -46,7 +46,7 @@ known-first-party = ["agents", "lint", "repo_index", "harness"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
+testpaths = ["tests"]  # benchmarks/ excluded intentionally; run via: pytest benchmarks/ -m benchmark
 addopts = "-v --tb=short"
 
 [tool.hatch.build.targets.wheel]
