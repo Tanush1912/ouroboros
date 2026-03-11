@@ -39,8 +39,8 @@ def _structured_log(level: str, event: str, **kwargs: object) -> None:
                 method="POST",
             )
             urlopen(req, timeout=2)
-        except Exception:
-            pass
+        except Exception as exc:
+            sys.stderr.write(f"log_forward_failed: {exc}\n")
 
 
 class _Handler(BaseHTTPRequestHandler):
