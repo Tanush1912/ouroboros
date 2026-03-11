@@ -1,6 +1,8 @@
 """Benchmark tools — run pytest-benchmark suites and compare results."""
 
 import json
+import os
+import tempfile
 import time
 from datetime import UTC, datetime
 
@@ -18,44 +20,56 @@ def run_benchmark(
 ) -> BenchmarkResult:
     """Run benchmark suite. Uses pytest-benchmark JSON output if available, else simple timing."""
     root = _repo_root()
-    bench_output = "/tmp/bench.json"
+    bench_fd, bench_output = tempfile.mkstemp(suffix=".json", prefix="ouroboros-bench-")
+    os.close(bench_fd)
 
-    start = time.monotonic()
-    returncode, _stdout, _stderr = run_subprocess(
-        [
-            "python",
-            "-m",
-            "pytest",
-            suite_path,
-            "-m",
-            marker,
-            f"--benchmark-json={bench_output}",
-            "--benchmark-disable-gc",
-            "-q",
-        ],
-        cwd=root,
-    )
-    duration = time.monotonic() - start
+    try:
+        start = time.monotonic()
+        returncode, _stdout, _stderr = run_subprocess(
+            [
+                "python",
+                "-m",
+                "pytest",
+                suite_path,
+                "-m",
+                marker,
+                f"--benchmark-json={bench_output}",
+                "--benchmark-disable-gc",
+                "-q",
+            ],
+            cwd=root,
+        )
+        duration = time.monotonic() - start
 
-    samples: list[BenchmarkSampleResult] = []
+        samples: list[BenchmarkSampleResult] = []
 
-    if returncode == 0:
-        try:
-            with open(bench_output, encoding="utf-8") as f:
-                data = json.load(f)
-            for bench in data.get("benchmarks", []):
-                stats = bench.get("stats", {})
+        if returncode == 0:
+            try:
+                with open(bench_output, encoding="utf-8") as f:
+                    data = json.load(f)
+                for bench in data.get("benchmarks", []):
+                    stats = bench.get("stats", {})
+                    samples.append(
+                        BenchmarkSampleResult(
+                            name=bench.get("name", "unknown"),
+                            mean_ms=stats.get("mean", 0) * 1000,
+                            stddev_ms=stats.get("stddev", 0) * 1000,
+                            rounds=stats.get("rounds", 1),
+                            min_ms=stats.get("min", 0) * 1000,
+                            max_ms=stats.get("max", 0) * 1000,
+                        )
+                    )
+            except (FileNotFoundError, json.JSONDecodeError, KeyError):
                 samples.append(
                     BenchmarkSampleResult(
-                        name=bench.get("name", "unknown"),
-                        mean_ms=stats.get("mean", 0) * 1000,
-                        stddev_ms=stats.get("stddev", 0) * 1000,
-                        rounds=stats.get("rounds", 1),
-                        min_ms=stats.get("min", 0) * 1000,
-                        max_ms=stats.get("max", 0) * 1000,
+                        name=f"suite:{suite_path}",
+                        mean_ms=duration * 1000,
+                        rounds=1,
+                        min_ms=duration * 1000,
+                        max_ms=duration * 1000,
                     )
                 )
-        except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        else:
             samples.append(
                 BenchmarkSampleResult(
                     name=f"suite:{suite_path}",
@@ -65,23 +79,16 @@ def run_benchmark(
                     max_ms=duration * 1000,
                 )
             )
-    else:
-        samples.append(
-            BenchmarkSampleResult(
-                name=f"suite:{suite_path}",
-                mean_ms=duration * 1000,
-                rounds=1,
-                min_ms=duration * 1000,
-                max_ms=duration * 1000,
-            )
-        )
 
-    return BenchmarkResult(
-        samples=samples,
-        total_duration_seconds=duration,
-        timestamp=datetime.now(UTC).isoformat(),
-        suite_name=marker,
-    )
+        return BenchmarkResult(
+            samples=samples,
+            total_duration_seconds=duration,
+            timestamp=datetime.now(UTC).isoformat(),
+            suite_name=marker,
+        )
+    finally:
+        if os.path.exists(bench_output):
+            os.remove(bench_output)
 
 
 @tool
