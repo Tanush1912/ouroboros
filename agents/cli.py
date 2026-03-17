@@ -212,7 +212,7 @@ def run(
         if branch:
             console.print(f"[bold]branch:[/bold]     {branch}")
 
-        if run_status not in ("done", "merged"):
+        if run_status not in ("done",):
             raise typer.Exit(1)
     finally:
         if worktree_path:
@@ -221,7 +221,7 @@ def run(
                 wt_name = branch.replace("/", "-")
                 console.print("[dim]stopping Docker stack...[/dim]")
                 _stop_worktree_app(worktree_path, wt_name)
-            if final_state and final_state.get("status") in ("done", "merged"):
+            if final_state and final_state.get("status") in ("done",):
                 subprocess.run(
                     ["git", "-C", str(worktree_path), "push", "-u", "origin", branch],
                     capture_output=True,
