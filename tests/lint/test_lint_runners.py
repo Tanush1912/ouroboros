@@ -94,6 +94,7 @@ def test_run_workflow_lint_calls_all_wf_checkers() -> None:
         "check_wf005_status_aware_edges",
         "check_wf006_loop_tool_accounting",
         "check_wf007_budget_off_by_one",
+        "check_wf008_node_name_consistency",
         "check_wf009_llm_accumulate_usage",
         "check_wf010_no_direct_file_mutation",
     }

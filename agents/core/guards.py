@@ -1,30 +1,37 @@
 """Rate-limit and iteration guards.
 
-Hard limits enforced at every LangGraph node across all workflows.
-These are constants, not config — intentionally not tunable at runtime.
+Limits are configurable via environment variables (defaults in parentheses).
 When limits are hit, escalate to human checkpoint.
 
 These guards run via the pre_node_guard wrapper on every node entry.
 Works with any state dict (RalphState, FeedbackState, ReviewerState)
 by using .get() with defaults for optional fields.
 
+Design note: guard functions accept Mapping[str, Any] rather than a typed
+state model. This is intentional — it allows a single guard implementation
+to work across RalphState, FeedbackState, and ReviewerState without unions.
+The trade-off is that misspelled field names silently fall back to defaults.
+A future typed WorkflowState protocol could replace this once all state
+types share a common base.
+
 Iteration guards only block re-entry into the nodes that perform the
 iteration (implement / review nodes), not downstream success nodes.
 """
 
+import os
 from collections.abc import Mapping
 from typing import Any, Literal
 
 from pydantic import BaseModel
 
-MAX_IMPLEMENT_ITERATIONS = 5
-MAX_REVIEW_ITERATIONS = 3
-MAX_TOOL_CALLS_PER_NODE = 50
-MAX_TOTAL_TOOL_CALLS = 200
-MAX_COST_USD_PER_RUN = 2.00
+MAX_IMPLEMENT_ITERATIONS = int(os.environ.get("OUROBOROS_MAX_IMPLEMENT_ITER", "5"))
+MAX_REVIEW_ITERATIONS = int(os.environ.get("OUROBOROS_MAX_REVIEW_ITER", "3"))
+MAX_TOOL_CALLS_PER_NODE = int(os.environ.get("OUROBOROS_MAX_TOOL_CALLS_NODE", "50"))
+MAX_TOTAL_TOOL_CALLS = int(os.environ.get("OUROBOROS_MAX_TOTAL_TOOL_CALLS", "200"))
+MAX_COST_USD_PER_RUN = float(os.environ.get("OUROBOROS_MAX_COST_USD", "2.00"))
 
-_IMPLEMENT_NODES = frozenset({"implement_node", "implement_feedback_node"})
-_REVIEW_NODES = frozenset({"review_loop_node", "address_feedback_node"})
+IMPLEMENT_NODES = frozenset({"implement_node", "implement_feedback_node"})
+REVIEW_NODES = frozenset({"review_loop_node", "address_feedback_node"})
 EXEMPT_NODES = frozenset({"post_mortem_node", "human_checkpoint"})
 
 
@@ -52,10 +59,7 @@ def check_guards(state: Mapping[str, Any], node_name: str | None = None) -> Guar
                 action="escalate",
             )
 
-    if (
-        node_name in _IMPLEMENT_NODES
-        and state.get("iteration_count", 0) >= MAX_IMPLEMENT_ITERATIONS
-    ):
+    if node_name in IMPLEMENT_NODES and state.get("iteration_count", 0) >= MAX_IMPLEMENT_ITERATIONS:
         return GuardResult(
             allowed=False,
             reason=(
@@ -66,7 +70,7 @@ def check_guards(state: Mapping[str, Any], node_name: str | None = None) -> Guar
         )
 
     if (
-        node_name in _REVIEW_NODES
+        node_name in REVIEW_NODES
         and state.get("review_iteration_count", 0) >= MAX_REVIEW_ITERATIONS
     ):
         return GuardResult(
