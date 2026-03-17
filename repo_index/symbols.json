@@ -264,19 +264,24 @@
     "line": 27,
     "kind": "constant"
   },
+  "EXEMPT_NODES": {
+    "file": "agents/core/guards.py",
+    "line": 28,
+    "kind": "constant"
+  },
   "GuardResult": {
     "file": "agents/core/guards.py",
-    "line": 30,
+    "line": 31,
     "kind": "class"
   },
   "check_guards": {
     "file": "agents/core/guards.py",
-    "line": 36,
+    "line": 37,
     "kind": "function"
   },
   "pre_node_guard": {
     "file": "agents/core/guards.py",
-    "line": 101,
+    "line": 102,
     "kind": "function"
   },
   "configure_logfire": {
@@ -1151,52 +1156,52 @@
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 126,
+    "line": 127,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 162,
+    "line": 163,
     "kind": "function"
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 176,
+    "line": 178,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 215,
+    "line": 220,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 268,
+    "line": 279,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 317,
+    "line": 328,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 332,
+    "line": 343,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 352,
+    "line": 363,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 363,
+    "line": 374,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 394,
+    "line": 405,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
@@ -1446,15 +1451,10 @@
   },
   "_TRACKING_KEYS": {
     "file": "lint/workflow_lint.py",
-    "line": 21,
-    "kind": "constant"
-  },
-  "_GUARD_FAILURE_KEYS": {
-    "file": "lint/workflow_lint.py",
     "line": 23,
     "kind": "constant"
   },
-  "_EXEMPT_NODES": {
+  "_GUARD_FAILURE_KEYS": {
     "file": "lint/workflow_lint.py",
     "line": 25,
     "kind": "constant"
@@ -1542,6 +1542,16 @@
   "run_workflow_lint": {
     "file": "lint/workflow_lint.py",
     "line": 386,
+    "kind": "function"
+  },
+  "check_wf004_guard_exemption": {
+    "file": "lint/workflow_lint_ext.py",
+    "line": 12,
+    "kind": "function"
+  },
+  "check_wf006_loop_tool_accounting": {
+    "file": "lint/workflow_lint_ext.py",
+    "line": 39,
     "kind": "function"
   },
   "_discover_python_files": {
@@ -1751,97 +1761,97 @@
   },
   "test_5th_implement_blocks_reentry": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 22,
+    "line": 23,
     "kind": "function"
   },
   "test_5th_implement_allows_validate": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 30,
+    "line": 31,
     "kind": "function"
   },
   "test_5th_implement_allows_perf_validate": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 37,
+    "line": 38,
     "kind": "function"
   },
   "test_5th_implement_allows_ui_validate": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 43,
+    "line": 44,
     "kind": "function"
   },
   "test_5th_implement_allows_open_pr": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 49,
+    "line": 50,
     "kind": "function"
   },
   "test_5th_implement_allows_review": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 55,
+    "line": 56,
     "kind": "function"
   },
   "test_5th_implement_allows_merge": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 61,
+    "line": 62,
     "kind": "function"
   },
   "test_5th_implement_allows_commit_push": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 67,
+    "line": 68,
     "kind": "function"
   },
   "test_5th_implement_blocks_feedback_reentry": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 74,
+    "line": 75,
     "kind": "function"
   },
   "test_3rd_review_blocks_reentry": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 84,
+    "line": 85,
     "kind": "function"
   },
   "test_3rd_review_allows_merge": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 92,
+    "line": 93,
     "kind": "function"
   },
   "test_3rd_review_blocks_address_feedback": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 99,
+    "line": 100,
     "kind": "function"
   },
   "test_3rd_review_allows_open_pr": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 106,
+    "line": 107,
     "kind": "function"
   },
   "test_exactly_at_node_limit_blocks_entry": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 116,
+    "line": 117,
     "kind": "function"
   },
   "test_under_node_limit_allows_entry": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 126,
+    "line": 127,
     "kind": "function"
   },
   "test_mid_loop_exactly_at_limit_should_not_escalate": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 135,
+    "line": 136,
     "kind": "function"
   },
   "test_mid_loop_over_limit_should_escalate": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 146,
+    "line": 150,
     "kind": "function"
   },
   "test_mid_loop_partial_budget_at_limit": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 157,
+    "line": 161,
     "kind": "function"
   },
   "test_mid_loop_partial_budget_over_limit": {
     "file": "tests/agent_eval/test_guard_boundary.py",
-    "line": 167,
+    "line": 171,
     "kind": "function"
   },
   "test_reviewer_fresh_state_allowed": {
@@ -2137,6 +2147,56 @@
   "test_status_endpoint": {
     "file": "tests/agent_eval/test_server.py",
     "line": 31,
+    "kind": "function"
+  },
+  "_REPO": {
+    "file": "tests/lint/test_lint_runners.py",
+    "line": 11,
+    "kind": "constant"
+  },
+  "_GUARD_FAILURE_STATUSES": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 49,
+    "kind": "constant"
+  },
+  "_parse_workflow_file": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 52,
+    "kind": "function"
+  },
+  "_get_node_functions": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 57,
+    "kind": "function"
+  },
+  "_calls_pre_node_guard": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 70,
+    "kind": "function"
+  },
+  "_get_return_dicts": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 82,
+    "kind": "function"
+  },
+  "test_exempt_nodes_matches_actual_unguarded_nodes": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 101,
+    "kind": "function"
+  },
+  "test_cli_does_not_reference_merged_status": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 128,
+    "kind": "function"
+  },
+  "test_skip_paths_include_tracking_keys": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 144,
+    "kind": "function"
+  },
+  "test_ralph_state_has_no_merged_status": {
+    "file": "tests/agent_eval/test_state_consistency.py",
+    "line": 166,
     "kind": "function"
   },
   "test_all_pass_proceeds": {
@@ -2444,199 +2504,314 @@
     "line": 61,
     "kind": "function"
   },
+  "_write_md": {
+    "file": "tests/lint/test_doc_lint.py",
+    "line": 8,
+    "kind": "function"
+  },
+  "test_stale_file_reference_detected": {
+    "file": "tests/lint/test_doc_lint.py",
+    "line": 15,
+    "kind": "function"
+  },
+  "test_valid_file_reference_passes": {
+    "file": "tests/lint/test_doc_lint.py",
+    "line": 30,
+    "kind": "function"
+  },
+  "test_stale_symbol_reference_detected": {
+    "file": "tests/lint/test_doc_lint.py",
+    "line": 47,
+    "kind": "function"
+  },
+  "test_valid_symbol_reference_passes": {
+    "file": "tests/lint/test_doc_lint.py",
+    "line": 62,
+    "kind": "function"
+  },
+  "test_common_non_symbols_not_flagged": {
+    "file": "tests/lint/test_doc_lint.py",
+    "line": 77,
+    "kind": "function"
+  },
   "test_gp002_file_exceeds_500_lines": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 16,
+    "line": 22,
     "kind": "function"
   },
   "test_gp002_file_under_limit_passes": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 23,
+    "line": 29,
     "kind": "function"
   },
   "test_gp005_print_detected_outside_scripts": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 30,
+    "line": 36,
     "kind": "function"
   },
   "test_gp005_print_allowed_in_scripts": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 43,
+    "line": 49,
     "kind": "function"
   },
   "test_gp001_duplicate_function_detected": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 56,
+    "line": 62,
     "kind": "function"
   },
   "test_gp001_unique_functions_pass": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 68,
+    "line": 74,
     "kind": "function"
   },
   "test_gp003_hand_rolled_retry_detected": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 90,
+    "line": 96,
     "kind": "function"
   },
   "test_gp003_no_false_positive_on_while_without_sleep": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 108,
+    "line": 114,
     "kind": "function"
   },
   "test_gp004_json_loads_without_validation_detected": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 123,
+    "line": 129,
     "kind": "function"
   },
   "test_gp004_json_loads_with_model_validate_passes": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 139,
+    "line": 145,
     "kind": "function"
   },
   "test_gp006_bad_model_name_detected": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 156,
+    "line": 162,
     "kind": "function"
   },
   "test_gp006_approved_suffix_passes": {
     "file": "tests/lint/test_golden_lint.py",
-    "line": 170,
+    "line": 176,
+    "kind": "function"
+  },
+  "test_gp011_cross_module_private_import_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 193,
+    "kind": "function"
+  },
+  "test_gp011_same_package_private_import_passes": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 207,
+    "kind": "function"
+  },
+  "test_gp012_missing_encoding_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 224,
+    "kind": "function"
+  },
+  "test_gp012_with_encoding_passes": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 238,
+    "kind": "function"
+  },
+  "test_gp013_silent_swallow_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 255,
+    "kind": "function"
+  },
+  "test_gp013_logged_exception_passes": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 271,
+    "kind": "function"
+  },
+  "test_gp014_hardcoded_limit_detected": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 290,
+    "kind": "function"
+  },
+  "test_gp014_constant_reference_passes": {
+    "file": "tests/lint/test_golden_lint.py",
+    "line": 304,
+    "kind": "function"
+  },
+  "_extract_calls_in_function": {
+    "file": "tests/lint/test_lint_runners.py",
+    "line": 14,
+    "kind": "function"
+  },
+  "test_run_golden_lint_calls_all_gp_checkers": {
+    "file": "tests/lint/test_lint_runners.py",
+    "line": 33,
+    "kind": "function"
+  },
+  "test_run_workflow_lint_calls_all_wf_checkers": {
+    "file": "tests/lint/test_lint_runners.py",
+    "line": 84,
     "kind": "function"
   },
   "_parse_func": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 17,
+    "line": 21,
     "kind": "function"
   },
   "test_wf001_passes_with_guard": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 28,
+    "line": 32,
     "kind": "function"
   },
   "test_wf001_fails_without_guard": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 39,
+    "line": 43,
     "kind": "function"
   },
   "test_wf002_passes_with_tracking": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 53,
+    "line": 57,
     "kind": "function"
   },
   "test_wf002_fails_missing_tracking": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 61,
+    "line": 65,
     "kind": "function"
   },
   "test_wf002_exempts_guard_failure_return": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 72,
+    "line": 76,
     "kind": "function"
   },
   "test_wf002_flags_non_guard_failure_missing_tracking": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 80,
+    "line": 84,
     "kind": "function"
   },
   "test_wf002_exempts_empty_return": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 91,
+    "line": 95,
     "kind": "function"
   },
   "test_wf002_exempts_double_star_spread": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 99,
+    "line": 103,
     "kind": "function"
   },
   "test_wf003_passes_matching_roles": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 110,
+    "line": 114,
     "kind": "function"
   },
   "test_wf003_fails_mismatched_roles": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 119,
+    "line": 123,
     "kind": "function"
   },
   "test_wf003_passes_separate_contexts": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 132,
+    "line": 136,
     "kind": "function"
   },
   "_parse_module": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 146,
+    "line": 150,
     "kind": "function"
   },
   "_collect_node_funcs": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 150,
+    "line": 154,
     "kind": "function"
   },
   "test_wf005_passes_with_conditional_edges": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 160,
+    "line": 164,
     "kind": "function"
   },
   "test_wf005_fails_with_unconditional_edge": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 172,
+    "line": 176,
     "kind": "function"
   },
   "test_wf005_passes_terminal_edge_to_end": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 187,
+    "line": 191,
     "kind": "function"
   },
   "test_wf005_passes_no_failure_status": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 200,
+    "line": 204,
     "kind": "function"
   },
   "test_wf007_flags_gte_in_loop": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 215,
+    "line": 219,
     "kind": "function"
   },
   "test_wf007_passes_gt_in_loop": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 229,
+    "line": 233,
     "kind": "function"
   },
   "test_wf007_passes_no_loop": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 240,
+    "line": 244,
     "kind": "function"
   },
   "test_wf009_passes_with_accumulate": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 252,
+    "line": 256,
     "kind": "function"
   },
   "test_wf009_fails_without_accumulate": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 261,
+    "line": 265,
     "kind": "function"
   },
   "test_wf009_passes_no_llm_call": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 273,
+    "line": 277,
     "kind": "function"
   },
   "test_wf010_flags_write_text": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 285,
+    "line": 289,
     "kind": "function"
   },
   "test_wf010_flags_unlink": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 297,
+    "line": 301,
     "kind": "function"
   },
   "test_wf010_passes_apply_file_changes": {
     "file": "tests/lint/test_workflow_lint.py",
-    "line": 308,
+    "line": 312,
+    "kind": "function"
+  },
+  "test_wf004_flags_unguarded_non_exempt_node": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 324,
+    "kind": "function"
+  },
+  "test_wf004_passes_guarded_node": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 335,
+    "kind": "function"
+  },
+  "test_wf004_passes_exempt_node": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 346,
+    "kind": "function"
+  },
+  "test_wf006_flags_loop_without_counter": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 357,
+    "kind": "function"
+  },
+  "test_wf006_passes_loop_with_attempts_counter": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 368,
+    "kind": "function"
+  },
+  "test_wf006_passes_no_loop": {
+    "file": "tests/lint/test_workflow_lint.py",
+    "line": 378,
     "kind": "function"
   }
 }
