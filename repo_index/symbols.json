@@ -231,57 +231,57 @@
   },
   "MAX_IMPLEMENT_ITERATIONS": {
     "file": "agents/core/guards.py",
-    "line": 20,
+    "line": 27,
     "kind": "constant"
   },
   "MAX_REVIEW_ITERATIONS": {
     "file": "agents/core/guards.py",
-    "line": 21,
+    "line": 28,
     "kind": "constant"
   },
   "MAX_TOOL_CALLS_PER_NODE": {
     "file": "agents/core/guards.py",
-    "line": 22,
+    "line": 29,
     "kind": "constant"
   },
   "MAX_TOTAL_TOOL_CALLS": {
     "file": "agents/core/guards.py",
-    "line": 23,
+    "line": 30,
     "kind": "constant"
   },
   "MAX_COST_USD_PER_RUN": {
     "file": "agents/core/guards.py",
-    "line": 24,
+    "line": 31,
     "kind": "constant"
   },
-  "_IMPLEMENT_NODES": {
+  "IMPLEMENT_NODES": {
     "file": "agents/core/guards.py",
-    "line": 26,
+    "line": 33,
     "kind": "constant"
   },
-  "_REVIEW_NODES": {
+  "REVIEW_NODES": {
     "file": "agents/core/guards.py",
-    "line": 27,
+    "line": 34,
     "kind": "constant"
   },
   "EXEMPT_NODES": {
     "file": "agents/core/guards.py",
-    "line": 28,
+    "line": 35,
     "kind": "constant"
   },
   "GuardResult": {
     "file": "agents/core/guards.py",
-    "line": 31,
+    "line": 38,
     "kind": "class"
   },
   "check_guards": {
     "file": "agents/core/guards.py",
-    "line": 37,
+    "line": 44,
     "kind": "function"
   },
   "pre_node_guard": {
     "file": "agents/core/guards.py",
-    "line": 102,
+    "line": 106,
     "kind": "function"
   },
   "configure_logfire": {
@@ -1451,107 +1451,112 @@
   },
   "_TRACKING_KEYS": {
     "file": "lint/workflow_lint.py",
-    "line": 23,
+    "line": 24,
     "kind": "constant"
   },
   "_GUARD_FAILURE_KEYS": {
     "file": "lint/workflow_lint.py",
-    "line": 25,
+    "line": 26,
     "kind": "constant"
   },
   "_WORKER_ROLE_TO_RUNNER": {
     "file": "lint/workflow_lint.py",
-    "line": 27,
+    "line": 28,
     "kind": "constant"
   },
   "_LLM_RUNNERS": {
     "file": "lint/workflow_lint.py",
-    "line": 34,
+    "line": 35,
     "kind": "constant"
   },
   "_FILE_MUTATION_METHODS": {
     "file": "lint/workflow_lint.py",
-    "line": 44,
+    "line": 45,
     "kind": "constant"
   },
   "_is_workflow_node": {
     "file": "lint/workflow_lint.py",
-    "line": 58,
+    "line": 59,
     "kind": "function"
   },
   "_dict_keys_from_return": {
     "file": "lint/workflow_lint.py",
-    "line": 69,
+    "line": 70,
     "kind": "function"
   },
   "_references_guard_reason": {
     "file": "lint/workflow_lint.py",
-    "line": 78,
+    "line": 79,
     "kind": "function"
   },
   "_is_guard_failure_return": {
     "file": "lint/workflow_lint.py",
-    "line": 91,
+    "line": 92,
     "kind": "function"
   },
   "_is_empty_return": {
     "file": "lint/workflow_lint.py",
-    "line": 105,
+    "line": 106,
     "kind": "function"
   },
   "_has_double_star": {
     "file": "lint/workflow_lint.py",
-    "line": 110,
+    "line": 111,
     "kind": "function"
   },
   "check_wf001_guard_contract": {
     "file": "lint/workflow_lint.py",
-    "line": 115,
+    "line": 116,
     "kind": "function"
   },
   "check_wf002_return_tracking": {
     "file": "lint/workflow_lint.py",
-    "line": 142,
+    "line": 143,
     "kind": "function"
   },
   "check_wf003_context_role_mismatch": {
     "file": "lint/workflow_lint.py",
-    "line": 179,
+    "line": 180,
     "kind": "function"
   },
   "check_wf005_status_aware_edges": {
     "file": "lint/workflow_lint.py",
-    "line": 242,
+    "line": 243,
     "kind": "function"
   },
   "check_wf007_budget_off_by_one": {
     "file": "lint/workflow_lint.py",
-    "line": 296,
+    "line": 297,
     "kind": "function"
   },
   "check_wf009_llm_accumulate_usage": {
     "file": "lint/workflow_lint.py",
-    "line": 328,
+    "line": 329,
     "kind": "function"
   },
   "check_wf010_no_direct_file_mutation": {
     "file": "lint/workflow_lint.py",
-    "line": 361,
+    "line": 362,
     "kind": "function"
   },
   "run_workflow_lint": {
     "file": "lint/workflow_lint.py",
-    "line": 386,
+    "line": 387,
     "kind": "function"
   },
   "check_wf004_guard_exemption": {
     "file": "lint/workflow_lint_ext.py",
-    "line": 12,
+    "line": 13,
     "kind": "function"
   },
   "check_wf006_loop_tool_accounting": {
     "file": "lint/workflow_lint_ext.py",
-    "line": 39,
+    "line": 40,
+    "kind": "function"
+  },
+  "check_wf008_node_name_consistency": {
+    "file": "lint/workflow_lint_ext.py",
+    "line": 82,
     "kind": "function"
   },
   "_discover_python_files": {
