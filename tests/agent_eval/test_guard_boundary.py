@@ -12,6 +12,7 @@ from agents.core.guards import (
     MAX_IMPLEMENT_ITERATIONS,
     MAX_REVIEW_ITERATIONS,
     MAX_TOOL_CALLS_PER_NODE,
+    MAX_TOTAL_TOOL_CALLS,
     check_guards,
 )
 from tests.agent_eval.conftest import _state_with
@@ -133,42 +134,46 @@ def test_under_node_limit_allows_entry() -> None:
 
 
 def test_mid_loop_exactly_at_limit_should_not_escalate() -> None:
-    """The reply_node mid-loop check uses > (not >=).
+    """With node_tool_calls exactly at the limit, the guard blocks entry.
 
-    With existing=0 and attempts=MAX_TOOL_CALLS_PER_NODE, the condition
-    `0 + 50 > 50` is False, so it should NOT escalate.
+    check_guards uses >= so exactly-at-limit IS blocked (pre-call check).
     """
-    existing = 0
-    attempts = MAX_TOOL_CALLS_PER_NODE
-    assert not (existing + attempts > MAX_TOOL_CALLS_PER_NODE)
+    state = _state_with(
+        node_tool_calls={"reply_node": MAX_TOOL_CALLS_PER_NODE},
+        total_tool_calls=MAX_TOOL_CALLS_PER_NODE,
+    )
+    result = check_guards(state, node_name="reply_node")
+    assert not result.allowed
+    assert result.action == "escalate"
 
 
 def test_mid_loop_over_limit_should_escalate() -> None:
-    """One attempt beyond the limit triggers escalation.
-
-    With existing=0 and attempts=MAX_TOOL_CALLS_PER_NODE+1, the condition
-    `0 + 51 > 50` is True, so it should escalate.
-    """
-    existing = 0
-    attempts = MAX_TOOL_CALLS_PER_NODE + 1
-    assert existing + attempts > MAX_TOOL_CALLS_PER_NODE
+    """One call beyond the per-node limit triggers escalation."""
+    state = _state_with(
+        node_tool_calls={"reply_node": MAX_TOOL_CALLS_PER_NODE + 1},
+        total_tool_calls=MAX_TOOL_CALLS_PER_NODE + 1,
+    )
+    result = check_guards(state, node_name="reply_node")
+    assert not result.allowed
+    assert result.action == "escalate"
 
 
 def test_mid_loop_partial_budget_at_limit() -> None:
-    """With prior calls, exactly reaching the limit is still OK.
-
-    existing=10, attempts=40: 10+40 > 50 is False → no escalation.
-    """
-    existing = 10
-    attempts = MAX_TOOL_CALLS_PER_NODE - existing
-    assert not (existing + attempts > MAX_TOOL_CALLS_PER_NODE)
+    """With prior calls from other nodes, exactly reaching per-node limit blocks."""
+    state = _state_with(
+        node_tool_calls={"reply_node": MAX_TOOL_CALLS_PER_NODE},
+        total_tool_calls=100,
+    )
+    result = check_guards(state, node_name="reply_node")
+    assert not result.allowed
 
 
 def test_mid_loop_partial_budget_over_limit() -> None:
-    """With prior calls, exceeding the limit triggers escalation.
-
-    existing=10, attempts=41: 10+41 > 50 is True → escalation.
-    """
-    existing = 10
-    attempts = MAX_TOOL_CALLS_PER_NODE - existing + 1
-    assert existing + attempts > MAX_TOOL_CALLS_PER_NODE
+    """Under per-node limit but over total budget → abort."""
+    state = _state_with(
+        node_tool_calls={"reply_node": 10},
+        total_tool_calls=MAX_TOTAL_TOOL_CALLS,
+    )
+    result = check_guards(state, node_name="reply_node")
+    assert not result.allowed
+    assert result.action == "abort"
