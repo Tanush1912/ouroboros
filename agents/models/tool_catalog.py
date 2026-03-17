@@ -225,7 +225,7 @@ ALL_TOOL_CAPABILITIES: list[ToolCapability] = [
             "current": {"type": "object", "description": "BenchmarkResult current"},
             "threshold_pct": {"type": "number", "default": 10.0},
         },
-        output_type="PerfComparison",
+        output_type="PerfComparisonResult",
         category="benchmark",
     ),
     # -- Git tools --

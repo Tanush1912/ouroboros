@@ -1,4 +1,4 @@
-"""Tests for golden principle lint rules."""
+"""Tests for golden principle lint rules (GP-001 through GP-006, GP-011 through GP-014)."""
 
 from pathlib import Path
 
@@ -9,6 +9,12 @@ from lint.golden_lint import (
     check_gp004_unvalidated_external,
     check_gp005_no_print,
     check_gp006_model_naming,
+)
+from lint.golden_lint_ext import (
+    check_gp011_cross_module_private_imports,
+    check_gp012_file_encoding,
+    check_gp013_silent_exception,
+    check_gp014_hardcoded_guard_limits,
 )
 from tests.lint.helpers import write_py
 
@@ -178,4 +184,133 @@ def test_gp006_approved_suffix_passes(tmp_path: Path) -> None:
     """,
     )
     violations = check_gp006_model_naming(tmp_path)
+    assert violations == []
+
+
+# --- GP-011: No cross-module private imports ---
+
+
+def test_gp011_cross_module_private_import_detected(tmp_path: Path) -> None:
+    write_py(tmp_path, "agents/core/__init__.py", "")
+    write_py(tmp_path, "agents/core/utils.py", "def _internal(): pass")
+    write_py(
+        tmp_path,
+        "agents/tools/shell.py",
+        """
+        from agents.core.utils import _internal
+    """,
+    )
+    violations = check_gp011_cross_module_private_imports(tmp_path)
+    assert any("GP-011" in v and "_internal" in v for v in violations)
+
+
+def test_gp011_same_package_private_import_passes(tmp_path: Path) -> None:
+    write_py(tmp_path, "agents/core/__init__.py", "")
+    write_py(tmp_path, "agents/core/utils.py", "def _internal(): pass")
+    write_py(
+        tmp_path,
+        "agents/core/helpers.py",
+        """
+        from agents.core.utils import _internal
+    """,
+    )
+    violations = check_gp011_cross_module_private_imports(tmp_path)
+    assert violations == []
+
+
+# --- GP-012: File encoding ---
+
+
+def test_gp012_missing_encoding_detected(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/core/reader.py",
+        """
+        from pathlib import Path
+        def read_config():
+            return Path("cfg.txt").read_text()
+    """,
+    )
+    violations = check_gp012_file_encoding(tmp_path)
+    assert any("GP-012" in v and "read_text" in v for v in violations)
+
+
+def test_gp012_with_encoding_passes(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/core/reader.py",
+        """
+        from pathlib import Path
+        def read_config():
+            return Path("cfg.txt").read_text(encoding="utf-8")
+    """,
+    )
+    violations = check_gp012_file_encoding(tmp_path)
+    assert violations == []
+
+
+# --- GP-013: No silent exception swallow ---
+
+
+def test_gp013_silent_swallow_detected(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/tools/fetcher.py",
+        """
+        def fetch():
+            try:
+                do_work()
+            except Exception:
+                return {}
+    """,
+    )
+    violations = check_gp013_silent_exception(tmp_path)
+    assert any("GP-013" in v for v in violations)
+
+
+def test_gp013_logged_exception_passes(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/tools/fetcher.py",
+        """
+        def fetch():
+            try:
+                do_work()
+            except Exception as e:
+                return {"error_log": [str(e)], "status": "failed"}
+    """,
+    )
+    violations = check_gp013_silent_exception(tmp_path)
+    assert violations == []
+
+
+# --- GP-014: No hardcoded guard limits ---
+
+
+def test_gp014_hardcoded_limit_detected(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/workflows/ralph_loop.py",
+        """
+        async def check_node(state):
+            if state["iteration_count"] >= 5:
+                return {"status": "escalated"}
+    """,
+    )
+    violations = check_gp014_hardcoded_guard_limits(tmp_path)
+    assert any("GP-014" in v and "5" in v for v in violations)
+
+
+def test_gp014_constant_reference_passes(tmp_path: Path) -> None:
+    write_py(
+        tmp_path,
+        "agents/workflows/ralph_loop.py",
+        """
+        from agents.core.guards import MAX_IMPLEMENT_ITERATIONS
+        async def check_node(state):
+            if state["iteration_count"] >= MAX_IMPLEMENT_ITERATIONS:
+                return {"status": "escalated"}
+    """,
+    )
+    violations = check_gp014_hardcoded_guard_limits(tmp_path)
     assert violations == []

@@ -4,6 +4,7 @@ WF-001: Every workflow node must call pre_node_guard() near entry.
 WF-002: Every return dict from a workflow node must include tool-call tracking keys,
         or be a guard-failure return (status + error_log only).
 WF-003: build_context(worker_role=X) result must not be passed to run_Y() where X != Y.
+WF-004: Nodes that skip pre_node_guard() must be listed in EXEMPT_NODES.
 WF-005: Nodes that can return status='failed'/'escalated' must use conditional edges.
 WF-006: Tool calls inside loops must count attempts, not just successes.
 WF-007: Post-call >= MAX_TOOL_CALLS_PER_NODE is off-by-one; require > for post-call.
@@ -15,14 +16,13 @@ import ast
 import sys
 from pathlib import Path
 
+from agents.core.guards import EXEMPT_NODES
 from agents.core.paths import repo_root as _repo_root
 from lint.rules import RULES_BY_ID
 
 _TRACKING_KEYS = {"total_tool_calls", "node_tool_calls"}
 
 _GUARD_FAILURE_KEYS = {"status", "error_log"}
-
-_EXEMPT_NODES = {"human_checkpoint", "post_mortem_node"}
 
 _WORKER_ROLE_TO_RUNNER = {
     "planner": "run_planner",
@@ -126,7 +126,7 @@ def check_wf001_guard_contract(
             if isinstance(callee, ast.Attribute) and callee.attr == "pre_node_guard":
                 has_guard = True
                 break
-    if not has_guard and func.name not in _EXEMPT_NODES:
+    if not has_guard and func.name not in EXEMPT_NODES:
         rule = RULES_BY_ID.get("WF-001")
         remediation = (
             rule.agent_remediation if rule else "Add pre_node_guard(state, node_name) call."
@@ -143,7 +143,7 @@ def check_wf002_return_tracking(
     func: ast.FunctionDef | ast.AsyncFunctionDef, rel_path: str
 ) -> list[str]:
     """WF-002: Every non-guard-failure return dict must include tool-call tracking."""
-    if func.name in _EXEMPT_NODES:
+    if func.name in EXEMPT_NODES:
         return []
     violations = []
     for node in ast.walk(func):
@@ -279,7 +279,7 @@ def check_wf005_status_aware_edges(
 
     violations = []
     for func_name in nodes_with_failure_status:
-        if func_name in unconditional_edges and func_name not in _EXEMPT_NODES:
+        if func_name in unconditional_edges and func_name not in EXEMPT_NODES:
             rule = RULES_BY_ID.get("WF-005")
             remediation = (
                 rule.agent_remediation if rule else "Use add_conditional_edges instead of add_edge."
@@ -329,7 +329,7 @@ def check_wf009_llm_accumulate_usage(
     func: ast.FunctionDef | ast.AsyncFunctionDef, rel_path: str
 ) -> list[str]:
     """WF-009: LLM runner nodes must call accumulate_usage()."""
-    if func.name in _EXEMPT_NODES:
+    if func.name in EXEMPT_NODES:
         return []
     has_llm_call = False
     has_accumulate = False
@@ -362,7 +362,7 @@ def check_wf010_no_direct_file_mutation(
     func: ast.FunctionDef | ast.AsyncFunctionDef, rel_path: str
 ) -> list[str]:
     """WF-010: No direct Path mutation in workflow nodes."""
-    if func.name in _EXEMPT_NODES:
+    if func.name in EXEMPT_NODES:
         return []
     violations = []
     for node in ast.walk(func):
@@ -385,6 +385,8 @@ def check_wf010_no_direct_file_mutation(
 
 def run_workflow_lint(path: str, repo_root: Path | None = None) -> list[str]:
     """Run all workflow contract checks. Returns violation messages."""
+    from lint.workflow_lint_ext import check_wf004_guard_exemption, check_wf006_loop_tool_accounting
+
     if repo_root is None:
         repo_root = _repo_root()
 
@@ -422,6 +424,8 @@ def run_workflow_lint(path: str, repo_root: Path | None = None) -> list[str]:
             all_violations.extend(check_wf001_guard_contract(func, rel_path))
             all_violations.extend(check_wf002_return_tracking(func, rel_path))
             all_violations.extend(check_wf003_context_role_mismatch(func, rel_path))
+            all_violations.extend(check_wf004_guard_exemption(func, rel_path))
+            all_violations.extend(check_wf006_loop_tool_accounting(func, rel_path))
             all_violations.extend(check_wf007_budget_off_by_one(func, rel_path))
             all_violations.extend(check_wf009_llm_accumulate_usage(func, rel_path))
             all_violations.extend(check_wf010_no_direct_file_mutation(func, rel_path))

@@ -1,7 +1,7 @@
 """State consistency tests — verify workflow state semantics are sound.
 
 Covers:
-- _EXEMPT_NODES matches actual unguarded nodes (AST-verified)
+- EXEMPT_NODES matches actual unguarded nodes (AST-verified)
 - CLI does not reference phantom status values
 - Skip paths include tracking keys (total_tool_calls, node_tool_calls)
 - All non-skip, non-guard-failure success paths set status explicitly
@@ -39,7 +39,7 @@ if "logfire" not in sys.modules:
     _logfire.warning = MagicMock()
     sys.modules["logfire"] = _logfire
 
-from agents.core.guards import _EXEMPT_NODES
+from agents.core.guards import EXEMPT_NODES
 from agents.core.paths import repo_root
 
 _REPO = repo_root()
@@ -95,11 +95,11 @@ def _get_return_dicts(func: ast.FunctionDef | ast.AsyncFunctionDef) -> list[set[
     return results
 
 
-# --- Test: _EXEMPT_NODES matches actual unguarded nodes ---
+# --- Test: EXEMPT_NODES matches actual unguarded nodes ---
 
 
 def test_exempt_nodes_matches_actual_unguarded_nodes():
-    """AST-verify that _EXEMPT_NODES exactly matches nodes that skip pre_node_guard()."""
+    """AST-verify that EXEMPT_NODES exactly matches nodes that skip pre_node_guard()."""
     tree = _parse_workflow_file("agents/workflows/ralph_loop.py")
     node_funcs = _get_node_functions(tree)
 
@@ -115,10 +115,10 @@ def test_exempt_nodes_matches_actual_unguarded_nodes():
         if not _calls_pre_node_guard(func):
             unguarded.add(func.name)
 
-    assert unguarded == _EXEMPT_NODES, (
-        f"_EXEMPT_NODES mismatch.\n"
+    assert unguarded == EXEMPT_NODES, (
+        f"EXEMPT_NODES mismatch.\n"
         f"  Unguarded in code: {unguarded}\n"
-        f"  _EXEMPT_NODES:     {_EXEMPT_NODES}"
+        f"  EXEMPT_NODES:     {EXEMPT_NODES}"
     )
 
 
