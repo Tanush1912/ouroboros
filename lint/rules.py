@@ -281,6 +281,21 @@ WORKFLOW_RULES: list[LintRule] = [
         ),
     ),
     LintRule(
+        id="WF-008",
+        name="node-name-consistency",
+        description=(
+            "Node names in IMPLEMENT_NODES, REVIEW_NODES, and EXEMPT_NODES "
+            "must match actual nodes registered in build_ralph_graph()."
+        ),
+        severity="error",
+        agent_remediation=(
+            "Update the frozenset in agents/core/guards.py to match the actual "
+            "node names in build_ralph_graph(). If a node was renamed, update "
+            "all references."
+        ),
+        docs_link="agents/core/guards.py",
+    ),
+    LintRule(
         id="WF-009",
         name="llm-node-must-accumulate-usage",
         description=(

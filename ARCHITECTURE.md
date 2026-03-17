@@ -5,7 +5,7 @@
 Layers are ordered. Each layer may only import from layers below it.
 
 ```
-types → config → models → core → workers → workflows → cli/scripts
+models → config → core → tools → workers → workflows → cli/scripts
 ```
 
 Cross-cutting concerns (logging, metrics, auth) enter only via `agents/core/`.
@@ -14,7 +14,7 @@ Cross-cutting concerns (logging, metrics, auth) enter only via `agents/core/`.
 
 | Layer | Module Prefix | May Import From |
 |---|---|---|
-| types | `agents.models.*` | stdlib, pydantic |
+| models | `agents.models.*` | stdlib, pydantic |
 | config | `agents.core.config` | `agents.models.*`, stdlib |
 | core | `agents.core.*` | `agents.models.*`, `agents.core.config` |
 | tools | `agents.tools.*` | `agents.models.*`, `agents.core.*` |

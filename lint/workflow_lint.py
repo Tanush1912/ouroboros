@@ -8,6 +8,7 @@ WF-004: Nodes that skip pre_node_guard() must be listed in EXEMPT_NODES.
 WF-005: Nodes that can return status='failed'/'escalated' must use conditional edges.
 WF-006: Tool calls inside loops must count attempts, not just successes.
 WF-007: Post-call >= MAX_TOOL_CALLS_PER_NODE is off-by-one; require > for post-call.
+WF-008: Node names in guard frozensets must match actual registered nodes.
 WF-009: LLM runner nodes must call accumulate_usage().
 WF-010: No direct Path.write_text/unlink/mkdir in workflow nodes.
 """
@@ -385,7 +386,11 @@ def check_wf010_no_direct_file_mutation(
 
 def run_workflow_lint(path: str, repo_root: Path | None = None) -> list[str]:
     """Run all workflow contract checks. Returns violation messages."""
-    from lint.workflow_lint_ext import check_wf004_guard_exemption, check_wf006_loop_tool_accounting
+    from lint.workflow_lint_ext import (
+        check_wf004_guard_exemption,
+        check_wf006_loop_tool_accounting,
+        check_wf008_node_name_consistency,
+    )
 
     if repo_root is None:
         repo_root = _repo_root()
@@ -431,6 +436,8 @@ def run_workflow_lint(path: str, repo_root: Path | None = None) -> list[str]:
             all_violations.extend(check_wf010_no_direct_file_mutation(func, rel_path))
 
         all_violations.extend(check_wf005_status_aware_edges(tree, node_funcs, rel_path))
+
+    all_violations.extend(check_wf008_node_name_consistency(repo_root))
 
     return all_violations
 
