@@ -226,12 +226,12 @@ WORKFLOW_RULES: list[LintRule] = [
         id="WF-004",
         name="guard-exemption-requires-listing",
         description=(
-            "Guard-exempt nodes must be listed in _EXEMPT_NODES with a reason. "
-            "A node without pre_node_guard() that is NOT in _EXEMPT_NODES is a violation."
+            "Guard-exempt nodes must be listed in EXEMPT_NODES with a reason. "
+            "A node without pre_node_guard() that is NOT in EXEMPT_NODES is a violation."
         ),
         severity="error",
         agent_remediation=(
-            "Either add the guard call, or add the node name to _EXEMPT_NODES in "
+            "Either add the guard call, or add the node name to EXEMPT_NODES in "
             "lint/workflow_lint.py with a comment explaining why it is exempt."
         ),
         docs_link="lint/workflow_lint.py",

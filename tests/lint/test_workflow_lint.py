@@ -12,6 +12,10 @@ from lint.workflow_lint import (
     check_wf009_llm_accumulate_usage,
     check_wf010_no_direct_file_mutation,
 )
+from lint.workflow_lint_ext import (
+    check_wf004_guard_exemption,
+    check_wf006_loop_tool_accounting,
+)
 
 
 def _parse_func(source: str) -> ast.AsyncFunctionDef | ast.FunctionDef:
@@ -312,3 +316,69 @@ async def impl_node(state):
     return {"total_tool_calls": 1, "node_tool_calls": {}}
 """)
     assert check_wf010_no_direct_file_mutation(func, "test.py") == []
+
+
+# --- WF-004: Guard exemption requires listing ---
+
+
+def test_wf004_flags_unguarded_non_exempt_node():
+    func = _parse_func("""
+async def rogue_node(state):
+    return {"total_tool_calls": 1, "node_tool_calls": {}}
+""")
+    violations = check_wf004_guard_exemption(func, "test.py")
+    assert len(violations) == 1
+    assert "WF-004" in violations[0]
+    assert "rogue_node" in violations[0]
+
+
+def test_wf004_passes_guarded_node():
+    func = _parse_func("""
+async def plan_node(state):
+    guard = pre_node_guard(state, "plan_node")
+    if not guard.allowed:
+        return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
+    return {"total_tool_calls": 1, "node_tool_calls": {}}
+""")
+    assert check_wf004_guard_exemption(func, "test.py") == []
+
+
+def test_wf004_passes_exempt_node():
+    func = _parse_func("""
+def human_checkpoint(state):
+    return {"status": "escalated"}
+""")
+    assert check_wf004_guard_exemption(func, "test.py") == []
+
+
+# --- WF-006: Loop tool call accounting ---
+
+
+def test_wf006_flags_loop_without_counter():
+    func = _parse_func("""
+async def reply_node(state):
+    for comment in comments:
+        result = await reply_to_comment.fn(comment)
+""")
+    violations = check_wf006_loop_tool_accounting(func, "test.py")
+    assert len(violations) == 1
+    assert "WF-006" in violations[0]
+
+
+def test_wf006_passes_loop_with_attempts_counter():
+    func = _parse_func("""
+async def reply_node(state):
+    for comment in comments:
+        attempts += 1
+        result = await reply_to_comment.fn(comment)
+""")
+    assert check_wf006_loop_tool_accounting(func, "test.py") == []
+
+
+def test_wf006_passes_no_loop():
+    func = _parse_func("""
+async def plan_node(state):
+    result = await run_planner(task, ctx)
+    return {"total_tool_calls": 1, "node_tool_calls": {}}
+""")
+    assert check_wf006_loop_tool_accounting(func, "test.py") == []

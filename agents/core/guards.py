@@ -25,6 +25,7 @@ MAX_COST_USD_PER_RUN = 2.00
 
 _IMPLEMENT_NODES = frozenset({"implement_node", "implement_feedback_node"})
 _REVIEW_NODES = frozenset({"review_loop_node", "address_feedback_node"})
+EXEMPT_NODES = frozenset({"post_mortem_node", "human_checkpoint"})
 
 
 class GuardResult(BaseModel):

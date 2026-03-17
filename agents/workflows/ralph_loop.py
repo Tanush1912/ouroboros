@@ -118,6 +118,7 @@ async def reproduce_node(state: RalphState) -> dict[str, Any]:
 
     return {
         "reproduction_evidence": result,
+        "status": "implementing",
         "total_tool_calls": state["total_tool_calls"] + 1,
         "node_tool_calls": update_node_tool_calls(state, "reproduce_node", 1),
     }
@@ -168,6 +169,7 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
     node_calls = 2  # run_tests + run_lint
     return {
         "validation": validation,
+        "status": "validating",
         "total_tool_calls": state["total_tool_calls"] + node_calls,
         "node_tool_calls": update_node_tool_calls(state, "validate_node", node_calls),
     }
@@ -182,7 +184,10 @@ async def perf_validate_node(state: RalphState) -> dict[str, Any]:
     plan = state["plan"]
     if plan and plan.risk_level == "low":
         logfire.info("perf_validate_skipped", reason="low risk change")
-        return {}
+        return {
+            "total_tool_calls": state["total_tool_calls"],
+            "node_tool_calls": update_node_tool_calls(state, "perf_validate_node", 0),
+        }
 
     try:
         from agents.tools.benchmark import compare_benchmarks, run_benchmark
@@ -224,12 +229,18 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
 
     plan = state["plan"]
     if not plan or not plan.requires_browser_validation:
-        return {}
+        return {
+            "total_tool_calls": state["total_tool_calls"],
+            "node_tool_calls": update_node_tool_calls(state, "ui_validate_node", 0),
+        }
 
     app_url = os.environ.get("APP_URL", "")
     if not app_url:
         logfire.warning("ui_validate_skipped", reason="APP_URL env var not set")
-        return {}
+        return {
+            "total_tool_calls": state["total_tool_calls"],
+            "node_tool_calls": update_node_tool_calls(state, "ui_validate_node", 0),
+        }
 
     try:
         from agents.tools.harness import run_app_and_probe

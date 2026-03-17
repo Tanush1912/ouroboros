@@ -3,10 +3,10 @@
 Extracted from ralph_loop to stay under GP-002 (500 lines). Wired into the
 ralph_loop graph after human_checkpoint.
 
-Guard checks are intentionally skipped (listed in _EXEMPT_NODES):
-post_mortem_node is only reached after a guard-triggered failure or
-human_checkpoint, so re-checking the same limits would suppress the
-main diagnostic path for those failures.
+Guard checks are intentionally skipped (see EXEMPT_NODES in
+agents.core.guards): post_mortem_node is only reached after a
+guard-triggered failure or human_checkpoint, so re-checking the same
+limits would suppress the main diagnostic path for those failures.
 """
 
 from typing import Any
