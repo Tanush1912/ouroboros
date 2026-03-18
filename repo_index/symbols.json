@@ -2281,7 +2281,7 @@
   },
   "test_planner_context_sees_all_tools": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 340,
+    "line": 367,
     "kind": "function"
   },
   "test_error_context_construction": {
@@ -2554,164 +2554,174 @@
     "line": 161,
     "kind": "function"
   },
-  "test_route_after_review_not_approved_retries": {
+  "test_route_after_review_meaningless_tests_blocks_merge": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 172,
     "kind": "function"
   },
-  "test_route_after_review_max_iterations_escalates": {
+  "test_route_after_review_meaningless_tests_escalates_at_max": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 183,
+    "line": 186,
     "kind": "function"
   },
-  "test_route_after_review_no_review": {
-    "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 194,
-    "kind": "function"
-  },
-  "test_route_after_plan_all_bug_keywords": {
+  "test_route_after_review_not_approved_retries": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 199,
     "kind": "function"
   },
+  "test_route_after_review_max_iterations_escalates": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 210,
+    "kind": "function"
+  },
+  "test_route_after_review_no_review": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 221,
+    "kind": "function"
+  },
+  "test_route_after_plan_all_bug_keywords": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 226,
+    "kind": "function"
+  },
   "test_reviewer_route_approved": {
-    "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 208,
-    "kind": "function"
-  },
-  "test_reviewer_route_escalate_on_max_iterations": {
-    "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 213,
-    "kind": "function"
-  },
-  "test_reviewer_route_address_feedback": {
-    "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 218,
-    "kind": "function"
-  },
-  "test_reviewer_route_failed_status_escalates": {
-    "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 223,
-    "kind": "function"
-  },
-  "test_route_after_implement_escalated": {
-    "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 229,
-    "kind": "function"
-  },
-  "test_route_after_implement_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 235,
     "kind": "function"
   },
-  "test_route_after_implement_normal": {
+  "test_reviewer_route_escalate_on_max_iterations": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 240,
     "kind": "function"
   },
-  "test_route_after_reproduce_escalated": {
+  "test_reviewer_route_address_feedback": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 245,
     "kind": "function"
   },
-  "test_route_after_reproduce_normal": {
+  "test_reviewer_route_failed_status_escalates": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 250,
     "kind": "function"
   },
+  "test_route_after_implement_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 256,
+    "kind": "function"
+  },
+  "test_route_after_implement_failed": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 262,
+    "kind": "function"
+  },
+  "test_route_after_implement_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 267,
+    "kind": "function"
+  },
+  "test_route_after_reproduce_escalated": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 272,
+    "kind": "function"
+  },
+  "test_route_after_reproduce_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 277,
+    "kind": "function"
+  },
   "test_route_after_perf_validate_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 255,
+    "line": 282,
     "kind": "function"
   },
   "test_route_after_perf_validate_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 260,
+    "line": 287,
     "kind": "function"
   },
   "test_route_after_ui_validate_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 265,
+    "line": 292,
     "kind": "function"
   },
   "test_route_after_ui_validate_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 270,
+    "line": 297,
     "kind": "function"
   },
   "test_route_after_open_pr_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 275,
+    "line": 302,
     "kind": "function"
   },
   "test_route_after_open_pr_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 281,
+    "line": 308,
     "kind": "function"
   },
   "test_route_after_merge_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 286,
+    "line": 313,
     "kind": "function"
   },
   "test_route_after_merge_done": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 291,
+    "line": 318,
     "kind": "function"
   },
   "test_feedback_route_after_gather_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 296,
+    "line": 323,
     "kind": "function"
   },
   "test_feedback_route_after_gather_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 301,
+    "line": 328,
     "kind": "function"
   },
   "test_feedback_route_after_implement_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 306,
+    "line": 333,
     "kind": "function"
   },
   "test_feedback_route_after_implement_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 311,
+    "line": 338,
     "kind": "function"
   },
   "test_feedback_route_after_commit_push_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 316,
+    "line": 343,
     "kind": "function"
   },
   "test_feedback_route_after_commit_push_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 322,
+    "line": 349,
     "kind": "function"
   },
   "test_reviewer_route_after_address_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 327,
+    "line": 354,
     "kind": "function"
   },
   "test_reviewer_route_after_address_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 332,
+    "line": 359,
     "kind": "function"
   },
   "test_implementer_context_is_filtered": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 349,
+    "line": 376,
     "kind": "function"
   },
   "test_planner_and_implementer_contexts_differ": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 360,
+    "line": 387,
     "kind": "function"
   },
   "test_feedback_route_escalated_status_ends": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 379,
+    "line": 406,
     "kind": "function"
   },
   "write_py": {
