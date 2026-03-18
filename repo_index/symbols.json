@@ -879,14 +879,19 @@
     "line": 64,
     "kind": "class"
   },
-  "query_logs": {
+  "_check_health": {
     "file": "agents/tools/observability.py",
     "line": 68,
     "kind": "function"
   },
+  "query_logs": {
+    "file": "agents/tools/observability.py",
+    "line": 78,
+    "kind": "function"
+  },
   "query_metrics": {
     "file": "agents/tools/observability.py",
-    "line": 87,
+    "line": 101,
     "kind": "function"
   },
   "BuildResult": {
