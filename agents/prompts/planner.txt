@@ -24,6 +24,8 @@ Rules:
    - New features → [] (full pipeline)
    - UI changes → ensure "ui_validate" is NOT in skip_stages
    The goal: only run stages that add value for this specific task.
+   Set commit_type based on task: feat (new feature), fix (bug fix),
+   docs (documentation), refactor (restructuring), chore (maintenance).
 9. For tasks involving services or apps, include an observability step using
    the observability tool category to verify logs flow after deployment.
 10. Emit at least 3 behavioral_specs per task:

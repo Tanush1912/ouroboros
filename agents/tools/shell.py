@@ -27,8 +27,15 @@ class CommandResult(BaseModel):
     success: bool
 
 
-def run_subprocess(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd or _repo_root())
+def run_subprocess(
+    cmd: list[str], cwd: Path | None = None, timeout: int = 300
+) -> tuple[int, str, str]:
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=cwd or _repo_root(), timeout=timeout
+        )
+    except subprocess.TimeoutExpired:
+        return 1, "", f"Command timed out after {timeout}s: {' '.join(cmd)}"
     return result.returncode, result.stdout, result.stderr
 
 

@@ -17,6 +17,7 @@ SYSTEM_PROMPT = (Path(__file__).parent.parent / "prompts" / "post_mortem.txt").r
     encoding="utf-8"
 )
 
+# TODO: Global singleton — not thread-safe for concurrent tasks. Use factory or async-local.
 _agent: Agent[None, HarnessImprovementOutput] | None = None
 
 

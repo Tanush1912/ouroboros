@@ -20,6 +20,33 @@ _logger = logging.getLogger(__name__)
 _MAX_RETRIES = 3
 _RETRY_BACKOFF = (2, 5, 10)
 
+# Import actual exception types for robust matching (not string-based).
+try:
+    from httpx import (
+        ConnectError,
+        ConnectTimeout,
+        PoolTimeout,
+        ReadError,
+        ReadTimeout,
+        RemoteProtocolError,
+    )
+
+    _TRANSIENT_HTTP_TYPES: tuple[type[Exception], ...] = (
+        ReadError,
+        ConnectError,
+        RemoteProtocolError,
+        ConnectTimeout,
+        ReadTimeout,
+        PoolTimeout,
+    )
+except ImportError:
+    _TRANSIENT_HTTP_TYPES = ()
+
+try:
+    from pydantic_ai.exceptions import ModelHTTPError as _ModelHTTPError
+except ImportError:
+    _ModelHTTPError = None  # type: ignore[assignment,misc]
+
 
 async def retry_on_transient[T](
     fn: Callable[..., Coroutine[Any, Any, T]],
@@ -28,25 +55,20 @@ async def retry_on_transient[T](
 ) -> T:
     """Retry an async function on transient HTTP/network errors.
 
-    Catches httpx transport errors (ReadError, ConnectError, RemoteProtocolError)
-    and PydanticAI ModelHTTPError with 5xx status. Retries up to 3 times with backoff.
+    Catches httpx transport errors and PydanticAI ModelHTTPError with 5xx status.
+    Retries up to 3 times with backoff (2s, 5s, 10s).
     """
     for attempt in range(_MAX_RETRIES):
         try:
             return await fn(*args, **kwargs)
         except Exception as exc:
-            exc_name = type(exc).__name__
-            is_transient = exc_name in (
-                "ReadError",
-                "ConnectError",
-                "RemoteProtocolError",
-                "ConnectTimeout",
-                "ReadTimeout",
-                "PoolTimeout",
-            )
-            if not is_transient and exc_name == "ModelHTTPError":
-                status = getattr(exc, "status_code", 0)
-                is_transient = status >= 500
+            is_transient = isinstance(exc, _TRANSIENT_HTTP_TYPES)
+            if (
+                not is_transient
+                and _ModelHTTPError is not None
+                and isinstance(exc, _ModelHTTPError)
+            ):
+                is_transient = getattr(exc, "status_code", 0) >= 500
 
             if not is_transient or attempt == _MAX_RETRIES - 1:
                 raise
@@ -66,11 +88,17 @@ def apply_file_changes(changes: list[FileChange], root: Path | None = None) -> N
     """Apply a list of FileChange objects to disk.
 
     Creates parent directories as needed. Handles create, modify, and delete operations.
+    Validates all paths stay within the repository root (prevents path traversal).
     """
     if root is None:
         root = _repo_root()
+    root_resolved = root.resolve()
     for change in changes:
-        target = root / change.path
+        target = (root / change.path).resolve()
+        try:
+            target.relative_to(root_resolved)
+        except ValueError as err:
+            raise ValueError(f"Path '{change.path}' escapes repository root") from err
         if change.operation == "delete":
             target.unlink(missing_ok=True)
         elif change.content is not None:
