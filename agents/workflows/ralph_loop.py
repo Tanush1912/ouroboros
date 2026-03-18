@@ -172,11 +172,12 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     plan = state["plan"]
+    skip_quality = plan is not None and "test_writer" in plan.skip_stages
     validation = await run_validator(
         iteration=state["iteration_count"],
         files_changed=state["files_changed"],
         behavioral_specs=plan.behavioral_specs if plan else None,
-        plan_risk_level=plan.risk_level if plan else "medium",
+        skip_quality_gate=skip_quality,
     )
     node_calls = 2  # run_tests + run_lint
     return {
@@ -193,14 +194,8 @@ async def perf_validate_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    plan = state["plan"]
-    if plan and plan.risk_level == "low":
-        logfire.info("perf_validate_skipped", reason="low risk change")
-        return {
-            "total_tool_calls": state["total_tool_calls"],
-            "node_tool_calls": update_node_tool_calls(state, "perf_validate_node", 0),
-        }
-
+    # Note: skip logic is now handled by routing (skip_stages).
+    # This node only runs when the planner says it should.
     try:
         from agents.tools.benchmark import compare_benchmarks, run_benchmark
 

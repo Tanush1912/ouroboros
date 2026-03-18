@@ -121,6 +121,7 @@ def test_route_after_validate_proceed():
         next_action="proceed",
     )
     state = _state(validation=validation)
+    # Default: no skip_stages → goes to mutation
     assert route_after_validate(state) == "mutation_validate_node"
 
 
@@ -348,7 +349,7 @@ def test_route_after_implement_normal():
 
 
 def test_route_after_implement_skips_test_writer():
-    """implement_node skips test_writer when plan.requires_tests=False."""
+    """implement_node skips test_writer when test_writer in skip_stages."""
     from agents.models.planner import PlanOutput
 
     plan = PlanOutput(
@@ -357,14 +358,14 @@ def test_route_after_implement_skips_test_writer():
         test_strategy="Lint only",
         risk_level="low",
         requires_human_review=False,
-        requires_tests=False,
+        skip_stages=["test_writer", "mutation", "perf_validate", "ui_validate"],
     )
     state = _state(status="validating", plan=plan)
     assert route_after_implement(state) == "validate_node"
 
 
 def test_route_after_implement_runs_test_writer_by_default():
-    """implement_node routes to test_writer when plan.requires_tests=True."""
+    """implement_node routes to test_writer when skip_stages is empty."""
     from agents.models.planner import PlanOutput
 
     plan = PlanOutput(
@@ -373,7 +374,7 @@ def test_route_after_implement_runs_test_writer_by_default():
         test_strategy="Unit + integration tests",
         risk_level="medium",
         requires_human_review=False,
-        requires_tests=True,
+        skip_stages=[],
     )
     state = _state(status="validating", plan=plan)
     assert route_after_implement(state) == "test_writer_node"
@@ -473,4 +474,4 @@ def test_route_after_merge_done():
     assert route_after_merge(state) == "END"
 
 
-# Feedback loop, reviewer loop, and context tests moved to test_feedback_routing.py (GP-002)
+# Adaptive pipeline tests in test_adaptive_pipeline.py, feedback tests in test_feedback_routing.py (GP-002)

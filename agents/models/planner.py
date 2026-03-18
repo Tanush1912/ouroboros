@@ -42,6 +42,14 @@ class PlanOutput(BaseModel):
             "docstrings, or other non-functional modifications."
         ),
     )
+    skip_stages: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Workflow stages to skip for this task. Valid values: "
+            "reproduce, test_writer, mutation, perf_validate, ui_validate, review. "
+            "Choose based on task complexity — skip stages that add no value."
+        ),
+    )
     behavioral_specs: list[BehavioralSpec] = Field(
         default_factory=list,
         description=(
