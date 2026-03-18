@@ -3,12 +3,51 @@
 from pathlib import Path
 
 from agents.models.implementer import FileChange
-from agents.tools.test_quality import analyze_test_quality
+from agents.tools.test_quality import _is_non_functional_change, analyze_test_quality
 from tests.lint.helpers import write_py
 
 
-def _fc(path: str, operation: str = "create") -> FileChange:
-    return FileChange(path=path, operation=operation, content="", diff_summary="test")
+def _fc(path: str, operation: str = "create", diff_summary: str = "test") -> FileChange:
+    return FileChange(path=path, operation=operation, content="", diff_summary=diff_summary)
+
+
+# --- Non-functional change detection ---
+
+
+def test_docstring_only_change_is_non_functional() -> None:
+    changes = [_fc("agents/core/paths.py", diff_summary="Add module docstring")]
+    assert _is_non_functional_change(changes)
+
+
+def test_markdown_change_is_non_functional() -> None:
+    changes = [_fc("docs/README.md")]
+    assert _is_non_functional_change(changes)
+
+
+def test_config_change_is_non_functional() -> None:
+    changes = [_fc("pyproject.toml")]
+    assert _is_non_functional_change(changes)
+
+
+def test_code_change_is_functional() -> None:
+    changes = [_fc("agents/core/guards.py", diff_summary="Add new guard logic")]
+    assert not _is_non_functional_change(changes)
+
+
+def test_mixed_change_is_functional() -> None:
+    changes = [
+        _fc("docs/README.md"),
+        _fc("agents/core/guards.py", diff_summary="Add new guard"),
+    ]
+    assert not _is_non_functional_change(changes)
+
+
+def test_non_functional_change_skips_quality_gate(tmp_path: Path) -> None:
+    changes = [_fc("agents/core/paths.py", diff_summary="Add docstring")]
+    result = analyze_test_quality(changes, root=tmp_path)
+    assert result.passed
+    assert result.score == 100.0
+    assert "non-functional" in result.details[0].lower()
 
 
 # --- Banned pattern detection ---

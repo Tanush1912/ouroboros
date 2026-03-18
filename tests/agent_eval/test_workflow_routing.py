@@ -36,15 +36,9 @@ if "logfire" not in sys.modules:
     _logfire.warning = MagicMock()
     sys.modules["logfire"] = _logfire
 
-from agents.core.context_builder import WORKER_TOOL_ACCESS, build_context
 from agents.core.state import RalphState, initial_state
 from agents.models.reviewer import ReviewOutput
 from agents.models.validator import LintResult, TestResult, ValidationOutput
-from agents.workflows.feedback_loop import (
-    route_after_commit_push,
-    route_after_gather,
-    route_after_implement_feedback,
-)
 from agents.workflows.ralph_loop import build_ralph_graph
 from agents.workflows.ralph_routing import (
     route_after_implement,
@@ -59,8 +53,7 @@ from agents.workflows.ralph_routing import (
     route_after_ui_validate,
     route_after_validate,
 )
-from agents.workflows.reviewer_loop import route_after_address, route_review
-from tests.agent_eval.conftest import make_feedback_state as _feedback_state
+from agents.workflows.reviewer_loop import route_review
 from tests.agent_eval.conftest import make_reviewer_state as _reviewer_state
 
 _PASS_TESTS = TestResult(passed=True, failures=[])
@@ -131,12 +124,12 @@ def test_route_after_validate_proceed():
     assert route_after_validate(state) == "mutation_validate_node"
 
 
-def test_route_after_validate_retry_code_bug():
-    """Test failures route to implement_node (code needs fixing)."""
+def test_route_after_validate_retry_lint_failure():
+    """Lint failures route to implement_node (code needs fixing)."""
     validation = ValidationOutput(
         overall_pass=False,
-        tests=_FAIL_TESTS,
-        lint=_PASS_LINT,
+        tests=_PASS_TESTS,
+        lint=_FAIL_LINT,
         arch_lint=_PASS_LINT,
         next_action="retry",
     )
@@ -188,6 +181,41 @@ def test_route_after_validate_test_writer_maxed_escalates():
     )
     state = _state(validation=validation, test_writer_iteration=3)
     assert route_after_validate(state) == "human_checkpoint"
+
+
+def test_route_after_validate_test_file_failure_to_test_writer():
+    """Test failures in test files route to test_writer, not implementer."""
+    fail_in_test = TestResult(
+        passed=False,
+        failures=["FAILED tests/test_paths.py::test_repo_root - AssertionError"],
+    )
+    validation = ValidationOutput(
+        overall_pass=False,
+        tests=fail_in_test,
+        lint=_PASS_LINT,
+        arch_lint=_PASS_LINT,
+        next_action="retry",
+    )
+    state = _state(validation=validation)
+    assert route_after_validate(state) == "test_writer_node"
+
+
+def test_route_after_validate_prod_failure_to_implementer():
+    """Non-test failures still route to implementer."""
+    fail_in_prod = TestResult(
+        passed=False,
+        failures=["ModuleNotFoundError: No module named 'agents.core.missing'"],
+    )
+    validation = ValidationOutput(
+        overall_pass=False,
+        tests=fail_in_prod,
+        lint=_PASS_LINT,
+        arch_lint=_PASS_LINT,
+        next_action="retry",
+    )
+    state = _state(validation=validation)
+    # Non-test failures don't match _test_failures_in_test_files → implementer
+    assert route_after_validate(state) == "implement_node"
 
 
 def test_route_after_validate_escalate():
@@ -413,87 +441,4 @@ def test_route_after_merge_done():
     assert route_after_merge(state) == "END"
 
 
-def test_feedback_route_after_gather_failed():
-    state = _feedback_state(status="failed")
-    assert route_after_gather(state) == "END"
-
-
-def test_feedback_route_after_gather_normal():
-    state = _feedback_state(status="implementing")
-    assert route_after_gather(state) == "implement_feedback_node"
-
-
-def test_feedback_route_after_implement_failed():
-    state = _feedback_state(status="failed")
-    assert route_after_implement_feedback(state) == "END"
-
-
-def test_feedback_route_after_implement_normal():
-    state = _feedback_state(status="validating")
-    assert route_after_implement_feedback(state) == "validate_feedback_node"
-
-
-def test_feedback_route_after_commit_push_failed():
-    """commit_push_node guard failure → END."""
-    state = _feedback_state(status="failed")
-    assert route_after_commit_push(state) == "END"
-
-
-def test_feedback_route_after_commit_push_normal():
-    state = _feedback_state(status="replying")
-    assert route_after_commit_push(state) == "reply_node"
-
-
-def test_reviewer_route_after_address_failed():
-    state = _reviewer_state(status="failed")
-    assert route_after_address(state) == "END"
-
-
-def test_reviewer_route_after_address_normal():
-    state = _reviewer_state(status="reviewing")
-    assert route_after_address(state) == "review_node"
-
-
-# --- Planner context visibility tests ---
-
-
-def test_planner_context_sees_all_tools():
-    """Planner role must see all tools (None = no filter) so plans reference valid capabilities."""
-    assert WORKER_TOOL_ACCESS["planner"] is None
-    ctx = build_context("add new dashboard", worker_role="planner")
-    tool_names = {t.name for t in ctx.available_tools}
-    assert "run_tests" in tool_names
-    assert "commit" in tool_names
-
-
-def test_implementer_context_is_filtered():
-    """Implementer role must see only agent-callable tools, not system capabilities."""
-    allowed = WORKER_TOOL_ACCESS["implementer"]
-    assert allowed is not None
-    ctx = build_context("fix login", worker_role="implementer")
-    tool_names = {t.name for t in ctx.available_tools}
-    assert "commit" not in tool_names
-    assert "merge_pr" not in tool_names
-    assert "read_file" in tool_names
-
-
-def test_planner_and_implementer_contexts_differ():
-    """The planner context must contain more tools than the implementer context.
-
-    This is a regression guard: if both get the same filtered set, the planner
-    cannot reference system capabilities in its plans.
-    """
-    planner_ctx = build_context("refactor module", worker_role="planner")
-    impl_ctx = build_context("refactor module", worker_role="implementer")
-    planner_tools = {t.name for t in planner_ctx.available_tools}
-    impl_tools = {t.name for t in impl_ctx.available_tools}
-    assert planner_tools > impl_tools, (
-        f"Planner tools should be a superset of implementer tools. "
-        f"Extra in impl: {impl_tools - planner_tools}"
-    )
-
-
-def test_feedback_route_escalated_status_ends():
-    """reply_node sets status='escalated' on truncation — routing must go to END."""
-    state = _feedback_state(status="escalated")
-    assert state["status"] == "escalated"
+# Feedback loop, reviewer loop, and context tests moved to test_feedback_routing.py (GP-002)
