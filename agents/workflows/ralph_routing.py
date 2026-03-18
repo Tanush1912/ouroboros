@@ -35,7 +35,7 @@ def route_after_validate(state: RalphState) -> str:
         return "human_checkpoint"
 
     if validation.next_action == "proceed":
-        return "perf_validate_node"
+        return "mutation_validate_node"
     if validation.next_action == "escalate":
         return "human_checkpoint"
 
@@ -80,6 +80,18 @@ def route_after_test_writer(state: RalphState) -> str:
 
 def route_after_reproduce(state: RalphState) -> str:
     return _ralph_status_gate(state, "implement_node")
+
+
+def route_after_mutation(state: RalphState) -> str:
+    """Route after mutation sampling. Low kill rate → test writer for retry."""
+    if state.get("status") in ("failed", "escalated"):
+        return "human_checkpoint"
+    mutation = state.get("mutation_result")
+    if mutation is not None and not mutation.passed:
+        if state.get("test_writer_iteration", 0) >= MAX_TEST_WRITER_ITERATIONS:
+            return "human_checkpoint"
+        return "test_writer_node"
+    return "perf_validate_node"
 
 
 def route_after_perf_validate(state: RalphState) -> str:

@@ -32,10 +32,12 @@ from agents.workers.implementer import run_implementer
 from agents.workers.planner import run_planner
 from agents.workers.reviewer import run_reviewer
 from agents.workers.validator import run_validator
+from agents.workflows.mutation_node import mutation_validate_node
 from agents.workflows.post_mortem import post_mortem_node
 from agents.workflows.ralph_routing import (
     route_after_implement,
     route_after_merge,
+    route_after_mutation,
     route_after_open_pr,
     route_after_perf_validate,
     route_after_plan,
@@ -386,6 +388,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_node("implement_node", implement_node)
     graph.add_node("test_writer_node", test_writer_node)
     graph.add_node("validate_node", validate_node)
+    graph.add_node("mutation_validate_node", mutation_validate_node)
     graph.add_node("perf_validate_node", perf_validate_node)
     graph.add_node("ui_validate_node", ui_validate_node)
     graph.add_node("open_pr_node", open_pr_node)
@@ -400,6 +403,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_conditional_edges("implement_node", route_after_implement)
     graph.add_conditional_edges("test_writer_node", route_after_test_writer)
     graph.add_conditional_edges("validate_node", route_after_validate)
+    graph.add_conditional_edges("mutation_validate_node", route_after_mutation)
     graph.add_conditional_edges("perf_validate_node", route_after_perf_validate)
     graph.add_conditional_edges("ui_validate_node", route_after_ui_validate)
     graph.add_conditional_edges("open_pr_node", route_after_open_pr)

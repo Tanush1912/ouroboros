@@ -4,6 +4,7 @@ from typing import Literal, TypedDict
 
 from agents.models.benchmark import BenchmarkResult, PerfComparisonResult
 from agents.models.implementer import FileChange
+from agents.models.mutation import MutationSamplingResult
 from agents.models.planner import PlanOutput
 from agents.models.post_mortem import HarnessImprovementOutput
 from agents.models.reproducer import ReproductionResult
@@ -46,6 +47,7 @@ class RalphState(TypedDict):
     perf_result: PerfComparisonResult | None
     test_quality: TestQualityResult | None
     test_writer_iteration: int
+    mutation_result: MutationSamplingResult | None
     post_mortem: HarnessImprovementOutput | None
     improvement_issue_url: str | None
 
@@ -132,6 +134,7 @@ def initial_state(task: str) -> RalphState:
         perf_result=None,
         test_quality=None,
         test_writer_iteration=0,
+        mutation_result=None,
         post_mortem=None,
         improvement_issue_url=None,
     )
