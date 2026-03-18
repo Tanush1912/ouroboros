@@ -526,57 +526,62 @@
   },
   "_PORT": {
     "file": "agents/server.py",
-    "line": 16,
+    "line": 14,
     "kind": "constant"
   },
   "_VERSION": {
     "file": "agents/server.py",
-    "line": 17,
+    "line": 15,
     "kind": "constant"
   },
   "_START_TIME": {
     "file": "agents/server.py",
-    "line": 18,
+    "line": 16,
     "kind": "constant"
   },
   "_REQUEST_COUNT": {
     "file": "agents/server.py",
-    "line": 19,
+    "line": 17,
     "kind": "constant"
   },
   "_REQUEST_COUNT_LOCK": {
     "file": "agents/server.py",
-    "line": 20,
+    "line": 18,
     "kind": "constant"
-  },
-  "_LOG_ENDPOINT": {
-    "file": "agents/server.py",
-    "line": 21,
-    "kind": "constant"
-  },
-  "_structured_log": {
-    "file": "agents/server.py",
-    "line": 24,
-    "kind": "function"
   },
   "_Handler": {
     "file": "agents/server.py",
-    "line": 48,
+    "line": 22,
     "kind": "class"
   },
   "do_GET": {
     "file": "agents/server.py",
-    "line": 49,
+    "line": 23,
     "kind": "function"
   },
   "_json_response": {
     "file": "agents/server.py",
-    "line": 71,
+    "line": 45,
     "kind": "function"
   },
   "log_message": {
     "file": "agents/server.py",
-    "line": 79,
+    "line": 53,
+    "kind": "function"
+  },
+  "VectorHandler": {
+    "file": "agents/tools/app_logging.py",
+    "line": 25,
+    "kind": "class"
+  },
+  "get_logger": {
+    "file": "agents/tools/app_logging.py",
+    "line": 58,
+    "kind": "function"
+  },
+  "emit": {
+    "file": "agents/tools/app_logging.py",
+    "line": 32,
     "kind": "function"
   },
   "run_benchmark": {
