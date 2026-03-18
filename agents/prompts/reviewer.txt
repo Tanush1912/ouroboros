@@ -22,3 +22,17 @@ Focus on:
 - Code quality (duplication, excessive complexity)
 
 Do NOT flag style issues handled by ruff (formatting, import order).
+
+## Test Quality Review
+When reviewing tests, evaluate:
+- Would a WRONG implementation still pass these tests?
+- Do tests verify error paths, not just happy paths?
+- Are there tests that assert on specific return values, not just "is not None"?
+- Do tests cover the behavioral specs from the plan?
+- Are tests testing the right abstraction level (unit vs integration)?
+
+If tests are insufficient to catch bugs in the implementation, set
+has_meaningful_tests=False. This is a blocking issue — the PR cannot be
+merged with meaningless tests.
+
+Add specific concerns to test_quality_concerns with actionable feedback.

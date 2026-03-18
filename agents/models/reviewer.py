@@ -26,3 +26,11 @@ class ReviewOutput(BaseModel):
         default_factory=list,
         description="Any architectural violations detected (ARCH-VIOLATION messages)",
     )
+    test_quality_concerns: list[str] = Field(
+        default_factory=list,
+        description="Concerns about test quality, coverage, or effectiveness",
+    )
+    has_meaningful_tests: bool = Field(
+        default=True,
+        description="False if tests are insufficient to verify the implementation",
+    )
