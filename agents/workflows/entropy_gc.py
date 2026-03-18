@@ -313,7 +313,13 @@ async def run_entropy_gc(update_scores_only: bool = False) -> GCState:
 
 if __name__ == "__main__":
     import asyncio
+    import os
     import sys
+
+    if os.environ.get("LOGFIRE_TOKEN"):
+        from agents.core.instrumentation import configure_logfire
+
+        configure_logfire()
 
     update_only = "--update-scores-only" in sys.argv
     asyncio.run(run_entropy_gc(update_scores_only=update_only))
