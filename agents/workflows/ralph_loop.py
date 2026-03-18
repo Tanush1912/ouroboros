@@ -41,9 +41,11 @@ from agents.workflows.ralph_routing import (
     route_after_plan,
     route_after_reproduce,
     route_after_review,
+    route_after_test_writer,
     route_after_ui_validate,
     route_after_validate,
 )
+from agents.workflows.test_writer_node import test_writer_node
 
 
 async def plan_node(state: RalphState) -> dict[str, Any]:
@@ -382,6 +384,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_node("plan_node", plan_node)
     graph.add_node("reproduce_node", reproduce_node)
     graph.add_node("implement_node", implement_node)
+    graph.add_node("test_writer_node", test_writer_node)
     graph.add_node("validate_node", validate_node)
     graph.add_node("perf_validate_node", perf_validate_node)
     graph.add_node("ui_validate_node", ui_validate_node)
@@ -395,6 +398,7 @@ def build_ralph_graph() -> StateGraph:
     graph.add_conditional_edges("plan_node", route_after_plan)
     graph.add_conditional_edges("reproduce_node", route_after_reproduce)
     graph.add_conditional_edges("implement_node", route_after_implement)
+    graph.add_conditional_edges("test_writer_node", route_after_test_writer)
     graph.add_conditional_edges("validate_node", route_after_validate)
     graph.add_conditional_edges("perf_validate_node", route_after_perf_validate)
     graph.add_conditional_edges("ui_validate_node", route_after_ui_validate)

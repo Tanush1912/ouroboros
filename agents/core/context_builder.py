@@ -22,6 +22,7 @@ WORKER_TOOL_ACCESS: dict[str, list[str] | None] = {
     # to_prompt_text() separates "Your Tools" from "System Capabilities".
     "planner": None,
     "implementer": _AGENT_CALLABLE_NAMES,
+    "test_writer": _AGENT_CALLABLE_NAMES,
     "reviewer": [],
     "cleaner": [],
     "post_mortem": [],

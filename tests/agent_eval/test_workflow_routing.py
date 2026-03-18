@@ -54,6 +54,7 @@ from agents.workflows.ralph_routing import (
     route_after_plan,
     route_after_reproduce,
     route_after_review,
+    route_after_test_writer,
     route_after_ui_validate,
     route_after_validate,
 )
@@ -129,7 +130,8 @@ def test_route_after_validate_proceed():
     assert route_after_validate(state) == "perf_validate_node"
 
 
-def test_route_after_validate_retry():
+def test_route_after_validate_retry_code_bug():
+    """Test failures route to implement_node (code needs fixing)."""
     validation = ValidationOutput(
         overall_pass=False,
         tests=_FAIL_TESTS,
@@ -139,6 +141,52 @@ def test_route_after_validate_retry():
     )
     state = _state(validation=validation)
     assert route_after_validate(state) == "implement_node"
+
+
+def test_route_after_validate_quality_fail_to_test_writer():
+    """Tests pass but quality fails → route to test_writer_node."""
+    from agents.models.test_quality import TestQualityResult
+
+    bad_quality = TestQualityResult(
+        score=30,
+        passed=False,
+        assertion_density=0.5,
+        trivial_test_count=3,
+        edge_case_coverage=0.0,
+    )
+    validation = ValidationOutput(
+        overall_pass=False,
+        tests=_PASS_TESTS,
+        lint=_PASS_LINT,
+        arch_lint=_PASS_LINT,
+        next_action="retry",
+        test_quality=bad_quality,
+    )
+    state = _state(validation=validation)
+    assert route_after_validate(state) == "test_writer_node"
+
+
+def test_route_after_validate_test_writer_maxed_escalates():
+    """Test writer at max iterations + quality fail → escalate."""
+    from agents.models.test_quality import TestQualityResult
+
+    bad_quality = TestQualityResult(
+        score=30,
+        passed=False,
+        assertion_density=0.5,
+        trivial_test_count=3,
+        edge_case_coverage=0.0,
+    )
+    validation = ValidationOutput(
+        overall_pass=False,
+        tests=_PASS_TESTS,
+        lint=_PASS_LINT,
+        arch_lint=_PASS_LINT,
+        next_action="retry",
+        test_quality=bad_quality,
+    )
+    state = _state(validation=validation, test_writer_iteration=3)
+    assert route_after_validate(state) == "human_checkpoint"
 
 
 def test_route_after_validate_escalate():
@@ -265,8 +313,19 @@ def test_route_after_implement_failed():
 
 
 def test_route_after_implement_normal():
+    """implement_node now routes to test_writer_node (not validate_node)."""
     state = _state(status="validating")
-    assert route_after_implement(state) == "validate_node"
+    assert route_after_implement(state) == "test_writer_node"
+
+
+def test_route_after_test_writer_normal():
+    state = _state(status="validating")
+    assert route_after_test_writer(state) == "validate_node"
+
+
+def test_route_after_test_writer_escalated():
+    state = _state(status="escalated")
+    assert route_after_test_writer(state) == "human_checkpoint"
 
 
 def test_route_after_reproduce_escalated():

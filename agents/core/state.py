@@ -45,6 +45,7 @@ class RalphState(TypedDict):
     perf_baseline: BenchmarkResult | None
     perf_result: PerfComparisonResult | None
     test_quality: TestQualityResult | None
+    test_writer_iteration: int
     post_mortem: HarnessImprovementOutput | None
     improvement_issue_url: str | None
 
@@ -130,6 +131,7 @@ def initial_state(task: str) -> RalphState:
         perf_baseline=None,
         perf_result=None,
         test_quality=None,
+        test_writer_iteration=0,
         post_mortem=None,
         improvement_issue_url=None,
     )

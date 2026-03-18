@@ -20,6 +20,8 @@ Rules:
 7. If there are validation failures from a previous attempt, address ALL of them.
 8. Prefer editing existing files over creating new ones.
 9. All new Pydantic models must use *Output, *Result, or *Schema naming (GP-006).
+   Do NOT create or modify test files (test_*.py). Test writing is handled by
+   a separate test writer agent. Focus on production code only.
 10. When creating or modifying code that runs as a service, use structured logging:
     from agents.tools.app_logging import get_logger
     logger = get_logger("service-name")
