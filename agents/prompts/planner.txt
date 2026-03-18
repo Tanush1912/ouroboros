@@ -19,6 +19,12 @@ Rules:
 8. The test_strategy must reference how the validator will verify success.
 9. For tasks involving services or apps, include an observability step using
    the observability tool category to verify logs flow after deployment.
+10. Emit at least 3 behavioral_specs per task:
+    - import_check for every new module you plan to create
+    - function_exists for every new public function
+    - At least one error_raises or callable_returns for behavioral verification
+    These specs are verified deterministically — they catch "module doesn't load"
+    and "function missing" bugs before the reviewer ever sees the PR.
 
 You have access to the task context in the user message. Use it to understand
 what files exist, what tools are available, and what the architecture rules are.

@@ -6,6 +6,7 @@ next_action is determined deterministically from test/lint/quality results — n
 
 import logfire
 
+from agents.models.contracts import BehavioralSpec, ContractVerificationResult
 from agents.models.implementer import FileChange
 from agents.models.test_quality import TestQualityResult
 from agents.models.validator import (
@@ -14,6 +15,7 @@ from agents.models.validator import (
     ValidationOutput,
     determine_next_action,
 )
+from agents.tools.contract_verifier import verify_contracts
 from agents.tools.shell import run_lint, run_tests
 from agents.tools.test_quality import analyze_test_quality
 
@@ -21,6 +23,7 @@ from agents.tools.test_quality import analyze_test_quality
 async def run_validator(
     iteration: int = 1,
     files_changed: list[FileChange] | None = None,
+    behavioral_specs: list[BehavioralSpec] | None = None,
 ) -> ValidationOutput:
     """Run tests, lint, and test quality gate. Returns structured validation result."""
     with logfire.span("validator", iteration=iteration):
@@ -52,12 +55,25 @@ async def run_validator(
                 assertion_density=quality.assertion_density,
             )
 
+        # Run behavioral contract verification if specs provided
+        contract_result: ContractVerificationResult | None = None
+        if behavioral_specs and test_result.passed:
+            contract_result = verify_contracts(behavioral_specs)
+            logfire.info(
+                "contracts_verified",
+                pass_rate=contract_result.pass_rate,
+                passed=contract_result.passed,
+                total=len(contract_result.checks),
+            )
+
         overall_pass = test_result.passed and ruff_lint_result.passed and arch_lint_result.passed
         if quality is not None and not quality.passed:
             overall_pass = False
+        if contract_result is not None and not contract_result.passed:
+            overall_pass = False
 
         next_action, failure_summary = determine_next_action(
-            test_result, ruff_lint_result, arch_lint_result, iteration, quality
+            test_result, ruff_lint_result, arch_lint_result, iteration, quality, contract_result
         )
 
         final = ValidationOutput(
@@ -68,6 +84,7 @@ async def run_validator(
             next_action=next_action,
             failure_summary=failure_summary,
             test_quality=quality,
+            contracts=contract_result,
         )
 
         logfire.info(

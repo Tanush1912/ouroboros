@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from agents.models.contracts import ContractVerificationResult
 from agents.models.test_quality import TestQualityResult
 
 
@@ -42,6 +43,10 @@ class ValidationOutput(BaseModel):
         default=None,
         description="AST-based test quality assessment (None if not yet analyzed)",
     )
+    contracts: ContractVerificationResult | None = Field(
+        default=None,
+        description="Behavioral contract verification results (None if no specs)",
+    )
     failure_summary: str = Field(
         default="",
         description="Human-readable summary of what failed and why",
@@ -54,6 +59,7 @@ def determine_next_action(
     arch_lint_result: LintResult,
     iteration: int,
     test_quality: TestQualityResult | None = None,
+    contracts: ContractVerificationResult | None = None,
 ) -> tuple[str, str]:
     """Deterministically compute next_action and failure_summary from results.
 
@@ -81,7 +87,13 @@ def determine_next_action(
                     return "escalate", "\n".join(failures)
         return "retry", "\n".join(failures)
 
-    # Tests + lint pass — check test quality if available
+    # Tests + lint pass — check contracts if available
+    if contracts is not None and not contracts.passed:
+        failed = [c for c in contracts.checks if not c.passed]
+        contract_issues = [f"{c.spec_description}: {c.actual}" for c in failed[:5]]
+        return "retry", "Behavioral contract failures:\n" + "\n".join(contract_issues)
+
+    # Check test quality if available
     if test_quality is not None and not test_quality.passed:
         quality_issues = test_quality.details or [
             f"Test quality score: {test_quality.score:.0f}/100"

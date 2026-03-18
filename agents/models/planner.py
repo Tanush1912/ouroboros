@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from agents.models.contracts import BehavioralSpec
+
 
 class ExecutionStep(BaseModel):
     description: str = Field(description="What this step does")
@@ -31,4 +33,12 @@ class PlanOutput(BaseModel):
     requires_browser_validation: bool = Field(
         default=False,
         description="True if this task involves UI changes that need browser validation",
+    )
+    behavioral_specs: list[BehavioralSpec] = Field(
+        default_factory=list,
+        description=(
+            "Machine-verifiable behavioral contracts. Include import_check for "
+            "new modules, function_exists for new public functions, and at least "
+            "one error_raises or callable_returns for behavioral verification."
+        ),
     )
