@@ -45,7 +45,7 @@ def route_after_review(state: RalphState) -> str:
     if state["status"] == "escalated":
         return "human_checkpoint"
     review = state["review"]
-    if review is None or not review.approved:
+    if review is None or not review.approved or not review.has_meaningful_tests:
         if state["review_iteration_count"] >= MAX_REVIEW_ITERATIONS:
             return "human_checkpoint"
         return "implement_node"

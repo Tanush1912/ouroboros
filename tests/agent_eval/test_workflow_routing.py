@@ -169,6 +169,33 @@ def test_route_after_review_approved():
     assert route_after_review(state) == "merge_node"
 
 
+def test_route_after_review_meaningless_tests_blocks_merge():
+    """has_meaningful_tests=False blocks merge even if approved=True."""
+    review = ReviewOutput(
+        approved=True,
+        comments=[],
+        blocking_issues=[],
+        summary="Code looks fine but tests are meaningless",
+        has_meaningful_tests=False,
+        test_quality_concerns=["Tests only check 'is not None'"],
+    )
+    state = _state(review=review, review_iteration_count=1)
+    assert route_after_review(state) == "implement_node"
+
+
+def test_route_after_review_meaningless_tests_escalates_at_max():
+    """has_meaningful_tests=False escalates when at max review iterations."""
+    review = ReviewOutput(
+        approved=True,
+        comments=[],
+        blocking_issues=[],
+        summary="Tests still meaningless",
+        has_meaningful_tests=False,
+    )
+    state = _state(review=review, review_iteration_count=3)
+    assert route_after_review(state) == "human_checkpoint"
+
+
 def test_route_after_review_not_approved_retries():
     review = ReviewOutput(
         approved=False,
