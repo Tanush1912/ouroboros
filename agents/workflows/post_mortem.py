@@ -14,7 +14,7 @@ from typing import Any
 import logfire
 
 from agents.core.state import RalphState
-from agents.core.workflow_helpers import accumulate_usage
+from agents.core.workflow_helpers import accumulate_usage, retry_on_transient
 from agents.tools.git import create_issue
 from agents.workers.post_mortem import run_post_mortem
 
@@ -39,7 +39,8 @@ async def post_mortem_node(state: RalphState) -> dict[str, Any]:
     guard_reasons = [e for e in state["error_log"] if "guard" in e.lower() or "max" in e.lower()]
 
     try:
-        analysis, usage = await run_post_mortem(
+        analysis, usage = await retry_on_transient(
+            run_post_mortem,
             task=state["task"],
             error_log=state["error_log"],
             iteration_count=state["iteration_count"],

@@ -12,6 +12,7 @@ from agents.core.state import RalphState
 from agents.core.workflow_helpers import (
     accumulate_usage,
     apply_file_changes,
+    retry_on_transient,
 )
 from agents.workers.test_writer import run_test_writer
 
@@ -28,7 +29,8 @@ async def test_writer_node(state: RalphState) -> dict[str, Any]:
     iteration = state["test_writer_iteration"] + 1
     context = build_context(state["task"], worker_role="test_writer")
 
-    output, usage, tool_calls = await run_test_writer(
+    output, usage, tool_calls = await retry_on_transient(
+        run_test_writer,
         task=state["task"],
         plan=state["plan"],
         files_changed=state["files_changed"],

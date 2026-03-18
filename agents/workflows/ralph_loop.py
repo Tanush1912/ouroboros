@@ -22,6 +22,7 @@ from agents.core.state import RalphState, initial_state
 from agents.core.workflow_helpers import (
     accumulate_usage,
     apply_file_changes,
+    retry_on_transient,
     update_node_tool_calls,
 )
 from agents.models.benchmark import PerfComparisonResult
@@ -56,7 +57,7 @@ async def plan_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     context = build_context(state["task"], worker_role="planner")
-    plan, usage, tool_calls = await run_planner(state["task"], context)
+    plan, usage, tool_calls = await retry_on_transient(run_planner, state["task"], context)
     node_calls = tool_calls + 1
     return {
         "plan": plan,
@@ -138,7 +139,8 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
 
     iteration = state["iteration_count"] + 1
     context = build_context(state["task"], worker_role="implementer")
-    impl, usage, tool_calls = await run_implementer(
+    impl, usage, tool_calls = await retry_on_transient(
+        run_implementer,
         task=state["task"],
         plan=state["plan"],
         context=context,
@@ -340,7 +342,7 @@ async def review_loop_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    review, usage = await run_reviewer(state["pr_number"], state["task"])
+    review, usage = await retry_on_transient(run_reviewer, state["pr_number"], state["task"])
     node_calls = 1  # get_pr_diff in reviewer
     return {
         "review": review,

@@ -1,16 +1,65 @@
 """Shared workflow helpers — DRY utilities used by all LangGraph workflows.
 
-Centralizes file-change application, token/cost accumulation, and per-node
-tool call tracking so orchestration nodes don't repeat this logic.
+Centralizes file-change application, token/cost accumulation, per-node
+tool call tracking, and transient error retry so orchestration nodes
+don't repeat this logic.
 """
 
-from collections.abc import Mapping
+import asyncio
+import logging
+from collections.abc import Callable, Coroutine, Mapping
 from pathlib import Path
 from typing import Any
 
 from agents.core.paths import repo_root as _repo_root
 from agents.models.cost import TokenUsage
 from agents.models.implementer import FileChange
+
+_logger = logging.getLogger(__name__)
+
+_MAX_RETRIES = 3
+_RETRY_BACKOFF = (2, 5, 10)
+
+
+async def retry_on_transient[T](
+    fn: Callable[..., Coroutine[Any, Any, T]],
+    *args: Any,
+    **kwargs: Any,
+) -> T:
+    """Retry an async function on transient HTTP/network errors.
+
+    Catches httpx transport errors (ReadError, ConnectError, RemoteProtocolError)
+    and PydanticAI ModelHTTPError with 5xx status. Retries up to 3 times with backoff.
+    """
+    for attempt in range(_MAX_RETRIES):
+        try:
+            return await fn(*args, **kwargs)
+        except Exception as exc:
+            exc_name = type(exc).__name__
+            is_transient = exc_name in (
+                "ReadError",
+                "ConnectError",
+                "RemoteProtocolError",
+                "ConnectTimeout",
+                "ReadTimeout",
+                "PoolTimeout",
+            )
+            if not is_transient and exc_name == "ModelHTTPError":
+                status = getattr(exc, "status_code", 0)
+                is_transient = status >= 500
+
+            if not is_transient or attempt == _MAX_RETRIES - 1:
+                raise
+
+            backoff = _RETRY_BACKOFF[attempt]
+            _logger.warning(
+                "Transient error (attempt %d/%d), retrying in %ds: %s",
+                attempt + 1,
+                _MAX_RETRIES,
+                backoff,
+                exc,
+            )
+            await asyncio.sleep(backoff)
 
 
 def apply_file_changes(changes: list[FileChange], root: Path | None = None) -> None:
