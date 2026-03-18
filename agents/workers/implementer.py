@@ -30,7 +30,7 @@ def _get_agent() -> Agent[None, ImplementOutput]:
     if _agent is None:
         _agent = Agent(
             model=get_model(),
-            result_type=ImplementOutput,
+            output_type=ImplementOutput,
             system_prompt=SYSTEM_PROMPT,
             tools=resolve_worker_tools("implementer"),
             retries=3,
@@ -109,8 +109,8 @@ async def run_implementer(
         result = await agent.run(prompt)
         usage_data = result.usage()
         token_usage = TokenUsage(
-            tokens_in=usage_data.request_tokens or 0,
-            tokens_out=usage_data.response_tokens or 0,
+            tokens_in=usage_data.input_tokens or 0,
+            tokens_out=usage_data.output_tokens or 0,
         )
         tool_calls = len(
             [
@@ -121,10 +121,10 @@ async def run_implementer(
         )
         logfire.info(
             "implementation_complete",
-            files_changed=len(result.data.files_changed),
+            files_changed=len(result.output.files_changed),
             iteration=iteration,
             tokens_in=token_usage.tokens_in,
             tokens_out=token_usage.tokens_out,
             tool_calls=tool_calls,
         )
-        return result.data, token_usage, tool_calls
+        return result.output, token_usage, tool_calls

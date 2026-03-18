@@ -8,7 +8,6 @@ import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel, Field
-from pydantic_ai import tool
 
 from agents.core.paths import repo_root as _repo_root
 from agents.models.reproducer import ErrorContext
@@ -33,7 +32,6 @@ def run_subprocess(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, s
     return result.returncode, result.stdout, result.stderr
 
 
-@tool
 def run_tests(path: str = ".") -> TestResult:
     """Run pytest. Returns structured pass/fail with failure details."""
     import time
@@ -53,7 +51,6 @@ def run_tests(path: str = ".") -> TestResult:
     return TestResult(passed=passed, failures=failures, duration_seconds=duration)
 
 
-@tool
 def run_lint(path: str = ".") -> LintResult:
     """Run ruff + arch_lint + golden_lint. Returns violations with AGENT_REMEDIATION instructions."""
     root = _repo_root()
@@ -81,7 +78,6 @@ def run_lint(path: str = ".") -> LintResult:
     return LintResult(passed=len(violations) == 0, violations=violations, auto_fixed=auto_fixed)
 
 
-@tool
 def run_build() -> BuildResult:
     """Build the application. Returns success/failure + build log."""
     import time
@@ -96,7 +92,6 @@ def run_build() -> BuildResult:
     )
 
 
-@tool
 def run_single_test(test_path: str) -> TestResult:
     """Run a single test file/function with full traceback for debugging."""
     import time
@@ -133,7 +128,6 @@ def extract_traceback(text: str) -> str:
     return ""
 
 
-@tool
 def capture_error_context(command: str, cwd: str = ".") -> ErrorContext:
     """Run a command and capture structured error context including traceback."""
     root = _repo_root()
@@ -163,7 +157,6 @@ def capture_error_context(command: str, cwd: str = ".") -> ErrorContext:
     )
 
 
-@tool
 def run_command(command: str, cwd: str = ".") -> CommandResult:
     """Run an arbitrary shell command. Use sparingly — prefer specific tools."""
     root = _repo_root()

@@ -75,7 +75,7 @@ def bootstrap(*, require_gh: bool = True, quiet: bool = False) -> dict[str, str]
 
     gcp_project = _check_required_env("GCP_PROJECT")
     gcp_location = os.environ.get("GCP_LOCATION", "us-central1")
-    model_name = os.environ.get("OUROBOROS_MODEL", "gemini-3.0-flash-preview")
+    model_name = os.environ.get("OUROBOROS_MODEL", "gemini-2.5-flash")
     logfire_token = os.environ.get("LOGFIRE_TOKEN", "")
 
     gh_ok = _check_gh_cli()

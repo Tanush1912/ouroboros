@@ -7,13 +7,10 @@ import shutil
 import subprocess
 import time
 
-from pydantic_ai import tool
-
 from agents.core.paths import repo_root as _repo_root
 from agents.models.harness import AppStartupResult, ProbeResult
 
 
-@tool
 def run_app_and_probe(
     compose_file: str = "harness/sandbox/docker-compose.yml",
     health_path: str = "/health",
@@ -101,7 +98,6 @@ def _poll_health(url: str, timeout_seconds: int) -> ProbeResult:
         return ProbeResult(url=url, healthy=False, error=f"Health check timed out: {last_error}")
 
 
-@tool
 def probe_endpoint(
     url: str,
     method: str = "GET",

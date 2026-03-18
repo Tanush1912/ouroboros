@@ -20,8 +20,8 @@ async def run_validator(
 ) -> ValidationOutput:
     """Run tests and lint on the implementation, return structured validation result."""
     with logfire.span("validator", iteration=iteration):
-        test_result: TestResult = run_tests.fn(".")
-        lint_result: LintResult = run_lint.fn(".")
+        test_result: TestResult = run_tests(".")
+        lint_result: LintResult = run_lint(".")
 
         arch_violations = [v for v in lint_result.violations if v.startswith("ARCH-")]
         other_violations = [v for v in lint_result.violations if not v.startswith("ARCH-")]

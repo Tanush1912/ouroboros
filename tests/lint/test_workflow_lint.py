@@ -277,7 +277,7 @@ async def review_node(state):
 def test_wf009_passes_no_llm_call():
     func = _parse_func("""
 async def commit_node(state):
-    result = await commit.fn(message="fix")
+    result = commit(message="fix")
     return {"total_tool_calls": 1, "node_tool_calls": {}}
 """)
     assert check_wf009_llm_accumulate_usage(func, "test.py") == []
@@ -358,7 +358,7 @@ def test_wf006_flags_loop_without_counter():
     func = _parse_func("""
 async def reply_node(state):
     for comment in comments:
-        result = await reply_to_comment.fn(comment)
+        result = reply_to_pr_comment(comment.id, "done")
 """)
     violations = check_wf006_loop_tool_accounting(func, "test.py")
     assert len(violations) == 1
@@ -370,7 +370,7 @@ def test_wf006_passes_loop_with_attempts_counter():
 async def reply_node(state):
     for comment in comments:
         attempts += 1
-        result = await reply_to_comment.fn(comment)
+        result = reply_to_pr_comment(comment.id, "done")
 """)
     assert check_wf006_loop_tool_accounting(func, "test.py") == []
 

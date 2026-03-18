@@ -62,7 +62,7 @@ async def gather_feedback_node(state: FeedbackState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "failed", "error_log": state["error_log"] + [guard.reason]}
 
-    comments = await get_pr_comments.fn(state["pr_number"])
+    comments = get_pr_comments(state["pr_number"])
     comment_dicts = [c.model_dump() for c in comments]
     return {
         "feedback_comments": comment_dicts,
@@ -154,7 +154,7 @@ async def commit_push_node(state: FeedbackState) -> dict[str, Any]:
             "node_tool_calls": update_node_tool_calls(state, "commit_push_node", 0),
         }
 
-    commit_result = await commit.fn(
+    commit_result = commit(
         message=f"fix: address reviewer feedback on PR #{state['pr_number']}",
         files=changed_paths,
     )

@@ -9,7 +9,6 @@ import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel, Field
-from pydantic_ai import tool
 
 from agents.core.paths import repo_root as _repo_root
 
@@ -44,13 +43,11 @@ def _resolve(path: str) -> Path:
     return resolved
 
 
-@tool
 def read_file(path: str) -> str:
     """Read a file from the repository. Returns file contents."""
     return _resolve(path).read_text(encoding="utf-8")
 
 
-@tool
 def write_file(path: str, content: str) -> WriteResult:
     """Write content to a file. Creates parent directories if needed."""
     target = _resolve(path)
@@ -60,7 +57,6 @@ def write_file(path: str, content: str) -> WriteResult:
     return WriteResult(path=path, bytes_written=len(content.encode()), created=created)
 
 
-@tool
 def list_dir(path: str) -> list[str]:
     """List files and directories at a path."""
     target = _resolve(path)
@@ -69,7 +65,6 @@ def list_dir(path: str) -> list[str]:
     return sorted(str(p.relative_to(_repo_root())) for p in target.iterdir())
 
 
-@tool
 def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatchResult]:
     """Search repository contents using ripgrep. Returns file + line matches."""
     root = _repo_root()
@@ -103,7 +98,6 @@ def search_repo(query: str, file_pattern: str = "**/*") -> list[SearchMatchResul
     return matches
 
 
-@tool
 def search_symbol(name: str) -> SymbolLocationResult | None:
     """Look up a symbol by name. Returns file + line. Never reads the whole repo."""
     symbols_path = _repo_root() / "repo_index" / "symbols.json"
@@ -123,7 +117,6 @@ def search_symbol(name: str) -> SymbolLocationResult | None:
     return None
 
 
-@tool
 def reindex(paths: list[str]) -> int:
     """Update the repo symbol index for a list of changed file paths.
 

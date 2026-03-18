@@ -25,7 +25,7 @@ def _get_agent() -> Agent[None, HarnessImprovementOutput]:
     if _agent is None:
         _agent = Agent(
             model=get_model(),
-            result_type=HarnessImprovementOutput,
+            output_type=HarnessImprovementOutput,
             system_prompt=SYSTEM_PROMPT,
             retries=2,
         )
@@ -95,16 +95,16 @@ async def run_post_mortem(
         result = await agent.run(prompt)
         usage_data = result.usage()
         token_usage = TokenUsage(
-            tokens_in=usage_data.request_tokens or 0,
-            tokens_out=usage_data.response_tokens or 0,
+            tokens_in=usage_data.input_tokens or 0,
+            tokens_out=usage_data.output_tokens or 0,
         )
 
         logfire.info(
             "post_mortem_complete",
-            category=result.data.category,
-            priority=result.data.priority,
-            affected_files=result.data.affected_files,
+            category=result.output.category,
+            priority=result.output.priority,
+            affected_files=result.output.affected_files,
             tokens_in=token_usage.tokens_in,
             tokens_out=token_usage.tokens_out,
         )
-        return result.data, token_usage
+        return result.output, token_usage

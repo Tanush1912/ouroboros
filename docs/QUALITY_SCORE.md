@@ -1,7 +1,7 @@
 # QUALITY_SCORE.md — Per-Domain Quality Grades
 
 > Auto-updated by the entropy GC workflow (`agents/workflows/entropy_gc.py`).
-> Last updated: 2026-03-06
+> Last updated: 2026-03-18
 
 ---
 
