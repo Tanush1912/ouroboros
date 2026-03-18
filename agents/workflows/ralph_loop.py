@@ -165,7 +165,10 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    validation = await run_validator(iteration=state["iteration_count"])
+    validation = await run_validator(
+        iteration=state["iteration_count"],
+        files_changed=state["files_changed"],
+    )
     node_calls = 2  # run_tests + run_lint
     return {
         "validation": validation,
