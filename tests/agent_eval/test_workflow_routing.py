@@ -49,6 +49,7 @@ from agents.workflows.ralph_loop import build_ralph_graph
 from agents.workflows.ralph_routing import (
     route_after_implement,
     route_after_merge,
+    route_after_mutation,
     route_after_open_pr,
     route_after_perf_validate,
     route_after_plan,
@@ -127,7 +128,7 @@ def test_route_after_validate_proceed():
         next_action="proceed",
     )
     state = _state(validation=validation)
-    assert route_after_validate(state) == "perf_validate_node"
+    assert route_after_validate(state) == "mutation_validate_node"
 
 
 def test_route_after_validate_retry_code_bug():
@@ -338,6 +339,39 @@ def test_route_after_reproduce_normal():
     assert route_after_reproduce(state) == "implement_node"
 
 
+def test_route_after_mutation_proceeds():
+    """Good kill rate → proceed to perf_validate_node."""
+    from agents.models.mutation import MutationSamplingResult
+
+    result = MutationSamplingResult(
+        total_mutants=10, killed=8, survived=2, kill_rate=0.8, passed=True
+    )
+    state = _state(mutation_result=result)
+    assert route_after_mutation(state) == "perf_validate_node"
+
+
+def test_route_after_mutation_low_kill_rate():
+    """Low kill rate → route to test_writer for better tests."""
+    from agents.models.mutation import MutationSamplingResult
+
+    result = MutationSamplingResult(
+        total_mutants=10, killed=3, survived=7, kill_rate=0.3, passed=False
+    )
+    state = _state(mutation_result=result)
+    assert route_after_mutation(state) == "test_writer_node"
+
+
+def test_route_after_mutation_escalates_at_max():
+    """Low kill rate + test writer maxed → escalate."""
+    from agents.models.mutation import MutationSamplingResult
+
+    result = MutationSamplingResult(
+        total_mutants=10, killed=3, survived=7, kill_rate=0.3, passed=False
+    )
+    state = _state(mutation_result=result, test_writer_iteration=3)
+    assert route_after_mutation(state) == "human_checkpoint"
+
+
 def test_route_after_perf_validate_escalated():
     state = _state(status="escalated")
     assert route_after_perf_validate(state) == "human_checkpoint"
@@ -457,9 +491,6 @@ def test_planner_and_implementer_contexts_differ():
         f"Planner tools should be a superset of implementer tools. "
         f"Extra in impl: {impl_tools - planner_tools}"
     )
-
-
-# --- reply_node escalation tests ---
 
 
 def test_feedback_route_escalated_status_ends():
