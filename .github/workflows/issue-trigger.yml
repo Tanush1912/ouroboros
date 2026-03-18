@@ -61,6 +61,17 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Start observability stack
+        run: |
+          docker compose \
+            -f harness/observability/docker-compose.yml \
+            -f harness/observability/docker-compose.ci.yml \
+            up -d
+          for i in $(seq 1 30); do curl -sf http://localhost:9428/health && break; sleep 2; done
+          curl -sf http://localhost:9428/health || { echo "VictoriaLogs failed to start"; exit 1; }
+          for i in $(seq 1 30); do curl -sf http://localhost:8428/health && break; sleep 2; done
+          curl -sf http://localhost:8428/health || { echo "VictoriaMetrics failed to start"; exit 1; }
+
       - name: Build repo index
         run: uv run python repo_index/build_index.py
 
@@ -109,9 +120,11 @@ jobs:
         env:
           GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
           GCP_LOCATION: ${{ vars.GCP_LOCATION || 'us-central1' }}
-          OUROBOROS_MODEL: ${{ vars.OUROBOROS_MODEL || 'gemini-3.0-flash-preview' }}
+          OUROBOROS_MODEL: ${{ vars.OUROBOROS_MODEL || 'gemini-2.5-flash' }}
           LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VICTORIA_LOGS_URL: http://localhost:9428
+          VICTORIA_METRICS_URL: http://localhost:8428
 
       - name: Post success comment
         if: success()
@@ -168,3 +181,11 @@ jobs:
           ${{ steps.run.outputs.output }}
           ```
           EOF
+
+      - name: Tear down observability stack
+        if: always()
+        run: |
+          docker compose \
+            -f harness/observability/docker-compose.yml \
+            -f harness/observability/docker-compose.ci.yml \
+            down -v
