@@ -1,11 +1,11 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.12+-blue?logo=python&logoColor=white" alt="Python 3.12+"/>
-  <img src="https://img.shields.io/badge/model-Gemini_3.0_Flash-4285F4?logo=google&logoColor=white" alt="Gemini 3.0 Flash"/>
+  <img src="https://img.shields.io/badge/model-Gemini_2.5_Flash-4285F4?logo=google&logoColor=white" alt="Gemini 2.5 Flash"/>
   <img src="https://img.shields.io/badge/framework-PydanticAI-E92063?logo=pydantic&logoColor=white" alt="PydanticAI"/>
   <img src="https://img.shields.io/badge/orchestration-LangGraph-1C3C3C" alt="LangGraph"/>
   <img src="https://img.shields.io/badge/tracing-Logfire-FF6B35" alt="Logfire"/>
   <img src="https://img.shields.io/badge/package_manager-uv-DE5FE9" alt="uv"/>
-  <img src="https://img.shields.io/badge/tests-64_passing-brightgreen" alt="Tests"/>
+  <img src="https://img.shields.io/badge/tests-284_passing-brightgreen" alt="Tests"/>
 </p>
 
 <h1 align="center">Ouroboros</h1>
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/%F0%9F%9A%A7_Under_Construction-Work_in_Progress-orange?style=for-the-badge" alt="Under Construction"/>
+  <img src="https://img.shields.io/badge/%F0%9F%A7%AA_Testing-In_Progress-blue?style=for-the-badge" alt="Testing"/>
 </p>
 
 ---
@@ -65,7 +65,7 @@ flowchart LR
 
 ### Current Status
 
-> **Status: Early prototype**
+> **Status: Testing**
 
 | Done | Upcoming |
 |------|----------|
@@ -74,7 +74,7 @@ flowchart LR
 | 10 Golden Principles with machine-checkable lint | Screenshot diff tool for UI validation |
 | Repository index (189 symbols, 47 files) | Prompt tuning from Logfire trace data |
 | Per-node token tracking and cost metrics | End-to-end Ralph Loop on real tasks |
-| 64 tests passing (no GCP credentials required) | |
+| 284 tests passing (no GCP credentials required) | |
 | Parallel sandbox execution via isolated git worktrees | |
 | GitHub issue comment trigger (`/run-task`) | |
 | PR feedback loop — agents address human review comments | |
@@ -591,7 +591,7 @@ Agents never receive raw file dumps. The context builder (`agents/core/context_b
 ```mermaid
 flowchart TD
     Task["Task: 'Fix the login endpoint validation'"]
-    Task --> build["build_context(task, max_tokens=8000)"]
+    Task --> build["build_context(task)"]
 
     build --> repo["Query repo index\nfor relevant files"]
     build --> arch["Load arch rules\nfor touched layers"]
@@ -712,7 +712,7 @@ Each agent worktree gets an isolated Docker environment:
 ```bash
 # Spin up isolated env for a task
 scripts/worktree_up.sh feature-login 8100
-# Creates git worktree at ../project-ouroboros-feature-login
+# Creates git worktree at ../ouroboros-feature-login
 # Starts sandbox containers on port 8100+
 
 # Tear down when done
@@ -868,7 +868,7 @@ Ten foundational principles that guide every design decision (from `docs/design-
 ## Repository Structure
 
 ```
-project-ouroboros/
+ouroboros/
 ├── AGENTS.md                        # Agent entry point (read first)
 ├── ARCHITECTURE.md                  # Layer dependency rules
 ├── README.md                        # This file
@@ -998,8 +998,8 @@ project-ouroboros/
 
 ```bash
 # Clone the repository
-git clone https://github.com/Tanush1912/project-ouroboros.git
-cd project-ouroboros
+git clone https://github.com/Tanush1912/ouroboros.git
+cd ouroboros
 
 # Install all dependencies
 uv sync --all-extras
