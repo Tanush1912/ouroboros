@@ -291,22 +291,22 @@
   },
   "RalphState": {
     "file": "agents/core/state.py",
-    "line": 14,
+    "line": 15,
     "kind": "class"
   },
   "FeedbackState": {
     "file": "agents/core/state.py",
-    "line": 50,
+    "line": 52,
     "kind": "class"
   },
   "initial_feedback_state": {
     "file": "agents/core/state.py",
-    "line": 78,
+    "line": 80,
     "kind": "function"
   },
   "initial_state": {
     "file": "agents/core/state.py",
-    "line": 105,
+    "line": 107,
     "kind": "function"
   },
   "apply_file_changes": {
@@ -459,6 +459,11 @@
     "line": 20,
     "kind": "class"
   },
+  "TestQualityResult": {
+    "file": "agents/models/test_quality.py",
+    "line": 10,
+    "kind": "class"
+  },
   "ToolCapability": {
     "file": "agents/models/tool_catalog.py",
     "line": 13,
@@ -506,22 +511,22 @@
   },
   "TestResult": {
     "file": "agents/models/validator.py",
-    "line": 12,
+    "line": 14,
     "kind": "class"
   },
   "LintResult": {
     "file": "agents/models/validator.py",
-    "line": 19,
+    "line": 21,
     "kind": "class"
   },
   "ValidationOutput": {
     "file": "agents/models/validator.py",
-    "line": 27,
+    "line": 29,
     "kind": "class"
   },
   "determine_next_action": {
     "file": "agents/models/validator.py",
-    "line": 45,
+    "line": 51,
     "kind": "function"
   },
   "_PORT": {
@@ -949,6 +954,56 @@
     "line": 160,
     "kind": "function"
   },
+  "_QUALITY_THRESHOLD": {
+    "file": "agents/tools/test_quality.py",
+    "line": 15,
+    "kind": "constant"
+  },
+  "_find_test_functions": {
+    "file": "agents/tools/test_quality.py",
+    "line": 18,
+    "kind": "function"
+  },
+  "_count_asserts": {
+    "file": "agents/tools/test_quality.py",
+    "line": 27,
+    "kind": "function"
+  },
+  "_is_trivial_assert": {
+    "file": "agents/tools/test_quality.py",
+    "line": 32,
+    "kind": "function"
+  },
+  "_is_sole_none_check": {
+    "file": "agents/tools/test_quality.py",
+    "line": 51,
+    "kind": "function"
+  },
+  "_is_empty_body": {
+    "file": "agents/tools/test_quality.py",
+    "line": 67,
+    "kind": "function"
+  },
+  "_has_edge_case_markers": {
+    "file": "agents/tools/test_quality.py",
+    "line": 77,
+    "kind": "function"
+  },
+  "_extract_imports": {
+    "file": "repo_index/build_index.py",
+    "line": 70,
+    "kind": "function"
+  },
+  "_find_test_files": {
+    "file": "agents/tools/test_quality.py",
+    "line": 119,
+    "kind": "function"
+  },
+  "analyze_test_quality": {
+    "file": "agents/tools/test_quality.py",
+    "line": 131,
+    "kind": "function"
+  },
   "resolve_worker_tools": {
     "file": "agents/tools/tool_wiring.py",
     "line": 22,
@@ -1001,7 +1056,7 @@
   },
   "run_validator": {
     "file": "agents/workers/validator.py",
-    "line": 18,
+    "line": 21,
     "kind": "function"
   },
   "GCState": {
@@ -1171,42 +1226,42 @@
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 178,
+    "line": 181,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 220,
+    "line": 223,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 279,
+    "line": 282,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 328,
+    "line": 331,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 343,
+    "line": 346,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 363,
+    "line": 366,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 374,
+    "line": 377,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 405,
+    "line": 408,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
@@ -1572,11 +1627,6 @@
   "_extract_symbols": {
     "file": "repo_index/build_index.py",
     "line": 34,
-    "kind": "function"
-  },
-  "_extract_imports": {
-    "file": "repo_index/build_index.py",
-    "line": 70,
     "kind": "function"
   },
   "_extract_exports": {
@@ -2207,6 +2257,71 @@
   "test_ralph_state_has_no_merged_status": {
     "file": "tests/agent_eval/test_state_consistency.py",
     "line": 166,
+    "kind": "function"
+  },
+  "_fc": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 10,
+    "kind": "function"
+  },
+  "test_detects_assert_true": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 17,
+    "kind": "function"
+  },
+  "test_detects_assert_literal_equality": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 33,
+    "kind": "function"
+  },
+  "test_detects_pass_body": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 48,
+    "kind": "function"
+  },
+  "test_detects_sole_none_check": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 64,
+    "kind": "function"
+  },
+  "test_good_test_passes": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 84,
+    "kind": "function"
+  },
+  "test_low_assertion_density_penalized": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 120,
+    "kind": "function"
+  },
+  "test_edge_case_detection": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 145,
+    "kind": "function"
+  },
+  "test_untested_production_file_detected": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 170,
+    "kind": "function"
+  },
+  "test_perfect_score_for_comprehensive_tests": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 180,
+    "kind": "function"
+  },
+  "test_no_tests_scores_low": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 215,
+    "kind": "function"
+  },
+  "test_determine_next_action_retries_on_quality_failure": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 224,
+    "kind": "function"
+  },
+  "test_determine_next_action_proceeds_on_quality_pass": {
+    "file": "tests/agent_eval/test_test_quality.py",
+    "line": 245,
     "kind": "function"
   },
   "test_all_pass_proceeds": {
