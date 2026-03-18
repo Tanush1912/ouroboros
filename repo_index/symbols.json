@@ -359,6 +359,21 @@
     "line": 36,
     "kind": "function"
   },
+  "BehavioralSpec": {
+    "file": "agents/models/contracts.py",
+    "line": 13,
+    "kind": "class"
+  },
+  "ContractCheckResult": {
+    "file": "agents/models/contracts.py",
+    "line": 28,
+    "kind": "class"
+  },
+  "ContractVerificationResult": {
+    "file": "agents/models/contracts.py",
+    "line": 35,
+    "kind": "class"
+  },
   "_INPUT_COST_PER_M": {
     "file": "agents/models/cost.py",
     "line": 10,
@@ -421,12 +436,12 @@
   },
   "ExecutionStep": {
     "file": "agents/models/planner.py",
-    "line": 8,
+    "line": 10,
     "kind": "class"
   },
   "PlanOutput": {
     "file": "agents/models/planner.py",
-    "line": 17,
+    "line": 19,
     "kind": "class"
   },
   "HarnessImprovementOutput": {
@@ -511,22 +526,22 @@
   },
   "TestResult": {
     "file": "agents/models/validator.py",
-    "line": 14,
+    "line": 15,
     "kind": "class"
   },
   "LintResult": {
     "file": "agents/models/validator.py",
-    "line": 21,
+    "line": 22,
     "kind": "class"
   },
   "ValidationOutput": {
     "file": "agents/models/validator.py",
-    "line": 29,
+    "line": 30,
     "kind": "class"
   },
   "determine_next_action": {
     "file": "agents/models/validator.py",
-    "line": 51,
+    "line": 56,
     "kind": "function"
   },
   "_PORT": {
@@ -647,6 +662,46 @@
   "_parse": {
     "file": "agents/tools/browser.py",
     "line": 88,
+    "kind": "function"
+  },
+  "_check_import": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 19,
+    "kind": "function"
+  },
+  "_check_function_exists": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 35,
+    "kind": "function"
+  },
+  "_check_callable_returns": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 75,
+    "kind": "function"
+  },
+  "_check_error_raises": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 110,
+    "kind": "function"
+  },
+  "_check_file_exists": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 155,
+    "kind": "function"
+  },
+  "_check_endpoint_returns": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 167,
+    "kind": "function"
+  },
+  "_HANDLERS": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 187,
+    "kind": "constant"
+  },
+  "verify_contracts": {
+    "file": "agents/tools/contract_verifier.py",
+    "line": 197,
     "kind": "function"
   },
   "WriteResult": {
@@ -1056,7 +1111,7 @@
   },
   "run_validator": {
     "file": "agents/workers/validator.py",
-    "line": 21,
+    "line": 23,
     "kind": "function"
   },
   "GCState": {
@@ -1226,42 +1281,42 @@
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 181,
+    "line": 183,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 223,
+    "line": 225,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 282,
+    "line": 284,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 331,
+    "line": 333,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 346,
+    "line": 348,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 366,
+    "line": 368,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 377,
+    "line": 379,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 408,
+    "line": 410,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
@@ -1421,62 +1476,62 @@
   },
   "_all_python_files": {
     "file": "lint/golden_lint.py",
-    "line": 43,
+    "line": 45,
     "kind": "function"
   },
   "check_gp001_duplicates": {
     "file": "lint/golden_lint.py",
-    "line": 56,
+    "line": 58,
     "kind": "function"
   },
   "check_gp002_file_size": {
     "file": "lint/golden_lint.py",
-    "line": 98,
+    "line": 100,
     "kind": "function"
   },
   "check_gp003_hand_rolled": {
     "file": "lint/golden_lint.py",
-    "line": 112,
+    "line": 114,
     "kind": "function"
   },
   "check_gp004_unvalidated_external": {
     "file": "lint/golden_lint.py",
-    "line": 147,
+    "line": 149,
     "kind": "function"
   },
   "_GP005_CLI_DIRS": {
     "file": "lint/golden_lint.py",
-    "line": 198,
+    "line": 200,
     "kind": "constant"
   },
   "check_gp005_no_print": {
     "file": "lint/golden_lint.py",
-    "line": 201,
+    "line": 203,
     "kind": "function"
   },
   "check_gp006_model_naming": {
     "file": "lint/golden_lint.py",
-    "line": 227,
+    "line": 229,
     "kind": "function"
   },
   "check_gp007_dead_imports": {
     "file": "lint/golden_lint.py",
-    "line": 270,
+    "line": 272,
     "kind": "function"
   },
   "check_gp009_active_plans": {
     "file": "lint/golden_lint.py",
-    "line": 290,
+    "line": 292,
     "kind": "function"
   },
   "check_gp010_quality_score": {
     "file": "lint/golden_lint.py",
-    "line": 325,
+    "line": 327,
     "kind": "function"
   },
   "run_golden_lint": {
     "file": "lint/golden_lint.py",
-    "line": 347,
+    "line": 349,
     "kind": "function"
   },
   "check_gp011_cross_module_private_imports": {
@@ -1737,6 +1792,66 @@
   "test_planner_called_with_mock": {
     "file": "tests/agent_eval/test_bug_fix.py",
     "line": 123,
+    "kind": "function"
+  },
+  "test_import_check_passes_for_existing_module": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 7,
+    "kind": "function"
+  },
+  "test_import_check_fails_for_missing_module": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 19,
+    "kind": "function"
+  },
+  "test_function_exists_passes": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 32,
+    "kind": "function"
+  },
+  "test_function_exists_fails_for_missing": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 44,
+    "kind": "function"
+  },
+  "test_file_exists_passes": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 55,
+    "kind": "function"
+  },
+  "test_file_exists_fails_for_missing": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 67,
+    "kind": "function"
+  },
+  "test_error_raises_passes": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 79,
+    "kind": "function"
+  },
+  "test_error_raises_fails_wrong_exception": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 92,
+    "kind": "function"
+  },
+  "test_callable_returns_passes": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 105,
+    "kind": "function"
+  },
+  "test_empty_specs_passes": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 117,
+    "kind": "function"
+  },
+  "test_pass_rate_calculated": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 123,
+    "kind": "function"
+  },
+  "test_determine_next_action_retries_on_contract_failure": {
+    "file": "tests/agent_eval/test_contracts.py",
+    "line": 135,
     "kind": "function"
   },
   "DUPLICATE_LOGGER": {
