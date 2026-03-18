@@ -136,6 +136,23 @@ def analyze_test_quality(
     if root is None:
         root = _repo_root()
 
+    # Anchor protection — flag any changes to tests/anchors/ as blocking
+    anchor_violations = [fc.path for fc in files_changed if fc.path.startswith("tests/anchors/")]
+    if anchor_violations:
+        return TestQualityResult(
+            score=0.0,
+            passed=False,
+            assertion_density=0.0,
+            trivial_test_count=0,
+            untested_files=[],
+            banned_patterns=[],
+            edge_case_coverage=0.0,
+            details=[
+                f"BLOCKING: Agent modified anchor file(s): {', '.join(anchor_violations)}. "
+                "Anchor files are human-authored invariants that agents must never change."
+            ],
+        )
+
     score = 100.0
     details: list[str] = []
     banned_patterns: list[str] = []
