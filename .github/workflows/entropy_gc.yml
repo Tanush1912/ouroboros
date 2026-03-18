@@ -62,6 +62,12 @@ jobs:
           name: gc-results-${{ github.run_id }}
           path: docs/QUALITY_SCORE.md
 
+      - name: Commit updated quality scores
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(gc): update quality scores [skip ci]"
+          file_pattern: "docs/QUALITY_SCORE.md"
+
       - name: Tear down observability stack
         if: always()
         run: |
