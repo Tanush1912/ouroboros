@@ -2,7 +2,11 @@
 
 The next_action field drives LangGraph conditional routing. No string parsing.
 next_action is determined deterministically from test/lint/quality results — no LLM call needed.
+
+Tests and lint run in parallel via asyncio for faster validation cycles.
 """
+
+import asyncio
 
 import logfire
 
@@ -29,7 +33,11 @@ async def run_validator(
 ) -> ValidationOutput:
     """Run tests, lint, and test quality gate. Returns structured validation result."""
     with logfire.span("validator", iteration=iteration):
-        test_result: TestResult = run_tests(".")
+        # Run tests and lint in parallel — they're independent
+        loop = asyncio.get_event_loop()
+        test_future = loop.run_in_executor(None, run_tests, ".")
+        lint_future = loop.run_in_executor(None, run_lint, ".")
+        test_result, lint_result = await asyncio.gather(test_future, lint_future)
 
         # Run anchor tests separately — failure always escalates
         anchors_dir = _repo_root() / "tests" / "anchors"
@@ -46,8 +54,6 @@ async def run_validator(
                     failure_summary="Anchor test failure (human-authored invariant):\n"
                     + "\n".join(anchor_result.failures[:5]),
                 )
-
-        lint_result: LintResult = run_lint(".")
 
         arch_violations = [v for v in lint_result.violations if v.startswith("ARCH-")]
         other_violations = [v for v in lint_result.violations if not v.startswith("ARCH-")]
