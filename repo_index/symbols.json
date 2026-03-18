@@ -176,47 +176,47 @@
   },
   "_find_relevant_files": {
     "file": "agents/core/context_builder.py",
-    "line": 134,
+    "line": 157,
     "kind": "function"
   },
   "_read_snippet": {
     "file": "agents/core/context_builder.py",
-    "line": 163,
+    "line": 195,
     "kind": "function"
   },
   "_load_arch_rules": {
     "file": "agents/core/context_builder.py",
-    "line": 178,
+    "line": 212,
     "kind": "function"
   },
   "_load_active_plans": {
     "file": "agents/core/context_builder.py",
-    "line": 196,
+    "line": 230,
     "kind": "function"
   },
   "_discover_doc_files": {
     "file": "agents/core/context_builder.py",
-    "line": 208,
+    "line": 242,
     "kind": "function"
   },
   "_chunk_markdown": {
     "file": "agents/core/context_builder.py",
-    "line": 222,
+    "line": 256,
     "kind": "function"
   },
   "_score_doc_chunk": {
     "file": "agents/core/context_builder.py",
-    "line": 251,
+    "line": 285,
     "kind": "function"
   },
   "_find_relevant_docs": {
     "file": "agents/core/context_builder.py",
-    "line": 264,
+    "line": 298,
     "kind": "function"
   },
   "build_context": {
     "file": "agents/core/context_builder.py",
-    "line": 280,
+    "line": 314,
     "kind": "function"
   },
   "to_prompt_text": {
@@ -1246,7 +1246,7 @@
   },
   "run_validator": {
     "file": "agents/workers/validator.py",
-    "line": 24,
+    "line": 28,
     "kind": "function"
   },
   "GCState": {
@@ -1401,12 +1401,12 @@
   },
   "plan_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 54,
+    "line": 56,
     "kind": "function"
   },
   "reproduce_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 70,
+    "line": 72,
     "kind": "function"
   },
   "implement_node": {
@@ -1416,47 +1416,47 @@
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 169,
+    "line": 167,
     "kind": "function"
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 191,
+    "line": 189,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 227,
+    "line": 225,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 286,
+    "line": 284,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 337,
+    "line": 335,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 352,
+    "line": 350,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 372,
+    "line": 370,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 383,
+    "line": 381,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 418,
+    "line": 416,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
