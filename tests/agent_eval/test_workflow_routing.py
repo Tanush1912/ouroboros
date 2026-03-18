@@ -342,8 +342,40 @@ def test_route_after_implement_failed():
 
 
 def test_route_after_implement_normal():
-    """implement_node now routes to test_writer_node (not validate_node)."""
+    """implement_node routes to test_writer_node when requires_tests=True."""
     state = _state(status="validating")
+    assert route_after_implement(state) == "test_writer_node"
+
+
+def test_route_after_implement_skips_test_writer():
+    """implement_node skips test_writer when plan.requires_tests=False."""
+    from agents.models.planner import PlanOutput
+
+    plan = PlanOutput(
+        task_summary="Add docstring",
+        steps=[],
+        test_strategy="Lint only",
+        risk_level="low",
+        requires_human_review=False,
+        requires_tests=False,
+    )
+    state = _state(status="validating", plan=plan)
+    assert route_after_implement(state) == "validate_node"
+
+
+def test_route_after_implement_runs_test_writer_by_default():
+    """implement_node routes to test_writer when plan.requires_tests=True."""
+    from agents.models.planner import PlanOutput
+
+    plan = PlanOutput(
+        task_summary="Add new endpoint",
+        steps=[],
+        test_strategy="Unit + integration tests",
+        risk_level="medium",
+        requires_human_review=False,
+        requires_tests=True,
+    )
+    state = _state(status="validating", plan=plan)
     assert route_after_implement(state) == "test_writer_node"
 
 

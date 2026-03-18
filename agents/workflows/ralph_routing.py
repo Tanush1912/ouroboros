@@ -84,7 +84,12 @@ def _ralph_status_gate(state: RalphState, next_node: str) -> str:
 
 
 def route_after_implement(state: RalphState) -> str:
-    return _ralph_status_gate(state, "test_writer_node")
+    if state.get("status") in ("failed", "escalated"):
+        return "human_checkpoint"
+    plan = state.get("plan")
+    if plan and not plan.requires_tests:
+        return "validate_node"
+    return "test_writer_node"
 
 
 def route_after_test_writer(state: RalphState) -> str:

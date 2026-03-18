@@ -34,6 +34,14 @@ class PlanOutput(BaseModel):
         default=False,
         description="True if this task involves UI changes that need browser validation",
     )
+    requires_tests: bool = Field(
+        default=True,
+        description=(
+            "True if this task changes functional code that needs dedicated tests. "
+            "False for documentation-only changes, config updates, comments, "
+            "docstrings, or other non-functional modifications."
+        ),
+    )
     behavioral_specs: list[BehavioralSpec] = Field(
         default_factory=list,
         description=(
