@@ -7,7 +7,7 @@ on failure/escalation.
 
 from langgraph.graph import END
 
-from agents.core.guards import MAX_REVIEW_ITERATIONS
+from agents.core.guards import MAX_REVIEW_ITERATIONS, MAX_TEST_WRITER_ITERATIONS
 from agents.core.state import RalphState
 
 _BUG_FIX_KEYWORDS = frozenset({"fix", "bug", "error", "broken", "failing", "crash"})
@@ -33,12 +33,23 @@ def route_after_validate(state: RalphState) -> str:
     validation = state["validation"]
     if validation is None:
         return "human_checkpoint"
-    route_map = {
-        "proceed": "perf_validate_node",
-        "retry": "implement_node",
-        "escalate": "human_checkpoint",
-    }
-    return route_map[validation.next_action]
+
+    if validation.next_action == "proceed":
+        return "perf_validate_node"
+    if validation.next_action == "escalate":
+        return "human_checkpoint"
+
+    # Retry — determine if it's a test quality issue or a code issue
+    quality = validation.test_quality
+    tests_pass = validation.tests.passed
+    if tests_pass and quality is not None and not quality.passed:
+        # Tests pass but quality is bad → route to test writer
+        if state.get("test_writer_iteration", 0) >= MAX_TEST_WRITER_ITERATIONS:
+            return "human_checkpoint"
+        return "test_writer_node"
+
+    # Code bugs or lint failures → route to implementer
+    return "implement_node"
 
 
 def route_after_review(state: RalphState) -> str:
@@ -60,6 +71,10 @@ def _ralph_status_gate(state: RalphState, next_node: str) -> str:
 
 
 def route_after_implement(state: RalphState) -> str:
+    return _ralph_status_gate(state, "test_writer_node")
+
+
+def route_after_test_writer(state: RalphState) -> str:
     return _ralph_status_gate(state, "validate_node")
 
 

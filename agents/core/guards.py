@@ -26,12 +26,14 @@ from pydantic import BaseModel
 
 MAX_IMPLEMENT_ITERATIONS = int(os.environ.get("OUROBOROS_MAX_IMPLEMENT_ITER", "5"))
 MAX_REVIEW_ITERATIONS = int(os.environ.get("OUROBOROS_MAX_REVIEW_ITER", "3"))
+MAX_TEST_WRITER_ITERATIONS = int(os.environ.get("OUROBOROS_MAX_TEST_WRITER_ITER", "3"))
 MAX_TOOL_CALLS_PER_NODE = int(os.environ.get("OUROBOROS_MAX_TOOL_CALLS_NODE", "50"))
 MAX_TOTAL_TOOL_CALLS = int(os.environ.get("OUROBOROS_MAX_TOTAL_TOOL_CALLS", "200"))
 MAX_COST_USD_PER_RUN = float(os.environ.get("OUROBOROS_MAX_COST_USD", "2.00"))
 
 IMPLEMENT_NODES = frozenset({"implement_node", "implement_feedback_node"})
 REVIEW_NODES = frozenset({"review_loop_node", "address_feedback_node"})
+TEST_WRITER_NODES = frozenset({"test_writer_node"})
 EXEMPT_NODES = frozenset({"post_mortem_node", "human_checkpoint"})
 
 
@@ -65,6 +67,19 @@ def check_guards(state: Mapping[str, Any], node_name: str | None = None) -> Guar
             reason=(
                 f"Max implement iterations reached ({MAX_IMPLEMENT_ITERATIONS}). "
                 "Cannot retry — escalating to human checkpoint."
+            ),
+            action="escalate",
+        )
+
+    if (
+        node_name in TEST_WRITER_NODES
+        and state.get("test_writer_iteration", 0) >= MAX_TEST_WRITER_ITERATIONS
+    ):
+        return GuardResult(
+            allowed=False,
+            reason=(
+                f"Max test writer iterations reached ({MAX_TEST_WRITER_ITERATIONS}). "
+                "Cannot improve test quality further — escalating."
             ),
             action="escalate",
         )
