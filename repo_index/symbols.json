@@ -1486,37 +1486,37 @@
   },
   "route_after_test_writer": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 90,
+    "line": 95,
     "kind": "function"
   },
   "route_after_reproduce": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 94,
+    "line": 99,
     "kind": "function"
   },
   "route_after_mutation": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 98,
+    "line": 103,
     "kind": "function"
   },
   "route_after_perf_validate": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 110,
+    "line": 115,
     "kind": "function"
   },
   "route_after_ui_validate": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 114,
+    "line": 119,
     "kind": "function"
   },
   "route_after_open_pr": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 118,
+    "line": 123,
     "kind": "function"
   },
   "route_after_merge": {
     "file": "agents/workflows/ralph_routing.py",
-    "line": 122,
+    "line": 127,
     "kind": "function"
   },
   "ReviewerState": {
@@ -2919,79 +2919,89 @@
     "line": 344,
     "kind": "function"
   },
-  "test_route_after_test_writer_normal": {
+  "test_route_after_implement_skips_test_writer": {
     "file": "tests/agent_eval/test_workflow_routing.py",
     "line": 350,
     "kind": "function"
   },
+  "test_route_after_implement_runs_test_writer_by_default": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 366,
+    "kind": "function"
+  },
+  "test_route_after_test_writer_normal": {
+    "file": "tests/agent_eval/test_workflow_routing.py",
+    "line": 382,
+    "kind": "function"
+  },
   "test_route_after_test_writer_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 355,
+    "line": 387,
     "kind": "function"
   },
   "test_route_after_reproduce_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 360,
+    "line": 392,
     "kind": "function"
   },
   "test_route_after_reproduce_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 365,
+    "line": 397,
     "kind": "function"
   },
   "test_route_after_mutation_proceeds": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 370,
+    "line": 402,
     "kind": "function"
   },
   "test_route_after_mutation_low_kill_rate": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 381,
+    "line": 413,
     "kind": "function"
   },
   "test_route_after_mutation_escalates_at_max": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 392,
+    "line": 424,
     "kind": "function"
   },
   "test_route_after_perf_validate_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 403,
+    "line": 435,
     "kind": "function"
   },
   "test_route_after_perf_validate_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 408,
+    "line": 440,
     "kind": "function"
   },
   "test_route_after_ui_validate_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 413,
+    "line": 445,
     "kind": "function"
   },
   "test_route_after_ui_validate_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 418,
+    "line": 450,
     "kind": "function"
   },
   "test_route_after_open_pr_failed": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 423,
+    "line": 455,
     "kind": "function"
   },
   "test_route_after_open_pr_normal": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 429,
+    "line": 461,
     "kind": "function"
   },
   "test_route_after_merge_escalated": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 434,
+    "line": 466,
     "kind": "function"
   },
   "test_route_after_merge_done": {
     "file": "tests/agent_eval/test_workflow_routing.py",
-    "line": 439,
+    "line": 471,
     "kind": "function"
   },
   "write_py": {
