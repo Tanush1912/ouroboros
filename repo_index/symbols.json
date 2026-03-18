@@ -319,19 +319,34 @@
     "line": 110,
     "kind": "function"
   },
+  "_MAX_RETRIES": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 20,
+    "kind": "constant"
+  },
+  "_RETRY_BACKOFF": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 21,
+    "kind": "constant"
+  },
+  "retry_on_transient": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 24,
+    "kind": "function"
+  },
   "apply_file_changes": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 16,
+    "line": 65,
     "kind": "function"
   },
   "accumulate_usage": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 32,
+    "line": 81,
     "kind": "function"
   },
   "update_node_tool_calls": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 56,
+    "line": 105,
     "kind": "function"
   },
   "BenchmarkSampleResult": {
@@ -1381,62 +1396,62 @@
   },
   "plan_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 53,
+    "line": 54,
     "kind": "function"
   },
   "reproduce_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 69,
+    "line": 70,
     "kind": "function"
   },
   "implement_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 131,
+    "line": 132,
     "kind": "function"
   },
   "validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 167,
+    "line": 169,
     "kind": "function"
   },
   "perf_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 188,
+    "line": 190,
     "kind": "function"
   },
   "ui_validate_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 230,
+    "line": 232,
     "kind": "function"
   },
   "open_pr_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 289,
+    "line": 291,
     "kind": "function"
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 338,
+    "line": 340,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 353,
+    "line": 355,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 373,
+    "line": 375,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 384,
+    "line": 386,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 419,
+    "line": 421,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
@@ -1546,7 +1561,7 @@
   },
   "test_writer_node": {
     "file": "agents/workflows/test_writer_node.py",
-    "line": 19,
+    "line": 20,
     "kind": "function"
   },
   "test_build_context_performance": {
