@@ -129,14 +129,9 @@
     "line": 14,
     "kind": "constant"
   },
-  "_ensure_initialized": {
-    "file": "agents/core/config.py",
-    "line": 19,
-    "kind": "function"
-  },
   "get_model": {
     "file": "agents/core/config.py",
-    "line": 31,
+    "line": 17,
     "kind": "function"
   },
   "FileSnippet": {
@@ -586,362 +581,362 @@
   },
   "run_benchmark": {
     "file": "agents/tools/benchmark.py",
-    "line": 17,
+    "line": 14,
     "kind": "function"
   },
   "compare_benchmarks": {
     "file": "agents/tools/benchmark.py",
-    "line": 95,
+    "line": 91,
     "kind": "function"
   },
   "ScreenshotResult": {
     "file": "agents/tools/browser.py",
-    "line": 14,
+    "line": 13,
     "kind": "class"
   },
   "DOMNode": {
     "file": "agents/tools/browser.py",
-    "line": 21,
+    "line": 20,
     "kind": "class"
   },
   "DOMSnapshot": {
     "file": "agents/tools/browser.py",
-    "line": 30,
+    "line": 29,
     "kind": "class"
   },
   "UIAction": {
     "file": "agents/tools/browser.py",
-    "line": 36,
+    "line": 35,
     "kind": "class"
   },
   "UIFlowResult": {
     "file": "agents/tools/browser.py",
-    "line": 43,
+    "line": 42,
     "kind": "class"
   },
   "_get_page": {
     "file": "agents/tools/browser.py",
-    "line": 52,
+    "line": 51,
     "kind": "function"
   },
   "take_screenshot": {
     "file": "agents/tools/browser.py",
-    "line": 64,
+    "line": 62,
     "kind": "function"
   },
   "snapshot_dom": {
     "file": "agents/tools/browser.py",
-    "line": 83,
+    "line": 80,
     "kind": "function"
   },
   "drive_ui_flow": {
     "file": "agents/tools/browser.py",
-    "line": 107,
+    "line": 103,
     "kind": "function"
   },
   "_parse": {
     "file": "agents/tools/browser.py",
-    "line": 91,
+    "line": 88,
     "kind": "function"
   },
   "WriteResult": {
     "file": "agents/tools/fs.py",
-    "line": 17,
+    "line": 16,
     "kind": "class"
   },
   "SearchMatchResult": {
     "file": "agents/tools/fs.py",
-    "line": 23,
+    "line": 22,
     "kind": "class"
   },
   "SymbolLocationResult": {
     "file": "agents/tools/fs.py",
-    "line": 30,
+    "line": 29,
     "kind": "class"
   },
   "_resolve": {
     "file": "agents/tools/fs.py",
-    "line": 37,
+    "line": 36,
     "kind": "function"
   },
   "read_file": {
     "file": "agents/tools/fs.py",
-    "line": 48,
+    "line": 46,
     "kind": "function"
   },
   "write_file": {
     "file": "agents/tools/fs.py",
-    "line": 54,
+    "line": 51,
     "kind": "function"
   },
   "list_dir": {
     "file": "agents/tools/fs.py",
-    "line": 64,
+    "line": 60,
     "kind": "function"
   },
   "search_repo": {
     "file": "agents/tools/fs.py",
-    "line": 73,
+    "line": 68,
     "kind": "function"
   },
   "search_symbol": {
     "file": "agents/tools/fs.py",
-    "line": 107,
+    "line": 101,
     "kind": "function"
   },
   "reindex": {
     "file": "agents/tools/fs.py",
-    "line": 127,
+    "line": 120,
     "kind": "function"
   },
   "_repo_nwo": {
     "file": "agents/tools/git.py",
-    "line": 19,
+    "line": 18,
     "kind": "function"
   },
   "GitStatus": {
     "file": "agents/tools/git.py",
-    "line": 33,
+    "line": 32,
     "kind": "class"
   },
   "CommitResult": {
     "file": "agents/tools/git.py",
-    "line": 41,
+    "line": 40,
     "kind": "class"
   },
   "PRResult": {
     "file": "agents/tools/git.py",
-    "line": 48,
+    "line": 47,
     "kind": "class"
   },
   "PRComment": {
     "file": "agents/tools/git.py",
-    "line": 55,
+    "line": 54,
     "kind": "class"
   },
   "MergeResult": {
     "file": "agents/tools/git.py",
-    "line": 64,
+    "line": 63,
     "kind": "class"
   },
   "_check_gh_auth": {
     "file": "agents/tools/git.py",
-    "line": 73,
+    "line": 72,
     "kind": "function"
   },
   "_run": {
     "file": "agents/tools/git.py",
-    "line": 91,
+    "line": 90,
     "kind": "function"
   },
   "git_status": {
     "file": "agents/tools/git.py",
-    "line": 99,
+    "line": 97,
     "kind": "function"
   },
   "commit": {
     "file": "agents/tools/git.py",
-    "line": 128,
+    "line": 125,
     "kind": "function"
   },
   "open_pr": {
     "file": "agents/tools/git.py",
-    "line": 151,
+    "line": 147,
     "kind": "function"
   },
   "get_pr_diff": {
     "file": "agents/tools/git.py",
-    "line": 177,
+    "line": 172,
     "kind": "function"
   },
   "get_pr_comments": {
     "file": "agents/tools/git.py",
-    "line": 186,
+    "line": 180,
     "kind": "function"
   },
   "PRMetadataSchema": {
     "file": "agents/tools/git.py",
-    "line": 217,
+    "line": 211,
     "kind": "class"
   },
   "PushResult": {
     "file": "agents/tools/git.py",
-    "line": 226,
+    "line": 220,
     "kind": "class"
   },
   "_PRMetadataRawSchema": {
     "file": "agents/tools/git.py",
-    "line": 231,
+    "line": 225,
     "kind": "class"
   },
   "get_pr_metadata": {
     "file": "agents/tools/git.py",
-    "line": 244,
+    "line": 238,
     "kind": "function"
   },
   "reply_to_pr_comment": {
     "file": "agents/tools/git.py",
-    "line": 269,
+    "line": 263,
     "kind": "function"
   },
   "add_pr_label": {
     "file": "agents/tools/git.py",
-    "line": 285,
+    "line": 279,
     "kind": "function"
   },
   "push_to_remote": {
     "file": "agents/tools/git.py",
-    "line": 291,
+    "line": 285,
     "kind": "function"
   },
   "IssueResult": {
     "file": "agents/tools/git.py",
-    "line": 299,
+    "line": 293,
     "kind": "class"
   },
   "create_issue": {
     "file": "agents/tools/git.py",
-    "line": 306,
+    "line": 300,
     "kind": "function"
   },
   "merge_pr": {
     "file": "agents/tools/git.py",
-    "line": 322,
+    "line": 315,
     "kind": "function"
   },
   "run_app_and_probe": {
     "file": "agents/tools/harness.py",
-    "line": 17,
+    "line": 14,
     "kind": "function"
   },
   "_poll_health": {
     "file": "agents/tools/harness.py",
-    "line": 73,
+    "line": 70,
     "kind": "function"
   },
   "probe_endpoint": {
     "file": "agents/tools/harness.py",
-    "line": 105,
+    "line": 101,
     "kind": "function"
   },
   "_attempt": {
     "file": "agents/tools/harness.py",
-    "line": 81,
+    "line": 78,
     "kind": "function"
   },
   "_victoria_logs_url": {
     "file": "agents/tools/observability.py",
-    "line": 18,
+    "line": 17,
     "kind": "function"
   },
   "_victoria_metrics_url": {
     "file": "agents/tools/observability.py",
-    "line": 22,
+    "line": 21,
     "kind": "function"
   },
   "LogLineSchema": {
     "file": "agents/tools/observability.py",
-    "line": 26,
+    "line": 25,
     "kind": "class"
   },
   "MetricSampleSchema": {
     "file": "agents/tools/observability.py",
-    "line": 32,
+    "line": 31,
     "kind": "class"
   },
   "MetricSeriesSchema": {
     "file": "agents/tools/observability.py",
-    "line": 37,
+    "line": 36,
     "kind": "class"
   },
   "MetricResult": {
     "file": "agents/tools/observability.py",
-    "line": 42,
+    "line": 41,
     "kind": "class"
   },
   "_LogStreamSchema": {
     "file": "agents/tools/observability.py",
-    "line": 47,
+    "line": 46,
     "kind": "class"
   },
   "_VictoriaLogsSchema": {
     "file": "agents/tools/observability.py",
-    "line": 52,
+    "line": 51,
     "kind": "class"
   },
   "_MetricSeriesRawSchema": {
     "file": "agents/tools/observability.py",
-    "line": 56,
+    "line": 55,
     "kind": "class"
   },
   "_MetricDataSchema": {
     "file": "agents/tools/observability.py",
-    "line": 61,
+    "line": 60,
     "kind": "class"
   },
   "_VictoriaMetricsSchema": {
     "file": "agents/tools/observability.py",
-    "line": 65,
+    "line": 64,
     "kind": "class"
   },
   "query_logs": {
     "file": "agents/tools/observability.py",
-    "line": 70,
+    "line": 68,
     "kind": "function"
   },
   "query_metrics": {
     "file": "agents/tools/observability.py",
-    "line": 90,
+    "line": 87,
     "kind": "function"
   },
   "BuildResult": {
     "file": "agents/tools/shell.py",
-    "line": 18,
+    "line": 17,
     "kind": "class"
   },
   "CommandResult": {
     "file": "agents/tools/shell.py",
-    "line": 24,
+    "line": 23,
     "kind": "class"
   },
   "run_subprocess": {
     "file": "agents/tools/shell.py",
-    "line": 31,
+    "line": 30,
     "kind": "function"
   },
   "run_tests": {
     "file": "agents/tools/shell.py",
-    "line": 37,
+    "line": 35,
     "kind": "function"
   },
   "run_lint": {
     "file": "agents/tools/shell.py",
-    "line": 57,
+    "line": 54,
     "kind": "function"
   },
   "run_build": {
     "file": "agents/tools/shell.py",
-    "line": 85,
+    "line": 81,
     "kind": "function"
   },
   "run_single_test": {
     "file": "agents/tools/shell.py",
-    "line": 100,
+    "line": 95,
     "kind": "function"
   },
   "extract_traceback": {
     "file": "agents/tools/shell.py",
-    "line": 119,
+    "line": 114,
     "kind": "function"
   },
   "capture_error_context": {
     "file": "agents/tools/shell.py",
-    "line": 137,
+    "line": 131,
     "kind": "function"
   },
   "run_command": {
     "file": "agents/tools/shell.py",
-    "line": 167,
+    "line": 160,
     "kind": "function"
   },
   "resolve_worker_tools": {
@@ -1556,7 +1551,7 @@
   },
   "check_wf008_node_name_consistency": {
     "file": "lint/workflow_lint_ext.py",
-    "line": 82,
+    "line": 83,
     "kind": "function"
   },
   "_discover_python_files": {
