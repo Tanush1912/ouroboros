@@ -17,6 +17,8 @@ Rules:
 6. requires_browser_validation = True if the task involves UI changes (pages, frontend, endpoints that render HTML).
 7. Keep steps atomic — one logical action per step.
 8. The test_strategy must reference how the validator will verify success.
+9. For tasks involving services or apps, include an observability step using
+   the observability tool category to verify logs flow after deployment.
 
 You have access to the task context in the user message. Use it to understand
 what files exist, what tools are available, and what the architecture rules are.
