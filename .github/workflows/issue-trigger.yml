@@ -125,6 +125,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VICTORIA_LOGS_URL: http://localhost:9428
           VICTORIA_METRICS_URL: http://localhost:8428
+          LOG_ENDPOINT: http://localhost:9001
 
       - name: Post success comment
         if: success()

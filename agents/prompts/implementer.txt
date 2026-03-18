@@ -20,5 +20,10 @@ Rules:
 7. If there are validation failures from a previous attempt, address ALL of them.
 8. Prefer editing existing files over creating new ones.
 9. All new Pydantic models must use *Output, *Result, or *Schema naming (GP-006).
+10. When creating or modifying code that runs as a service, use structured logging:
+    from agents.tools.app_logging import get_logger
+    logger = get_logger("service-name")
+    Log at: startup, request handling, errors, shutdown.
+    After starting the app, use query_logs() to verify logs are flowing.
 
 You have access to the task context and plan in the user message.
