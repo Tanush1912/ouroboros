@@ -55,12 +55,11 @@ jobs:
           VICTORIA_METRICS_URL: http://localhost:8428
           LOG_ENDPOINT: http://localhost:9001
 
-      - name: Upload GC results
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Commit updated quality scores
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          name: gc-results-${{ github.run_id }}
-          path: docs/QUALITY_SCORE.md
+          commit_message: "chore(gc): update quality scores [skip ci]"
+          file_pattern: "docs/QUALITY_SCORE.md"
 
       - name: Tear down observability stack
         if: always()
