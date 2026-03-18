@@ -27,6 +27,11 @@ def route_after_plan(state: RalphState) -> str:
     return "implement_node"
 
 
+def _test_failures_in_test_files(failures: list[str]) -> bool:
+    """Check if test failures reference test files (test_writer's fault, not implementer's)."""
+    return any("test_" in f and ("FAILED" in f or "Error" in f) for f in failures)
+
+
 def route_after_validate(state: RalphState) -> str:
     if state["status"] == "escalated":
         return "human_checkpoint"
@@ -42,13 +47,21 @@ def route_after_validate(state: RalphState) -> str:
     # Retry — determine if it's a test quality issue or a code issue
     quality = validation.test_quality
     tests_pass = validation.tests.passed
+    test_writer_maxed = state.get("test_writer_iteration", 0) >= MAX_TEST_WRITER_ITERATIONS
+
+    # Tests pass but quality is bad → test writer
     if tests_pass and quality is not None and not quality.passed:
-        # Tests pass but quality is bad → route to test writer
-        if state.get("test_writer_iteration", 0) >= MAX_TEST_WRITER_ITERATIONS:
+        if test_writer_maxed:
             return "human_checkpoint"
         return "test_writer_node"
 
-    # Code bugs or lint failures → route to implementer
+    # Tests failed in test files → test writer wrote broken tests
+    if not tests_pass and _test_failures_in_test_files(validation.tests.failures):
+        if test_writer_maxed:
+            return "human_checkpoint"
+        return "test_writer_node"
+
+    # Production code bugs or lint failures → implementer
     return "implement_node"
 
 

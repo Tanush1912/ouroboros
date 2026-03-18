@@ -174,6 +174,7 @@ async def validate_node(state: RalphState) -> dict[str, Any]:
         iteration=state["iteration_count"],
         files_changed=state["files_changed"],
         behavioral_specs=plan.behavioral_specs if plan else None,
+        plan_risk_level=plan.risk_level if plan else "medium",
     )
     node_calls = 2  # run_tests + run_lint
     return {

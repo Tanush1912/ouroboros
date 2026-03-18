@@ -128,6 +128,29 @@ def _find_test_files(root: Path) -> list[Path]:
     ]
 
 
+_NON_FUNCTIONAL_EXTENSIONS = frozenset({".md", ".txt", ".rst", ".toml", ".yml", ".yaml", ".json"})
+_DOCS_ONLY_KEYWORDS = frozenset(
+    {"docstring", "comment", "type hint", "annotation", "readme", "docs"}
+)
+
+
+def _is_non_functional_change(files_changed: list[FileChange]) -> bool:
+    """Check if all changes are non-functional (docs, comments, config only)."""
+    for fc in files_changed:
+        if fc.operation == "delete":
+            continue
+        if any(fc.path.endswith(ext) for ext in _NON_FUNCTIONAL_EXTENSIONS):
+            continue
+        if (
+            fc.path.endswith(".py")
+            and fc.diff_summary
+            and any(kw in fc.diff_summary.lower() for kw in _DOCS_ONLY_KEYWORDS)
+        ):
+            continue
+        return False
+    return True
+
+
 def analyze_test_quality(
     files_changed: list[FileChange],
     root: Path | None = None,
@@ -135,6 +158,17 @@ def analyze_test_quality(
     """Analyze test quality for changed files. Returns deterministic quality score."""
     if root is None:
         root = _repo_root()
+
+    # Skip for non-functional changes (docstrings, comments, config files)
+    if _is_non_functional_change(files_changed):
+        return TestQualityResult(
+            score=100.0,
+            passed=True,
+            assertion_density=0.0,
+            trivial_test_count=0,
+            edge_case_coverage=0.0,
+            details=["Skipped: non-functional changes only"],
+        )
 
     # Anchor protection — flag any changes to tests/anchors/ as blocking
     anchor_violations = [fc.path for fc in files_changed if fc.path.startswith("tests/anchors/")]
