@@ -37,6 +37,8 @@ _GP006_ALLOWED_SUFFIXES = (
     "Metrics",
     "Status",
     "Usage",
+    "Spec",
+    "Strategy",
 )
 
 
