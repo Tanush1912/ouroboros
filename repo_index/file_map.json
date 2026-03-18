@@ -17,19 +17,19 @@
     "domain": "agents",
     "layer": "agents",
     "imports": [
-      "rich.console",
-      "agents.workflows.entropy_gc",
       "subprocess",
-      "agents.workflows.feedback_loop",
-      "rich.table",
       "agents.core.bootstrap",
       "os",
+      "rich.table",
       "agents.tools.git",
-      "hashlib",
-      "asyncio",
+      "agents.workflows.entropy_gc",
+      "rich.console",
       "time",
-      "typer",
+      "agents.workflows.feedback_loop",
       "pathlib",
+      "hashlib",
+      "typer",
+      "asyncio",
       "agents.workflows.ralph_loop"
     ],
     "exports": [
@@ -52,10 +52,10 @@
     "imports": [
       "shutil",
       "subprocess",
-      "sys",
-      "agents.core.paths",
       "os",
-      "agents.core.instrumentation"
+      "agents.core.instrumentation",
+      "agents.core.paths",
+      "sys"
     ],
     "exports": [
       "BootstrapError",
@@ -77,10 +77,10 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "pydantic",
-      "agents.models.registry",
       "agents.models.tool_catalog",
-      "agents.core.paths"
+      "agents.core.paths",
+      "pydantic",
+      "agents.models.registry"
     ],
     "exports": [
       "FileSnippet",
@@ -95,11 +95,11 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "typing",
-      "os",
-      "logfire",
       "collections.abc",
-      "pydantic"
+      "os",
+      "typing",
+      "pydantic",
+      "logfire"
     ],
     "exports": [
       "GuardResult",
@@ -111,8 +111,8 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "os",
-      "logfire"
+      "logfire",
+      "os"
     ],
     "exports": [
       "configure_logfire"
@@ -122,8 +122,8 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "subprocess",
-      "pathlib"
+      "pathlib",
+      "subprocess"
     ],
     "exports": [
       "repo_root"
@@ -133,15 +133,15 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "agents.models.test_quality",
-      "agents.models.post_mortem",
-      "agents.models.validator",
       "agents.models.benchmark",
-      "agents.models.reviewer",
-      "agents.models.reproducer",
       "agents.models.implementer",
+      "agents.models.post_mortem",
+      "agents.models.reproducer",
+      "agents.models.validator",
       "typing",
-      "agents.models.planner"
+      "agents.models.reviewer",
+      "agents.models.planner",
+      "agents.models.test_quality"
     ],
     "exports": [
       "RalphState",
@@ -154,11 +154,11 @@
     "domain": "agents",
     "layer": "core",
     "imports": [
-      "agents.core.paths",
-      "agents.models.cost",
-      "agents.models.implementer",
       "collections.abc",
+      "agents.models.implementer",
       "typing",
+      "agents.models.cost",
+      "agents.core.paths",
       "pathlib"
     ],
     "exports": [
@@ -316,6 +316,18 @@
       "TestQualityResult"
     ]
   },
+  "agents/models/test_writer.py": {
+    "domain": "agents",
+    "layer": "models",
+    "imports": [
+      "pydantic",
+      "agents.models.implementer"
+    ],
+    "exports": [
+      "TestStrategy",
+      "TestWriterOutput"
+    ]
+  },
   "agents/models/tool_catalog.py": {
     "domain": "agents",
     "layer": "models",
@@ -339,10 +351,10 @@
     "domain": "agents",
     "layer": "models",
     "imports": [
-      "agents.models.test_quality",
       "pydantic",
       "agents.models.contracts",
-      "typing"
+      "typing",
+      "agents.models.test_quality"
     ],
     "exports": [
       "TestResult",
@@ -355,12 +367,12 @@
     "domain": "agents",
     "layer": "agents",
     "imports": [
-      "threading",
-      "http.server",
-      "contextlib",
       "json",
+      "threading",
+      "contextlib",
       "agents.tools.app_logging",
-      "time"
+      "time",
+      "http.server"
     ],
     "exports": [
       "main",
@@ -378,12 +390,12 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "sys",
-      "logging",
       "json",
       "os",
+      "logging",
+      "time",
       "urllib.request",
-      "time"
+      "sys"
     ],
     "exports": [
       "VectorHandler",
@@ -395,14 +407,14 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "tempfile",
       "agents.models.benchmark",
       "agents.tools.shell",
-      "agents.core.paths",
       "json",
       "os",
+      "datetime",
       "time",
-      "datetime"
+      "agents.core.paths",
+      "tempfile"
     ],
     "exports": [
       "run_benchmark",
@@ -414,9 +426,9 @@
     "layer": "tools",
     "imports": [
       "pydantic",
-      "typing",
+      "base64",
       "playwright.async_api",
-      "base64"
+      "typing"
     ],
     "exports": [
       "ScreenshotResult",
@@ -434,10 +446,10 @@
     "layer": "tools",
     "imports": [
       "inspect",
-      "agents.core.paths",
-      "httpx",
       "importlib",
-      "agents.models.contracts"
+      "agents.core.paths",
+      "agents.models.contracts",
+      "httpx"
     ],
     "exports": [
       "verify_contracts"
@@ -448,10 +460,10 @@
     "layer": "tools",
     "imports": [
       "subprocess",
-      "repo_index.build_index",
-      "agents.core.paths",
       "json",
+      "repo_index.build_index",
       "pydantic",
+      "agents.core.paths",
       "pathlib"
     ],
     "exports": [
@@ -470,13 +482,13 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "subprocess",
-      "agents.core.paths",
-      "json",
       "functools",
-      "typing",
+      "subprocess",
+      "json",
       "contextlib",
-      "pydantic"
+      "typing",
+      "pydantic",
+      "agents.core.paths"
     ],
     "exports": [
       "GitStatus",
@@ -506,12 +518,12 @@
     "imports": [
       "shutil",
       "subprocess",
-      "agents.core.paths",
       "os",
-      "agents.models.harness",
       "time",
+      "agents.core.paths",
+      "tenacity",
       "httpx",
-      "tenacity"
+      "agents.models.harness"
     ],
     "exports": [
       "run_app_and_probe",
@@ -523,8 +535,8 @@
     "layer": "tools",
     "imports": [
       "pydantic",
-      "httpx",
       "os",
+      "httpx",
       "typing"
     ],
     "exports": [
@@ -549,13 +561,13 @@
     "layer": "tools",
     "imports": [
       "subprocess",
-      "agents.models.validator",
-      "shlex",
-      "agents.core.paths",
       "agents.models.reproducer",
+      "agents.models.validator",
       "time",
       "pydantic",
-      "pathlib"
+      "agents.core.paths",
+      "pathlib",
+      "shlex"
     ],
     "exports": [
       "BuildResult",
@@ -574,11 +586,11 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "agents.models.test_quality",
       "ast",
-      "agents.core.paths",
       "agents.models.implementer",
-      "pathlib"
+      "agents.core.paths",
+      "pathlib",
+      "agents.models.test_quality"
     ],
     "exports": [
       "analyze_test_quality"
@@ -588,9 +600,9 @@
     "domain": "agents",
     "layer": "tools",
     "imports": [
-      "agents.tools.fs",
+      "agents.core.context_builder",
       "collections.abc",
-      "agents.core.context_builder"
+      "agents.tools.fs"
     ],
     "exports": [
       "resolve_worker_tools"
@@ -606,12 +618,12 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "pydantic_ai",
-      "agents.core.config",
       "agents.models.cost",
-      "agents.models.cleaner",
+      "pydantic_ai",
       "logfire",
-      "pathlib"
+      "pathlib",
+      "agents.core.config",
+      "agents.models.cleaner"
     ],
     "exports": [
       "run_cleaner"
@@ -621,17 +633,17 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "agents.tools.tool_wiring",
-      "pydantic_ai",
-      "agents.core.config",
+      "agents.models.implementer",
+      "agents.core.context_builder",
+      "agents.models.reproducer",
       "agents.models.validator",
       "agents.models.cost",
-      "agents.models.reproducer",
-      "agents.models.implementer",
-      "logfire",
-      "agents.core.context_builder",
+      "pydantic_ai",
       "agents.models.planner",
-      "pathlib"
+      "logfire",
+      "pathlib",
+      "agents.core.config",
+      "agents.tools.tool_wiring"
     ],
     "exports": [
       "run_implementer"
@@ -641,14 +653,14 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "agents.tools.tool_wiring",
-      "pydantic_ai",
-      "agents.core.config",
-      "agents.models.cost",
-      "logfire",
       "agents.core.context_builder",
+      "agents.models.cost",
+      "pydantic_ai",
       "agents.models.planner",
-      "pathlib"
+      "logfire",
+      "pathlib",
+      "agents.core.config",
+      "agents.tools.tool_wiring"
     ],
     "exports": [
       "run_planner"
@@ -658,12 +670,12 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "pydantic_ai",
-      "agents.core.config",
       "agents.models.post_mortem",
       "agents.models.cost",
+      "pydantic_ai",
       "logfire",
-      "pathlib"
+      "pathlib",
+      "agents.core.config"
     ],
     "exports": [
       "run_post_mortem"
@@ -673,30 +685,50 @@
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "pydantic_ai",
-      "agents.core.config",
-      "agents.models.cost",
-      "agents.models.reviewer",
       "agents.tools.git",
+      "agents.models.reviewer",
+      "agents.models.cost",
+      "pydantic_ai",
       "logfire",
-      "pathlib"
+      "pathlib",
+      "agents.core.config"
     ],
     "exports": [
       "run_reviewer"
+    ]
+  },
+  "agents/workers/test_writer.py": {
+    "domain": "agents",
+    "layer": "workers",
+    "imports": [
+      "agents.models.implementer",
+      "agents.core.context_builder",
+      "agents.models.test_writer",
+      "agents.models.cost",
+      "pydantic_ai",
+      "agents.models.planner",
+      "logfire",
+      "pathlib",
+      "agents.core.config",
+      "agents.tools.tool_wiring",
+      "agents.models.test_quality"
+    ],
+    "exports": [
+      "run_test_writer"
     ]
   },
   "agents/workers/validator.py": {
     "domain": "agents",
     "layer": "workers",
     "imports": [
-      "agents.models.test_quality",
-      "agents.models.validator",
-      "agents.tools.shell",
-      "agents.tools.contract_verifier",
       "agents.tools.test_quality",
+      "agents.tools.shell",
       "agents.models.implementer",
+      "agents.models.validator",
+      "agents.tools.contract_verifier",
+      "agents.models.contracts",
       "logfire",
-      "agents.models.contracts"
+      "agents.models.test_quality"
     ],
     "exports": [
       "run_validator"
@@ -712,20 +744,20 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "sys",
-      "agents.core.guards",
-      "langgraph.graph",
       "agents.tools.shell",
-      "agents.core.paths",
       "agents.models.implementer",
-      "logfire",
-      "typing",
-      "agents.models.cleaner",
       "agents.tools.git",
-      "agents.workers.cleaner",
+      "langgraph.graph",
       "agents.core.workflow_helpers",
+      "datetime",
+      "agents.core.guards",
+      "typing",
+      "agents.workers.cleaner",
+      "agents.core.paths",
+      "logfire",
+      "agents.models.cleaner",
       "asyncio",
-      "datetime"
+      "sys"
     ],
     "exports": [
       "GCState",
@@ -742,19 +774,19 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "typing",
-      "agents.core.guards",
-      "agents.workers.validator",
-      "langgraph.graph",
-      "agents.models.cost",
-      "agents.workers.planner",
-      "agents.tools.git",
-      "logfire",
-      "agents.core.context_builder",
-      "time",
       "agents.workers.implementer",
+      "agents.tools.git",
+      "agents.core.context_builder",
+      "langgraph.graph",
+      "agents.core.state",
+      "typing",
+      "time",
+      "agents.core.guards",
       "agents.core.workflow_helpers",
-      "agents.core.state"
+      "agents.models.cost",
+      "agents.workers.validator",
+      "agents.workers.planner",
+      "logfire"
     ],
     "exports": [
       "gather_feedback_node",
@@ -774,12 +806,12 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.workers.post_mortem",
       "agents.tools.git",
-      "logfire",
-      "typing",
       "agents.core.state",
-      "agents.core.workflow_helpers"
+      "typing",
+      "agents.core.workflow_helpers",
+      "agents.workers.post_mortem",
+      "logfire"
     ],
     "exports": [
       "post_mortem_node"
@@ -789,31 +821,32 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.workers.validator",
-      "langgraph.graph",
+      "agents.workflows.test_writer_node",
+      "time",
+      "agents.models.cost",
+      "agents.tools.fs",
       "agents.models.benchmark",
       "agents.tools.shell",
-      "agents.models.cost",
-      "agents.core.context_builder",
-      "agents.core.guards",
-      "agents.workflows.ralph_routing",
-      "agents.workflows.post_mortem",
+      "agents.tools.benchmark",
       "agents.tools.browser",
-      "logfire",
-      "typing",
-      "agents.core.state",
-      "agents.tools.fs",
-      "agents.workers.reviewer",
-      "agents.core.paths",
-      "agents.workers.planner",
       "os",
       "agents.tools.git",
-      "agents.tools.benchmark",
+      "typing",
+      "agents.core.guards",
+      "agents.workers.planner",
+      "logfire",
+      "agents.workflows.ralph_routing",
+      "agents.workers.implementer",
       "agents.tools.harness",
+      "agents.core.context_builder",
+      "langgraph.graph",
+      "agents.core.state",
+      "agents.core.paths",
+      "agents.workers.reviewer",
       "agents.core.workflow_helpers",
       "agents.models.reproducer",
-      "agents.workers.implementer",
-      "time"
+      "agents.workers.validator",
+      "agents.workflows.post_mortem"
     ],
     "exports": [
       "plan_node",
@@ -834,8 +867,8 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.core.state",
       "langgraph.graph",
+      "agents.core.state",
       "agents.core.guards"
     ],
     "exports": [
@@ -843,6 +876,7 @@
       "route_after_validate",
       "route_after_review",
       "route_after_implement",
+      "route_after_test_writer",
       "route_after_reproduce",
       "route_after_perf_validate",
       "route_after_ui_validate",
@@ -854,15 +888,15 @@
     "domain": "agents",
     "layer": "workflows",
     "imports": [
-      "agents.core.guards",
-      "langgraph.graph",
-      "agents.workers.reviewer",
-      "agents.models.reviewer",
-      "logfire",
-      "typing",
       "agents.workers.implementer",
+      "langgraph.graph",
+      "agents.core.workflow_helpers",
+      "typing",
+      "agents.core.guards",
+      "agents.models.reviewer",
+      "agents.workers.reviewer",
       "agents.models.planner",
-      "agents.core.workflow_helpers"
+      "logfire"
     ],
     "exports": [
       "ReviewerState",
@@ -872,6 +906,21 @@
       "route_after_address",
       "build_reviewer_graph",
       "run_reviewer_loop"
+    ]
+  },
+  "agents/workflows/test_writer_node.py": {
+    "domain": "agents",
+    "layer": "workflows",
+    "imports": [
+      "agents.core.context_builder",
+      "agents.core.state",
+      "typing",
+      "agents.core.guards",
+      "agents.workers.test_writer",
+      "agents.core.workflow_helpers"
+    ],
+    "exports": [
+      "test_writer_node"
     ]
   },
   "benchmarks/__init__.py": {
@@ -901,11 +950,11 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "sys",
       "ast",
       "agents.core.paths",
+      "pathlib",
       "lint.rules",
-      "pathlib"
+      "sys"
     ],
     "exports": [
       "check_file",
@@ -917,11 +966,11 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "re",
-      "sys",
-      "agents.core.paths",
       "json",
-      "pathlib"
+      "re",
+      "agents.core.paths",
+      "pathlib",
+      "sys"
     ],
     "exports": [
       "check_doc_references",
@@ -933,18 +982,18 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "lint.doc_lint",
-      "lint.golden_lint_ext",
-      "re",
-      "sys",
-      "subprocess",
-      "lint.workflow_lint",
-      "agents.core.paths",
-      "pathlib",
-      "os",
-      "lint.rules",
       "ast",
-      "datetime"
+      "subprocess",
+      "re",
+      "os",
+      "lint.golden_lint_ext",
+      "datetime",
+      "lint.doc_lint",
+      "agents.core.paths",
+      "lint.workflow_lint",
+      "pathlib",
+      "lint.rules",
+      "sys"
     ],
     "exports": [
       "check_gp001_duplicates",
@@ -964,10 +1013,10 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "pathlib",
       "ast",
-      "agents.core.guards",
-      "lint.rules"
+      "pathlib",
+      "lint.rules",
+      "agents.core.guards"
     ],
     "exports": [
       "check_gp011_cross_module_private_imports",
@@ -991,14 +1040,14 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "lint.doc_lint",
-      "lint.workflow_lint",
       "subprocess",
-      "sys",
-      "agents.core.paths",
       "lint.golden_lint",
+      "lint.doc_lint",
+      "agents.core.paths",
+      "lint.workflow_lint",
+      "lint.arch_lint",
       "pathlib",
-      "lint.arch_lint"
+      "sys"
     ],
     "exports": [
       "run_all",
@@ -1009,13 +1058,13 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "lint.workflow_lint_ext",
-      "sys",
-      "agents.core.guards",
       "ast",
+      "agents.core.guards",
       "agents.core.paths",
+      "pathlib",
+      "lint.workflow_lint_ext",
       "lint.rules",
-      "pathlib"
+      "sys"
     ],
     "exports": [
       "check_wf001_guard_contract",
@@ -1033,10 +1082,10 @@
     "domain": "lint",
     "layer": "lint",
     "imports": [
-      "pathlib",
       "ast",
-      "agents.core.guards",
-      "lint.rules"
+      "pathlib",
+      "lint.rules",
+      "agents.core.guards"
     ],
     "exports": [
       "check_wf004_guard_exemption",
@@ -1054,10 +1103,10 @@
     "domain": "repo_index",
     "layer": "repo_index",
     "imports": [
-      "json",
-      "pathlib",
+      "agents.core.paths",
       "ast",
-      "agents.core.paths"
+      "pathlib",
+      "json"
     ],
     "exports": [
       "build_index",
@@ -1109,14 +1158,14 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "sys",
-      "agents.models.validator",
-      "unittest.mock",
       "pytest",
-      "textwrap",
       "agents.models.implementer",
+      "agents.models.validator",
+      "textwrap",
+      "unittest.mock",
       "agents.models.planner",
-      "pathlib"
+      "pathlib",
+      "sys"
     ],
     "exports": [
       "tmp_repo",
@@ -1131,9 +1180,9 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "agents.tools.contract_verifier",
       "agents.models.validator",
-      "agents.models.contracts"
+      "agents.models.contracts",
+      "agents.tools.contract_verifier"
     ],
     "exports": [
       "test_import_check_passes_for_existing_module",
@@ -1154,13 +1203,13 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "sys",
-      "unittest.mock",
       "pytest",
       "lint.golden_lint",
       "textwrap",
+      "unittest.mock",
+      "pathlib",
       "agents.models.cleaner",
-      "pathlib"
+      "sys"
     ],
     "exports": [
       "tmp_repo_with_gp001",
@@ -1178,12 +1227,12 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "sys",
-      "unittest.mock",
       "pytest",
-      "agents.models.reviewer",
       "agents.models.implementer",
-      "agents.models.planner"
+      "agents.models.reviewer",
+      "unittest.mock",
+      "agents.models.planner",
+      "sys"
     ],
     "exports": [
       "test_plan_output_for_feature_task",
@@ -1197,8 +1246,8 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "agents.core.guards",
-      "tests.agent_eval.conftest"
+      "tests.agent_eval.conftest",
+      "agents.core.guards"
     ],
     "exports": [
       "test_5th_implement_blocks_reentry",
@@ -1226,8 +1275,8 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "agents.core.guards",
-      "tests.agent_eval.conftest"
+      "tests.agent_eval.conftest",
+      "agents.core.guards"
     ],
     "exports": [
       "test_reviewer_fresh_state_allowed",
@@ -1257,9 +1306,9 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
+      "tests.agent_eval.conftest",
       "agents.core.state",
-      "agents.core.guards",
-      "tests.agent_eval.conftest"
+      "agents.core.guards"
     ],
     "exports": [
       "test_fresh_state_allowed",
@@ -1294,9 +1343,9 @@
     "imports": [
       "pytest",
       "ast",
-      "agents.models.tool_catalog",
-      "agents.models.registry",
       "agents.core.context_builder",
+      "agents.models.registry",
+      "agents.models.tool_catalog",
       "pathlib"
     ],
     "exports": [
@@ -1335,11 +1384,11 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "threading",
       "agents.server",
-      "http.server",
       "json",
-      "urllib.request"
+      "threading",
+      "urllib.request",
+      "http.server"
     ],
     "exports": [
       "test_health_endpoint",
@@ -1350,13 +1399,13 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "sys",
-      "agents.core.guards",
-      "unittest.mock",
-      "agents.core.paths",
-      "types",
+      "ast",
       "agents.core.state",
-      "ast"
+      "agents.core.guards",
+      "types",
+      "agents.core.paths",
+      "unittest.mock",
+      "sys"
     ],
     "exports": [
       "test_exempt_nodes_matches_actual_unguarded_nodes",
@@ -1369,12 +1418,12 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "agents.models.test_quality",
-      "agents.models.validator",
-      "tests.lint.helpers",
       "agents.tools.test_quality",
       "agents.models.implementer",
-      "pathlib"
+      "agents.models.validator",
+      "pathlib",
+      "tests.lint.helpers",
+      "agents.models.test_quality"
     ],
     "exports": [
       "test_detects_assert_true",
@@ -1410,18 +1459,19 @@
     "domain": "tests",
     "layer": "agent_eval",
     "imports": [
-      "sys",
-      "agents.workflows.feedback_loop",
+      "agents.models.test_quality",
+      "agents.core.context_builder",
       "agents.models.validator",
-      "agents.workflows.ralph_routing",
-      "unittest.mock",
-      "tests.agent_eval.conftest",
-      "agents.workflows.reviewer_loop",
+      "agents.core.state",
       "agents.models.reviewer",
       "types",
-      "agents.core.context_builder",
-      "agents.core.state",
-      "agents.workflows.ralph_loop"
+      "agents.workflows.feedback_loop",
+      "agents.workflows.ralph_loop",
+      "unittest.mock",
+      "tests.agent_eval.conftest",
+      "agents.workflows.ralph_routing",
+      "agents.workflows.reviewer_loop",
+      "sys"
     ],
     "exports": [
       "test_graph_compiles",
@@ -1432,7 +1482,9 @@
       "test_route_after_validate_escalated",
       "test_route_after_validate_no_validation",
       "test_route_after_validate_proceed",
-      "test_route_after_validate_retry",
+      "test_route_after_validate_retry_code_bug",
+      "test_route_after_validate_quality_fail_to_test_writer",
+      "test_route_after_validate_test_writer_maxed_escalates",
       "test_route_after_validate_escalate",
       "test_route_after_review_escalated",
       "test_route_after_review_approved",
@@ -1449,6 +1501,8 @@
       "test_route_after_implement_escalated",
       "test_route_after_implement_failed",
       "test_route_after_implement_normal",
+      "test_route_after_test_writer_normal",
+      "test_route_after_test_writer_escalated",
       "test_route_after_reproduce_escalated",
       "test_route_after_reproduce_normal",
       "test_route_after_perf_validate_escalated",
@@ -1483,8 +1537,8 @@
     "domain": "tests",
     "layer": "lint",
     "imports": [
-      "textwrap",
-      "pathlib"
+      "pathlib",
+      "textwrap"
     ],
     "exports": [
       "write_py"
@@ -1525,10 +1579,10 @@
     "domain": "tests",
     "layer": "lint",
     "imports": [
-      "lint.golden_lint_ext",
       "pathlib",
+      "lint.golden_lint",
       "tests.lint.helpers",
-      "lint.golden_lint"
+      "lint.golden_lint_ext"
     ],
     "exports": [
       "test_gp002_file_exceeds_500_lines",
@@ -1569,10 +1623,10 @@
     "domain": "tests",
     "layer": "lint",
     "imports": [
-      "textwrap",
-      "lint.workflow_lint_ext",
       "ast",
-      "lint.workflow_lint"
+      "lint.workflow_lint",
+      "lint.workflow_lint_ext",
+      "textwrap"
     ],
     "exports": [
       "test_wf001_passes_with_guard",
