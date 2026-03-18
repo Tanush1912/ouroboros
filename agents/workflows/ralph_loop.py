@@ -28,7 +28,9 @@ from agents.core.workflow_helpers import (
 from agents.models.benchmark import PerfComparisonResult
 from agents.models.cost import CostSummary, RunMetrics, TokenUsage
 from agents.models.reproducer import ErrorContext, ReproductionResult
+from agents.tools.fs import reindex as _reindex_tool
 from agents.tools.git import commit, merge_pr, open_pr
+from agents.tools.shell import extract_traceback, run_subprocess
 from agents.workers.implementer import run_implementer
 from agents.workers.planner import run_planner
 from agents.workers.reviewer import run_reviewer
@@ -72,8 +74,6 @@ async def reproduce_node(state: RalphState) -> dict[str, Any]:
     guard = pre_node_guard(state, "reproduce_node")
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
-
-    from agents.tools.shell import extract_traceback, run_subprocess
 
     root_path = None
     try:
@@ -152,8 +152,6 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
     apply_file_changes(impl.files_changed)
 
     # Keep symbol index fresh for subsequent implement iterations
-    from agents.tools.fs import reindex as _reindex_tool
-
     _reindex_tool([fc.path for fc in impl.files_changed])
 
     node_calls = tool_calls + 1

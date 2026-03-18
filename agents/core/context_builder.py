@@ -125,42 +125,76 @@ def _load_file_map() -> dict:
 
 
 def _extract_intent_keywords(task: str) -> list[str]:
-    """Simple keyword extraction from task string."""
-    stopwords = {"the", "a", "an", "in", "at", "to", "for", "and", "or", "of", "is", "it"}
-    words = [w.strip(".,()[]\"'").lower() for w in task.split()]
-    return [w for w in words if len(w) > 3 and w not in stopwords]
+    """Keyword extraction from task string. Keeps acronyms and short technical terms."""
+    stopwords = {
+        "the",
+        "a",
+        "an",
+        "in",
+        "at",
+        "to",
+        "for",
+        "and",
+        "or",
+        "of",
+        "is",
+        "it",
+        "on",
+        "by",
+    }
+    words = [w.strip(".,()[]\"'") for w in task.split()]
+    result = []
+    for w in words:
+        wl = w.lower()
+        is_acronym = w.isupper() and len(w) >= 2 and wl not in stopwords
+        is_long_word = len(w) > 3 and wl not in stopwords
+        is_code_fragment = len(w) > 1 and ("_" in w or any(c.isupper() for c in w[1:]))
+        if is_acronym or is_long_word or is_code_fragment:
+            result.append(wl)
+    return result
 
 
-def _find_relevant_files(task: str, file_map: dict, symbols: dict, max_files: int = 5) -> list[str]:
-    """Find files relevant to the task using keyword matching against the index."""
+def _find_relevant_files(
+    task: str, file_map: dict, symbols: dict, max_files: int = 5
+) -> list[tuple[str, str]]:
+    """Find files relevant to the task. Returns (path, reason) tuples."""
     keywords = _extract_intent_keywords(task)
     scored: dict[str, int] = {}
+    reasons: dict[str, list[str]] = {}
 
     for file_path, meta in file_map.items():
         score = 0
+        hits: list[str] = []
         for kw in keywords:
             if kw in file_path.lower():
                 score += 3
+                hits.append(f"path match '{kw}'")
             if kw in meta.get("domain", "").lower():
                 score += 2
+                hits.append(f"domain '{meta.get('domain')}'")
             for export in meta.get("exports", []):
                 if kw in export.lower():
                     score += 2
+                    hits.append(f"export '{export}'")
 
         if score > 0:
             scored[file_path] = score
+            reasons[file_path] = hits
 
     for sym_name, sym_info in symbols.items():
         for kw in keywords:
             if kw in sym_name.lower():
                 file = sym_info["file"]
                 scored[file] = scored.get(file, 0) + 1
+                reasons.setdefault(file, []).append(f"symbol '{sym_name}'")
 
     sorted_files = sorted(scored, key=lambda f: scored[f], reverse=True)
-    return sorted_files[:max_files]
+    return [(f, ", ".join(reasons.get(f, ["keyword match"]))) for f in sorted_files[:max_files]]
 
 
-def _read_snippet(path: str, max_lines: int = 80) -> FileSnippet | None:
+def _read_snippet(
+    path: str, reason: str = "keyword match", max_lines: int = 80
+) -> FileSnippet | None:
     full_path = _repo_root() / path
     if not full_path.exists():
         return None
@@ -171,7 +205,7 @@ def _read_snippet(path: str, max_lines: int = 80) -> FileSnippet | None:
         start_line=1,
         end_line=min(max_lines, len(lines)),
         content="\n".join(snippet_lines),
-        relevance_reason="Matched task keywords",
+        relevance_reason=reason,
     )
 
 
@@ -291,10 +325,10 @@ def build_context(task: str, max_tokens: int = 8000, worker_role: str | None = N
     file_map = _load_file_map()
     symbols = _load_symbols()
 
-    relevant_file_paths = _find_relevant_files(task, file_map, symbols)
+    relevant_file_results = _find_relevant_files(task, file_map, symbols)
     relevant_files = []
-    for file_path in relevant_file_paths:
-        snippet = _read_snippet(file_path)
+    for file_path, reason in relevant_file_results:
+        snippet = _read_snippet(file_path, reason=reason)
         if snippet:
             cost = _estimate_tokens(snippet.content)
             if budget - cost > 1000:

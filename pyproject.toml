@@ -49,5 +49,11 @@ asyncio_mode = "auto"
 testpaths = ["tests"]  # benchmarks/ excluded intentionally; run via: pytest benchmarks/ -m benchmark
 addopts = "-v --tb=short"
 
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+include = ["agents"]
+exclude = ["tests", "benchmarks", "scripts"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["agents", "lint", "repo_index"]
