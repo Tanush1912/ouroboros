@@ -331,23 +331,28 @@
   },
   "retry_on_transient": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 24,
+    "line": 51,
     "kind": "function"
   },
   "apply_file_changes": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 65,
+    "line": 87,
     "kind": "function"
   },
   "accumulate_usage": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 81,
+    "line": 109,
     "kind": "function"
   },
   "update_node_tool_calls": {
     "file": "agents/core/workflow_helpers.py",
-    "line": 105,
+    "line": 133,
     "kind": "function"
+  },
+  "_TRANSIENT_HTTP_TYPES": {
+    "file": "agents/core/workflow_helpers.py",
+    "line": 43,
+    "kind": "constant"
   },
   "BenchmarkSampleResult": {
     "file": "agents/models/benchmark.py",
@@ -1086,37 +1091,37 @@
   },
   "run_tests": {
     "file": "agents/tools/shell.py",
-    "line": 35,
+    "line": 42,
     "kind": "function"
   },
   "run_lint": {
     "file": "agents/tools/shell.py",
-    "line": 54,
+    "line": 61,
     "kind": "function"
   },
   "run_build": {
     "file": "agents/tools/shell.py",
-    "line": 81,
+    "line": 88,
     "kind": "function"
   },
   "run_single_test": {
     "file": "agents/tools/shell.py",
-    "line": 95,
+    "line": 102,
     "kind": "function"
   },
   "extract_traceback": {
     "file": "agents/tools/shell.py",
-    "line": 114,
+    "line": 121,
     "kind": "function"
   },
   "capture_error_context": {
     "file": "agents/tools/shell.py",
-    "line": 131,
+    "line": 138,
     "kind": "function"
   },
   "run_command": {
     "file": "agents/tools/shell.py",
-    "line": 160,
+    "line": 167,
     "kind": "function"
   },
   "_QUALITY_THRESHOLD": {
@@ -1196,47 +1201,47 @@
   },
   "_get_agent": {
     "file": "agents/workers/cleaner.py",
-    "line": 19,
+    "line": 20,
     "kind": "function"
   },
   "run_cleaner": {
     "file": "agents/workers/cleaner.py",
-    "line": 31,
+    "line": 32,
     "kind": "function"
   },
   "_build_prompt": {
     "file": "agents/workers/implementer.py",
-    "line": 41,
+    "line": 42,
     "kind": "function"
   },
   "run_implementer": {
     "file": "agents/workers/implementer.py",
-    "line": 93,
+    "line": 94,
     "kind": "function"
   },
   "run_planner": {
     "file": "agents/workers/planner.py",
-    "line": 38,
+    "line": 39,
     "kind": "function"
   },
   "_build_failure_prompt": {
     "file": "agents/workers/post_mortem.py",
-    "line": 35,
+    "line": 36,
     "kind": "function"
   },
   "run_post_mortem": {
     "file": "agents/workers/post_mortem.py",
-    "line": 73,
+    "line": 74,
     "kind": "function"
   },
   "run_reviewer": {
     "file": "agents/workers/reviewer.py",
-    "line": 35,
+    "line": 36,
     "kind": "function"
   },
   "run_test_writer": {
     "file": "agents/workers/test_writer.py",
-    "line": 79,
+    "line": 80,
     "kind": "function"
   },
   "run_validator": {
@@ -1431,27 +1436,27 @@
   },
   "review_loop_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 335,
+    "line": 337,
     "kind": "function"
   },
   "merge_node": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 350,
+    "line": 352,
     "kind": "function"
   },
   "human_checkpoint": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 370,
+    "line": 372,
     "kind": "function"
   },
   "build_ralph_graph": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 381,
+    "line": 383,
     "kind": "function"
   },
   "run_ralph_loop": {
     "file": "agents/workflows/ralph_loop.py",
-    "line": 416,
+    "line": 418,
     "kind": "function"
   },
   "_BUG_FIX_KEYWORDS": {
@@ -2822,6 +2827,21 @@
   "test_missing_module_escalates": {
     "file": "tests/agent_eval/test_validator_logic.py",
     "line": 61,
+    "kind": "function"
+  },
+  "test_apply_file_changes_rejects_path_traversal": {
+    "file": "tests/agent_eval/test_workflow_helpers.py",
+    "line": 9,
+    "kind": "function"
+  },
+  "test_apply_file_changes_allows_normal_paths": {
+    "file": "tests/agent_eval/test_workflow_helpers.py",
+    "line": 23,
+    "kind": "function"
+  },
+  "test_apply_file_changes_delete_within_root": {
+    "file": "tests/agent_eval/test_workflow_helpers.py",
+    "line": 38,
     "kind": "function"
   },
   "_PASS_TESTS": {
