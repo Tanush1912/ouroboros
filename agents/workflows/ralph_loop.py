@@ -289,8 +289,10 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     changed_paths = [f.path for f in state["files_changed"]]
+    plan = state["plan"]
+    commit_type = plan.commit_type if plan else "feat"
     commit_result = commit(
-        message=f"feat: {state['task'][:72]}",
+        message=f"{commit_type}: {state['task'][:72]}",
         files=changed_paths,
     )
     if not commit_result.success:

@@ -42,6 +42,14 @@ class PlanOutput(BaseModel):
             "docstrings, or other non-functional modifications."
         ),
     )
+    commit_type: Literal["feat", "fix", "docs", "refactor", "chore", "test"] = Field(
+        default="feat",
+        description=(
+            "Conventional commit type: feat (new feature), fix (bug fix), "
+            "docs (documentation), refactor (restructuring), chore (maintenance), "
+            "test (test changes only)"
+        ),
+    )
     skip_stages: list[str] = Field(
         default_factory=list,
         description=(
