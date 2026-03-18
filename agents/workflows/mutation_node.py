@@ -20,15 +20,8 @@ async def mutation_validate_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    # Skip for low-risk changes
-    plan = state["plan"]
-    if plan and plan.risk_level == "low":
-        logfire.info("mutation_sampling_skipped", reason="low risk change")
-        return {
-            "total_tool_calls": state["total_tool_calls"],
-            "node_tool_calls": update_node_tool_calls(state, "mutation_validate_node", 0),
-        }
-
+    # Note: skip logic is now handled by routing (skip_stages).
+    # This node only runs when the planner says it should.
     result = run_mutation_sampling(state["files_changed"])
     node_calls = result.total_mutants + 1  # Each mutation = 1 pytest run + 1 for the sampler
 

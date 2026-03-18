@@ -25,7 +25,7 @@ async def run_validator(
     iteration: int = 1,
     files_changed: list[FileChange] | None = None,
     behavioral_specs: list[BehavioralSpec] | None = None,
-    plan_risk_level: str = "medium",
+    skip_quality_gate: bool = False,
 ) -> ValidationOutput:
     """Run tests, lint, and test quality gate. Returns structured validation result."""
     with logfire.span("validator", iteration=iteration):
@@ -62,9 +62,9 @@ async def run_validator(
             auto_fixed=lint_result.auto_fixed,
         )
 
-        # Run test quality gate — skip for low-risk changes
+        # Run test quality gate — skip when planner says test_writer is skipped
         quality: TestQualityResult | None = None
-        if files_changed and test_result.passed and plan_risk_level != "low":
+        if files_changed and test_result.passed and not skip_quality_gate:
             quality = analyze_test_quality(files_changed)
             logfire.info(
                 "test_quality_analyzed",

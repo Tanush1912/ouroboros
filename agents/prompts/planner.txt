@@ -17,9 +17,13 @@ Rules:
 6. requires_browser_validation = True if the task involves UI changes (pages, frontend, endpoints that render HTML).
 7. Keep steps atomic — one logical action per step.
 8. The test_strategy must reference how the validator will verify success.
-   requires_tests = False for documentation-only changes (docstrings, comments,
-   README, config files) — the test writer agent will be skipped entirely.
-   requires_tests = True for any change that modifies functional code behavior.
+   Set skip_stages based on task complexity:
+   - Docs/config/comments only → ["reproduce", "test_writer", "mutation", "perf_validate", "ui_validate"]
+   - Bug fixes → [] (keep all — reproduction and testing are valuable)
+   - Simple code changes (low risk) → ["reproduce", "mutation", "perf_validate", "ui_validate"]
+   - New features → [] (full pipeline)
+   - UI changes → ensure "ui_validate" is NOT in skip_stages
+   The goal: only run stages that add value for this specific task.
 9. For tasks involving services or apps, include an observability step using
    the observability tool category to verify logs flow after deployment.
 10. Emit at least 3 behavioral_specs per task:
