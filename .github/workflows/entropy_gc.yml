@@ -25,6 +25,22 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Start observability stack
+        run: |
+          docker compose \
+            -f harness/observability/docker-compose.yml \
+            -f harness/observability/docker-compose.ci.yml \
+            up -d
+          for i in $(seq 1 30); do curl -sf http://localhost:9428/health && break; sleep 2; done
+          curl -sf http://localhost:9428/health || { echo "VictoriaLogs failed to start"; exit 1; }
+          for i in $(seq 1 30); do curl -sf http://localhost:8428/health && break; sleep 2; done
+          curl -sf http://localhost:8428/health || { echo "VictoriaMetrics failed to start"; exit 1; }
+
       - name: Build repo index
         run: uv run python repo_index/build_index.py
 
@@ -35,6 +51,8 @@ jobs:
           GCP_LOCATION: ${{ vars.GCP_LOCATION || 'us-central1' }}
           LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VICTORIA_LOGS_URL: http://localhost:9428
+          VICTORIA_METRICS_URL: http://localhost:8428
 
       - name: Upload GC results
         uses: actions/upload-artifact@v4
@@ -42,3 +60,11 @@ jobs:
         with:
           name: gc-results-${{ github.run_id }}
           path: docs/QUALITY_SCORE.md
+
+      - name: Tear down observability stack
+        if: always()
+        run: |
+          docker compose \
+            -f harness/observability/docker-compose.yml \
+            -f harness/observability/docker-compose.ci.yml \
+            down -v

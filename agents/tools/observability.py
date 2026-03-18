@@ -65,11 +65,25 @@ class _VictoriaMetricsSchema(BaseModel):
     data: _MetricDataSchema = Field(default_factory=_MetricDataSchema)
 
 
+async def _check_health(url: str) -> bool:
+    """Quick pre-flight check — returns False if stack is unreachable (2s timeout)."""
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"{url}/health", timeout=2.0)
+            return resp.status_code == 200
+    except Exception:
+        return False
+
+
 async def query_logs(logql: str, duration: str = "1h") -> list[LogLineSchema]:
     """Query VictoriaLogs with LogQL. E.g. '{service="api"} |= "error"'"""
+    logs_url = _victoria_logs_url()
+    if not await _check_health(logs_url):
+        return []
+
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{_victoria_logs_url()}/select/logsql/query",
+            f"{logs_url}/select/logsql/query",
             params={"query": logql, "duration": duration},
             timeout=30.0,
         )
@@ -86,9 +100,13 @@ async def query_logs(logql: str, duration: str = "1h") -> list[LogLineSchema]:
 
 async def query_metrics(promql: str, duration: str = "1h") -> MetricResult:
     """Query VictoriaMetrics with PromQL. E.g. 'rate(http_requests_total[5m])'"""
+    metrics_url = _victoria_metrics_url()
+    if not await _check_health(metrics_url):
+        return MetricResult(query=promql, series=[])
+
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{_victoria_metrics_url()}/api/v1/query_range",
+            f"{metrics_url}/api/v1/query_range",
             params={"query": promql, "duration": duration},
             timeout=30.0,
         )
