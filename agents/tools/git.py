@@ -10,7 +10,6 @@ import subprocess
 from typing import Literal
 
 from pydantic import BaseModel, Field
-from pydantic_ai import tool
 
 from agents.core.paths import repo_root as _repo_root
 
@@ -95,7 +94,6 @@ def _run(cmd: list[str]) -> tuple[int, str, str]:
     return result.returncode, result.stdout, result.stderr
 
 
-@tool
 def git_status() -> GitStatus:
     """Returns changed files, staged files, current branch."""
     _, branch_out, _ = _run(["git", "branch", "--show-current"])
@@ -124,7 +122,6 @@ def git_status() -> GitStatus:
     )
 
 
-@tool
 def commit(message: str, files: list[str]) -> CommitResult:
     """Stage specific files and create a git commit."""
     if not files:
@@ -147,7 +144,6 @@ def commit(message: str, files: list[str]) -> CommitResult:
     return CommitResult(success=True, sha=sha, message=message)
 
 
-@tool
 def open_pr(title: str, body: str, base: str = "main") -> PRResult:
     """Open a pull request via gh CLI. Returns PR URL and number."""
     rc, out, err = _run(
@@ -173,7 +169,6 @@ def open_pr(title: str, body: str, base: str = "main") -> PRResult:
     return PRResult(success=True, url=url, number=number)
 
 
-@tool
 def get_pr_diff(pr_number: int) -> str:
     """Get the full diff for a pull request."""
     rc, out, err = _run(["gh", "pr", "diff", str(pr_number)])
@@ -182,7 +177,6 @@ def get_pr_diff(pr_number: int) -> str:
     return out
 
 
-@tool
 def get_pr_comments(pr_number: int) -> list[PRComment]:
     """Fetch review comments on a PR. Returns structured comment list."""
     rc, out, err = _run(
@@ -318,7 +312,6 @@ def create_issue(title: str, body: str, labels: list[str] | None = None) -> Issu
     return IssueResult(success=True, url=url, number=number)
 
 
-@tool
 def merge_pr(pr_number: int, strategy: Literal["squash", "merge"] = "squash") -> MergeResult:
     """Merge a pull request."""
     flag = "--squash" if strategy == "squash" else "--merge"

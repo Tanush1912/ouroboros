@@ -8,7 +8,6 @@ import base64
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-from pydantic_ai import tool
 
 
 class ScreenshotResult(BaseModel):
@@ -60,7 +59,6 @@ async def _get_page() -> Any:
     return page, browser, playwright
 
 
-@tool
 async def take_screenshot(url: str) -> ScreenshotResult:
     """Navigate to URL and capture screenshot. Returns base64-encoded PNG."""
     page, browser, pw = await _get_page()
@@ -79,7 +77,6 @@ async def take_screenshot(url: str) -> ScreenshotResult:
         await pw.stop()
 
 
-@tool
 async def snapshot_dom(url: str) -> DOMSnapshot:
     """Capture DOM accessibility tree. Returns structured DOM for analysis."""
     page, browser, pw = await _get_page()
@@ -103,7 +100,6 @@ async def snapshot_dom(url: str) -> DOMSnapshot:
         await pw.stop()
 
 
-@tool
 async def drive_ui_flow(url: str, steps: list[UIAction]) -> UIFlowResult:
     """Execute a sequence of UI actions. Returns pass/fail + screenshots."""
     page, browser, pw = await _get_page()

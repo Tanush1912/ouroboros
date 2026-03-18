@@ -27,7 +27,7 @@ def _get_agent() -> Agent[None, PlanOutput]:
     if _agent is None:
         _agent = Agent(
             model=get_model(),
-            result_type=PlanOutput,
+            output_type=PlanOutput,
             system_prompt=SYSTEM_PROMPT,
             tools=resolve_worker_tools("planner"),
             retries=3,
@@ -47,8 +47,8 @@ async def run_planner(
         result = await agent.run(context.to_prompt_text())
         usage_data = result.usage()
         token_usage = TokenUsage(
-            tokens_in=usage_data.request_tokens or 0,
-            tokens_out=usage_data.response_tokens or 0,
+            tokens_in=usage_data.input_tokens or 0,
+            tokens_out=usage_data.output_tokens or 0,
         )
         tool_calls = len(
             [
@@ -59,11 +59,11 @@ async def run_planner(
         )
         logfire.info(
             "plan_created",
-            task_summary=result.data.task_summary,
-            steps_count=len(result.data.steps),
-            risk_level=result.data.risk_level,
+            task_summary=result.output.task_summary,
+            steps_count=len(result.output.steps),
+            risk_level=result.output.risk_level,
             tokens_in=token_usage.tokens_in,
             tokens_out=token_usage.tokens_out,
             tool_calls=tool_calls,
         )
-        return result.data, token_usage, tool_calls
+        return result.output, token_usage, tool_calls

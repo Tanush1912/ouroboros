@@ -12,7 +12,6 @@ from typing import Any
 
 import httpx
 from pydantic import BaseModel, Field
-from pydantic_ai import tool
 
 
 def _victoria_logs_url() -> str:
@@ -66,7 +65,6 @@ class _VictoriaMetricsSchema(BaseModel):
     data: _MetricDataSchema = Field(default_factory=_MetricDataSchema)
 
 
-@tool
 async def query_logs(logql: str, duration: str = "1h") -> list[LogLineSchema]:
     """Query VictoriaLogs with LogQL. E.g. '{service="api"} |= "error"'"""
     async with httpx.AsyncClient() as client:
@@ -86,7 +84,6 @@ async def query_logs(logql: str, duration: str = "1h") -> list[LogLineSchema]:
     return lines
 
 
-@tool
 async def query_metrics(promql: str, duration: str = "1h") -> MetricResult:
     """Query VictoriaMetrics with PromQL. E.g. 'rate(http_requests_total[5m])'"""
     async with httpx.AsyncClient() as client:

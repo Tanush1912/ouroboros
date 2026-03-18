@@ -6,14 +6,11 @@ import tempfile
 import time
 from datetime import UTC, datetime
 
-from pydantic_ai import tool
-
 from agents.core.paths import repo_root as _repo_root
 from agents.models.benchmark import BenchmarkResult, BenchmarkSampleResult, PerfComparisonResult
 from agents.tools.shell import run_subprocess
 
 
-@tool
 def run_benchmark(
     suite_path: str = "benchmarks/",
     marker: str = "benchmark",
@@ -91,7 +88,6 @@ def run_benchmark(
             os.remove(bench_output)
 
 
-@tool
 def compare_benchmarks(
     baseline: BenchmarkResult,
     current: BenchmarkResult,

@@ -148,7 +148,7 @@ async def implement_node(state: RalphState) -> dict[str, Any]:
     # Keep symbol index fresh for subsequent implement iterations
     from agents.tools.fs import reindex as _reindex_tool
 
-    _reindex_tool.fn([fc.path for fc in impl.files_changed])
+    _reindex_tool([fc.path for fc in impl.files_changed])
 
     node_calls = tool_calls + 1
     return {
@@ -192,12 +192,12 @@ async def perf_validate_node(state: RalphState) -> dict[str, Any]:
     try:
         from agents.tools.benchmark import compare_benchmarks, run_benchmark
 
-        current = await run_benchmark.fn()
+        current = run_benchmark()
         baseline = state["perf_baseline"]
         if baseline is None:
             comparison = PerfComparisonResult(current=current, verdict="no_baseline")
         else:
-            comparison = await compare_benchmarks.fn(baseline=baseline, current=current)
+            comparison = compare_benchmarks(baseline=baseline, current=current)
         if comparison.verdict == "regressed":
             logfire.warning(
                 "perf_regression_detected",
@@ -245,7 +245,7 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
     try:
         from agents.tools.harness import run_app_and_probe
 
-        startup = await run_app_and_probe.fn()
+        startup = run_app_and_probe()
         if not startup.started:
             logfire.warning("ui_validate_app_not_started", error=startup.error)
     except Exception as e:
@@ -254,8 +254,8 @@ async def ui_validate_node(state: RalphState) -> dict[str, Any]:
     try:
         from agents.tools.browser import snapshot_dom, take_screenshot
 
-        screenshot = await take_screenshot.fn(app_url)
-        dom = await snapshot_dom.fn(app_url)
+        screenshot = await take_screenshot(app_url)
+        dom = await snapshot_dom(app_url)
         logfire.info(
             "ui_validate_complete",
             url=app_url,
@@ -282,7 +282,7 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
     changed_paths = [f.path for f in state["files_changed"]]
-    commit_result = await commit.fn(
+    commit_result = commit(
         message=f"feat: {state['task'][:72]}",
         files=changed_paths,
     )
@@ -298,7 +298,7 @@ async def open_pr_node(state: RalphState) -> dict[str, Any]:
     if state["ui_screenshots"]:
         screenshot_note = f"\n\n## UI Validation\n{len(state['ui_screenshots'])} screenshot(s) captured before this PR."
 
-    pr_result = await open_pr.fn(
+    pr_result = open_pr(
         title=state["task"][:72],
         body=(
             f"## Task\n{state['task']}\n\n"
@@ -345,7 +345,7 @@ async def merge_node(state: RalphState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "escalated", "error_log": state["error_log"] + [guard.reason]}
 
-    result = await merge_pr.fn(pr_number=state["pr_number"])
+    result = merge_pr(pr_number=state["pr_number"])
     if not result.success:
         return {
             "status": "failed",
@@ -436,7 +436,7 @@ async def run_ralph_loop(task: str) -> RalphState:
                 tokens_in=usage_data["tokens_in"],
                 tokens_out=usage_data["tokens_out"],
                 cost_usd=node_cost,
-                model="gemini-3.0-flash-preview",
+                model="gemini-2.5-flash",
                 task=task[:200],
                 workflow="ralph_loop",
                 duration_seconds=duration,
@@ -455,7 +455,7 @@ async def run_ralph_loop(task: str) -> RalphState:
                 tokens_in=final_state["total_tokens_in"],
                 tokens_out=final_state["total_tokens_out"],
                 cost_usd=total_cost,
-                model="gemini-3.0-flash-preview",
+                model="gemini-2.5-flash",
                 task=task[:200],
                 workflow="ralph_loop",
                 duration_seconds=duration,

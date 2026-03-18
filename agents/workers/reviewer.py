@@ -25,7 +25,7 @@ def _get_agent() -> Agent[None, ReviewOutput]:
     if _agent is None:
         _agent = Agent(
             model=get_model(),
-            result_type=ReviewOutput,
+            output_type=ReviewOutput,
             system_prompt=SYSTEM_PROMPT,
             retries=3,
         )
@@ -35,7 +35,7 @@ def _get_agent() -> Agent[None, ReviewOutput]:
 async def run_reviewer(pr_number: int, task: str) -> tuple[ReviewOutput, TokenUsage]:
     """Review a PR. Returns (ReviewOutput, TokenUsage) for cost tracking."""
     with logfire.span("reviewer", pr_number=pr_number):
-        diff = await get_pr_diff.fn(pr_number)
+        diff = get_pr_diff(pr_number)
 
         prompt = f"""## Task Context
 {task}
@@ -51,15 +51,15 @@ Review this PR against the task context and architecture rules.
         result = await agent.run(prompt)
         usage_data = result.usage()
         token_usage = TokenUsage(
-            tokens_in=usage_data.request_tokens or 0,
-            tokens_out=usage_data.response_tokens or 0,
+            tokens_in=usage_data.input_tokens or 0,
+            tokens_out=usage_data.output_tokens or 0,
         )
         logfire.info(
             "review_complete",
             pr_number=pr_number,
-            approved=result.data.approved,
-            blocking_count=len(result.data.blocking_issues),
+            approved=result.output.approved,
+            blocking_count=len(result.output.blocking_issues),
             tokens_in=token_usage.tokens_in,
             tokens_out=token_usage.tokens_out,
         )
-        return result.data, token_usage
+        return result.output, token_usage

@@ -15,11 +15,11 @@ if "pydantic_ai" not in sys.modules or not hasattr(sys.modules["pydantic_ai"], "
     _mock.tool = MagicMock()
     _mock.Tool = MagicMock()
     _mock_models = types.ModuleType("pydantic_ai.models")
-    _mock_vertexai = types.ModuleType("pydantic_ai.models.vertexai")
-    _mock_vertexai.VertexAIModel = MagicMock()
+    _mock_google = types.ModuleType("pydantic_ai.models.google")
+    _mock_google.GoogleModel = MagicMock()
     sys.modules["pydantic_ai"] = _mock
     sys.modules["pydantic_ai.models"] = _mock_models
-    sys.modules["pydantic_ai.models.vertexai"] = _mock_vertexai
+    sys.modules["pydantic_ai.models.google"] = _mock_google
 
 if "langgraph" not in sys.modules:
     _lg = types.ModuleType("langgraph")

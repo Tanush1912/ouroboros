@@ -53,13 +53,14 @@ def check_wf006_loop_tool_accounting(
             if isinstance(child, ast.Call):
                 callee = child.func
                 name = None
-                if isinstance(callee, ast.Attribute) and callee.attr == "fn":
-                    has_tool_call = True
-                elif isinstance(callee, ast.Name):
+                if isinstance(callee, ast.Name):
                     name = callee.id
                 elif isinstance(callee, ast.Attribute):
                     name = callee.attr
-                if name and name.startswith("run_"):
+                if name and (
+                    name.startswith("run_")
+                    or name in ("commit", "open_pr", "merge_pr", "reply_to_pr_comment")
+                ):
                     has_tool_call = True
             if (
                 isinstance(child, ast.AugAssign)

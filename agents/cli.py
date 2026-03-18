@@ -307,7 +307,7 @@ def feedback(
         raise typer.Exit(1)
 
     try:
-        comments = get_pr_comments.fn(pr_number)
+        comments = get_pr_comments(pr_number)
     except RuntimeError as e:
         console.print(f"[red]Failed to fetch PR comments:[/red] {e}")
         raise typer.Exit(1) from None

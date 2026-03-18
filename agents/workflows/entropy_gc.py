@@ -53,7 +53,7 @@ async def entropy_scan_node(state: GCState) -> dict[str, Any]:
     if not guard.allowed:
         return {"status": "failed", "error_log": state["error_log"] + [guard.reason]}
 
-    lint_result = run_lint.fn(".")  # sync tool (subprocess.run); .fn() is correct
+    lint_result = run_lint(".")
     violations_text = (
         "\n".join(lint_result.violations) if lint_result.violations else "No violations"
     )
@@ -112,7 +112,7 @@ async def open_cleanup_prs_node(state: GCState) -> dict[str, Any]:
 
     clusters = _cluster_violations(state["cleanup"].violations)
     prs_opened = []
-    pr_calls = 0
+    attempts = 0
 
     for principle, violations in clusters.items():
         affected_files = sorted({v.file for v in violations})
@@ -126,16 +126,16 @@ async def open_cleanup_prs_node(state: GCState) -> dict[str, Any]:
 
         title = f"[gc] {principle}: {violations[0].description[:60]}"
 
-        pr_result = await open_pr.fn(title=title, body=body)
-        pr_calls += 1
+        attempts += 1
+        pr_result = open_pr(title=title, body=body)
         if pr_result.success:
             prs_opened.append(pr_result.url)
             logfire.info("gc_pr_opened", principle=principle, url=pr_result.url)
 
     return {
         "prs_opened": prs_opened,
-        "total_tool_calls": state["total_tool_calls"] + pr_calls,
-        "node_tool_calls": update_node_tool_calls(state, "open_cleanup_prs_node", pr_calls),
+        "total_tool_calls": state["total_tool_calls"] + attempts,
+        "node_tool_calls": update_node_tool_calls(state, "open_cleanup_prs_node", attempts),
     }
 
 
@@ -216,7 +216,7 @@ async def update_quality_score_node(state: GCState) -> dict[str, Any]:
         root=root,
     )
 
-    commit_result = await commit.fn(
+    commit_result = commit(
         message=f"chore(gc): update quality scores [{now}]",
         files=["docs/QUALITY_SCORE.md"],
     )
