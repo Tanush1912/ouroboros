@@ -6,6 +6,7 @@ next_action is determined deterministically from test/lint/quality results — n
 
 import logfire
 
+from agents.core.paths import repo_root as _repo_root
 from agents.models.contracts import BehavioralSpec, ContractVerificationResult
 from agents.models.implementer import FileChange
 from agents.models.test_quality import TestQualityResult
@@ -28,6 +29,23 @@ async def run_validator(
     """Run tests, lint, and test quality gate. Returns structured validation result."""
     with logfire.span("validator", iteration=iteration):
         test_result: TestResult = run_tests(".")
+
+        # Run anchor tests separately — failure always escalates
+        anchors_dir = _repo_root() / "tests" / "anchors"
+        if anchors_dir.exists() and any(anchors_dir.glob("test_*.py")):
+            anchor_result: TestResult = run_tests("tests/anchors/")
+            if not anchor_result.passed:
+                logfire.warning("anchor_tests_failed", failures=anchor_result.failures[:5])
+                return ValidationOutput(
+                    tests=anchor_result,
+                    lint=LintResult(passed=True, violations=[]),
+                    arch_lint=LintResult(passed=True, violations=[]),
+                    overall_pass=False,
+                    next_action="escalate",
+                    failure_summary="Anchor test failure (human-authored invariant):\n"
+                    + "\n".join(anchor_result.failures[:5]),
+                )
+
         lint_result: LintResult = run_lint(".")
 
         arch_violations = [v for v in lint_result.violations if v.startswith("ARCH-")]
