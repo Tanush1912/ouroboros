@@ -1,0 +1,69 @@
+name: Agent Task
+description: Create a task for the Ouroboros agent to pick up
+labels: ["agent-task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe what the agent should do. Once the issue is created, comment `/run` to trigger the agent.
+        The agent will use the issue title + description as context.
+
+        **Trigger syntax:** `/run <optional extra instructions>`
+        - `/run` — run with just the issue context
+        - `/run focus on the edge cases` — run with additional guidance
+
+  - type: dropdown
+    id: task-type
+    attributes:
+      label: Task Type
+      options:
+        - feature
+        - bug-fix
+        - refactor
+        - docs
+        - test
+        - chore
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: What should the agent do? Be specific about files, behavior, and expected outcome.
+      placeholder: |
+        Example: Add a retry mechanism to the webhook handler in agents/tools/git.py.
+        When gh CLI calls fail with a 502, retry up to 3 times with exponential backoff.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know the task is done?
+      placeholder: |
+        - [ ] Webhook handler retries on 502 errors
+        - [ ] Tests cover retry and exhaustion scenarios
+        - [ ] No regressions in existing tests
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Relevant files, links, error logs, or constraints the agent should know about.
+      placeholder: |
+        Related to #42. See the traceback in the last CI run.
+        Constraint: must not add new dependencies.
+
+  - type: dropdown
+    id: risk-level
+    attributes:
+      label: Risk Level
+      description: How risky is this change?
+      options:
+        - low — isolated change, clear scope
+        - medium — touches multiple files or shared code
+        - high — core infrastructure, needs careful review
+    validations:
+      required: true
