@@ -1,6 +1,6 @@
 # QUALITY_SCORE.md — Per-Domain Quality Grades
 
-> Auto-updated by entropy GC workflow. Last updated: 2026-05-06 08:05 UTC
+> Auto-updated by entropy GC workflow. Last updated: 2026-05-07 08:11 UTC
 
 ---
 
